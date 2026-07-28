@@ -2,6 +2,62 @@
 // Include supplier ledger functions
 require_once __DIR__ . '/supplier_ledger.php';
 
+/**
+ * Get shop settings from the settings table (single source of truth).
+ * Returns an associative array with shop_name, logo, phone, email, address, currency.
+ * Always fetches fresh data to avoid stale cache after settings updates.
+ */
+function getShopSettings($conn) {
+    $result = mysqli_query($conn, "SELECT shop_name, logo, phone, email, address, currency FROM settings WHERE id=1");
+    if ($result && mysqli_num_rows($result) > 0) {
+        $settings = mysqli_fetch_assoc($result);
+    } else {
+        $settings = [
+            'shop_name' => 'Smart Inventory',
+            'logo' => '',
+            'phone' => '',
+            'email' => '',
+            'address' => '',
+            'currency' => 'Ks',
+        ];
+    }
+    // Apply defaults for empty values
+    if (empty($settings['shop_name'])) $settings['shop_name'] = 'Smart Inventory';
+    if (empty($settings['currency'])) $settings['currency'] = 'Ks';
+
+    return $settings;
+}
+
+/**
+ * Reset the shop settings cache. Call after updating settings.
+ * (No-op since getShopSettings always fetches fresh data)
+ */
+function resetShopSettingsCache() {
+    // No-op: getShopSettings always fetches fresh data
+}
+
+/**
+ * Get the URL path to the shop logo, or empty string if no logo.
+ * Works from any depth in the project directory.
+ */
+function getShopLogoUrl($conn, $depth = 0) {
+    $settings = getShopSettings($conn);
+    $logo = trim($settings['logo'] ?? '');
+    if (empty($logo)) return '';
+    $prefix = str_repeat('../', $depth);
+    return $prefix . 'img/' . $logo;
+}
+
+/**
+ * Get the filesystem path to the shop logo for file_exists checks.
+ */
+function getShopLogoPath($conn) {
+    $settings = getShopSettings($conn);
+    $logo = trim($settings['logo'] ?? '');
+    if (empty($logo)) return '';
+    return dirname(__DIR__) . '/img/' . $logo;
+}
+
 function sanitize($conn, $value) {
     return mysqli_real_escape_string($conn, trim($value));
 }

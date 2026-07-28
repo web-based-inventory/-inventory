@@ -2,6 +2,7 @@
 include "../includes/auth_check.php";
 protectUsers('view');
 include "../config/database.php";
+include "../config/helpers.php";
 
 $search = $_GET['search'] ?? '';
 $role_filter = $_GET['role'] ?? '';
@@ -87,7 +88,7 @@ if (isset($_GET['edit_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users - Smart Inventory</title>
+    <title>Users - <?= htmlspecialchars(getShopSettings($conn)['shop_name']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">

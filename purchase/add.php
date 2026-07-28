@@ -241,6 +241,8 @@ $old_supplier = $_POST['supplier_id'] ?? $_GET['supplier_id'] ?? '';
 $old_date     = $_POST['purchase_date'] ?? $_GET['purchase_date'] ?? date('Y-m-d');
 
 $page_title = "New Purchase";
+$pur_settings = getShopSettings($conn);
+$pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -248,7 +250,7 @@ $page_title = "New Purchase";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Purchase - Smart Inventory</title>
+    <title>New Purchase - <?= $pur_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">

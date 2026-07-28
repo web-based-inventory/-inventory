@@ -2,21 +2,28 @@
 include "../includes/auth_check.php";
 protectSettings();
 include "../config/database.php";
+include "../config/helpers.php";
 $page_title = "Settings";
 
 $setting = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM settings WHERE id=1"));
 
 if (isset($_POST['save'])) {
-    $shop_name = mysqli_real_escape_string($conn, $_POST['shop_name']);
+    $shop_name = trim(mysqli_real_escape_string($conn, $_POST['shop_name']));
+    if (empty($shop_name)) $shop_name = 'Smart Inventory';
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $currency = mysqli_real_escape_string($conn, $_POST['currency']);
+    if (empty($currency)) $currency = 'Ks';
     $tax_rate = (float)$_POST['tax_rate'];
     $minimum_profit_margin = (float)$_POST['minimum_profit_margin'];
     $logo = $setting['logo'] ?? '';
 
     if ($_FILES['logo']['name'] != "") {
+        // Delete old logo if exists
+        if (!empty($logo) && file_exists("../img/" . $logo)) {
+            unlink("../img/" . $logo);
+        }
         $ext = pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
         $logo = 'logo_' . time() . '.' . $ext;
         move_uploaded_file($_FILES['logo']['tmp_name'], "../img/" . $logo);
@@ -28,7 +35,10 @@ if (isset($_POST['save'])) {
         mysqli_query($conn, "INSERT INTO settings (shop_name, logo, phone, email, address, currency, tax_rate, minimum_profit_margin) VALUES ('$shop_name', '$logo', '$phone', '$email', '$address', '$currency', $tax_rate, $minimum_profit_margin)");
     }
 
+    // Clear the getShopSettings cache so the sidebar picks up changes immediately
     $setting = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM settings WHERE id=1"));
+    // Force cache refresh
+    getShopSettings($conn);
     $success = "Settings updated successfully.";
 }
 
@@ -62,17 +72,23 @@ if (isset($_POST['save'])) {
                         <div class="grid grid-cols-2 gap-5">
                             <div>
                                 <label class="font-semibold">Shop Name</label>
-                                <input type="text" name="shop_name" value="<?= $setting['shop_name'] ?? '' ?>" class="w-full border rounded-lg p-3 mt-2" placeholder="Shop Name">
+                                <input type="text" name="shop_name" value="<?= htmlspecialchars($setting['shop_name'] ?? '') ?>" class="w-full border rounded-lg p-3 mt-2" placeholder="Shop Name">
                             </div>
                             <div>
                                 <label class="font-semibold">Logo</label>
-                                <input type="file" name="logo" class="w-full border rounded-lg p-3 mt-2">
-                                <?php if (!empty($setting['logo'])): ?>
-                                    <div class="flex gap-3 items-center mt-3">
-                                        <img src="../img/<?= $setting['logo'] ?>" class="w-16 h-16 rounded-lg object-cover">
-                                        <p class="text-sm text-gray-400">Leave empty to keep current logo</p>
-                                    </div>
-                                <?php endif; ?>
+                                <input type="file" name="logo" accept="image/*" class="w-full border rounded-lg p-3 mt-2" onchange="previewLogo(this)">
+                                <div class="flex gap-3 items-center mt-3">
+                                    <?php if (!empty($setting['logo']) && file_exists('../img/' . $setting['logo'])): ?>
+                                        <img id="logoPreview" src="../img/<?= htmlspecialchars($setting['logo']) ?>" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+                                    <?php else: ?>
+                                        <div id="logoPreview" class="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200">
+                                            <svg class="w-8 h-8 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    <?php endif; ?>
+                                    <p class="text-xs text-gray-400">Leave empty to keep current logo</p>
+                                </div>
                             </div>
                         </div>
 
@@ -123,6 +139,26 @@ if (isset($_POST['save'])) {
     <?php include "../includes/modal.php"; ?>
     <?php include "../includes/form_guard.php"; ?>
     <?php include "../includes/footer.php"; ?>
+    <script>
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var preview = document.getElementById('logoPreview');
+                if (preview.tagName === 'IMG') {
+                    preview.src = e.target.result;
+                } else {
+                    var img = document.createElement('img');
+                    img.id = 'logoPreview';
+                    img.src = e.target.result;
+                    img.className = 'w-16 h-16 rounded-lg object-cover border border-gray-200';
+                    preview.parentNode.replaceChild(img, preview);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    </script>
 </body>
 
 </html>

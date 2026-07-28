@@ -1,6 +1,7 @@
 <?php
 include "includes/auth_check.php";
 include "config/database.php";
+include "config/helpers.php";
 $page_title = "Change Password";
 
 $success = '';
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Password - Smart Inventory</title>
+    <title>Change Password - <?= htmlspecialchars(getShopSettings($conn)['shop_name']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "includes/theme-init.php"; ?>
     <link rel="stylesheet" href="assets/css/style.css">

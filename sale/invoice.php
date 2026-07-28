@@ -56,6 +56,13 @@ if (mysqli_num_rows($payments) > 0) {
 $discount = (float)($sale['discount'] ?? 0);
 $grand_total = (float)$sale['total_amount'];
 $change = max(0, $total_paid - $grand_total);
+
+// Fetch shop settings
+$invoice_settings = getShopSettings($conn);
+$invoice_shop_name = htmlspecialchars($invoice_settings['shop_name']);
+$invoice_logo = trim($invoice_settings['logo'] ?? '');
+$invoice_logo_path = !empty($invoice_logo) ? dirname(__DIR__) . '/img/' . $invoice_logo : '';
+$invoice_has_logo = !empty($invoice_logo) && file_exists($invoice_logo_path);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,7 +70,7 @@ $change = max(0, $total_paid - $grand_total);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #<?= htmlspecialchars($sale['invoice_no']) ?></title>
+    <title><?= $invoice_shop_name ?> - Invoice #<?= htmlspecialchars($sale['invoice_no']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -88,14 +95,23 @@ $change = max(0, $total_paid - $grand_total);
 
 <body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex items-start justify-center p-4 sm:p-6 md:p-8">
 
-    <div class="w-full max-w-[480px] flex flex-col items-center">
+    <div class="w-full max-w-[580px] flex flex-col items-center">
 
         <!-- Invoice Card -->
         <div id="invoice-area" class="bg-white w-full rounded-2xl shadow-lg border border-gray-200/80 overflow-hidden">
 
             <!-- Header -->
             <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 text-center">
-                <h1 class="text-lg font-bold text-white tracking-wide">Smart Inventory</h1>
+                <?php if ($invoice_has_logo): ?>
+                    <img src="../img/<?= htmlspecialchars($invoice_logo) ?>" alt="<?= $invoice_shop_name ?>"
+                        class="w-12 h-12 rounded-xl object-cover mx-auto mb-2 shadow-lg">
+                <?php endif; ?>
+                <h1 class="text-lg font-bold text-white tracking-wide"><?= $invoice_shop_name ?></h1>
+                <?php if (!empty($invoice_settings['phone']) || !empty($invoice_settings['address'])): ?>
+                    <p class="text-indigo-200 text-[11px] mt-0.5">
+                        <?= htmlspecialchars(implode(' | ', array_filter([$invoice_settings['phone'], $invoice_settings['address']]))) ?>
+                    </p>
+                <?php endif; ?>
                 <p class="text-indigo-200 text-xs mt-0.5">Sales Invoice</p>
             </div>
 

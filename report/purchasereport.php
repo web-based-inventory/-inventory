@@ -18,24 +18,47 @@ $purchase_summary = mysqli_fetch_assoc(mysqli_query($conn, "
 // Paid vs Unpaid - calculate from payment data
 $paid_stats = ['Paid' => ['count' => 0, 'amount' => 0], 'Partial' => ['count' => 0, 'amount' => 0], 'Unpaid' => ['count' => 0, 'amount' => 0]];
 $purAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
+$hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
+
+// total_paid includes cash paid + advance credit applied (matches updatePurchasePaymentStatus logic)
+$advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
 $paid_summary = mysqli_query($conn, "
     SELECT p.id, p.total_amount,
-           COALESCE(SUM(pp.$purAmtCol), 0) AS total_paid
+           COALESCE(SUM(pp.$purAmtCol$advanceExpr), 0) AS total_paid,
+           COALESCE(SUM(pp.$purAmtCol), 0) AS cash_paid
     FROM purchases p
     LEFT JOIN purchase_payments pp ON pp.purchase_id = p.id
     WHERE p.purchase_date BETWEEN '$safe_from' AND '$safe_to'
     GROUP BY p.id, p.total_amount
 ");
+$outstanding_balance = 0;
+$outstanding_count = 0;
+$total_paid_amount = 0;
+
 while ($ps = mysqli_fetch_assoc($paid_summary)) {
     $ta = (float)$ps['total_amount'];
     $tp = (float)$ps['total_paid'];
-    if ($ta > 0 && $tp >= $ta) $st = 'Paid';
-    elseif ($tp > 0) $st = 'Partial';
-    else $st = 'Unpaid';
-    $paid_stats[$st]['count']++;
-    $paid_stats[$st]['amount'] += $ta;
-}
+    $cp = (float)$ps['cash_paid'];
+    $remaining = max(0, round($ta - $tp, 2));
 
+    // Paid Amount = total cash actually paid to suppliers
+    $total_paid_amount += $cp;
+
+    if ($remaining <= 0.01) {
+        $paid_stats['Paid']['count']++;
+        $paid_stats['Paid']['amount'] += $ta;
+    } elseif ($tp > 0.01) {
+        $paid_stats['Partial']['count']++;
+        $paid_stats['Partial']['amount'] += $remaining;
+        $outstanding_balance += $remaining;
+        $outstanding_count++;
+    } else {
+        $paid_stats['Unpaid']['count']++;
+        $paid_stats['Unpaid']['amount'] += $ta;
+        $outstanding_balance += $ta;
+        $outstanding_count++;
+    }
+}
 // Top suppliers
 $top_suppliers = mysqli_query($conn, "
     SELECT s.supplier_name, COUNT(*) AS purchase_count, SUM(p.total_amount) AS total_spent
@@ -72,6 +95,8 @@ $monthly_trend = mysqli_query($conn, "
 ");
 
 $page_title = "Purchase Reports";
+$report_settings = getShopSettings($conn);
+$report_shop_name = htmlspecialchars($report_settings['shop_name']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,7 +104,7 @@ $page_title = "Purchase Reports";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Reports - Smart Inventory</title>
+    <title>Purchase Reports - <?= $report_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -108,15 +133,15 @@ $page_title = "Purchase Reports";
                         <div class="flex flex-wrap items-end gap-4">
                             <div>
                                 <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 block">From Date</label>
-                                <input type="date" name="date_from" value="<?= $date_from ?>" class="form-input text-sm">
+                                <input type="date" name="date_from" value="<?= $date_from ?>" class="form-input text-sm" form="reportForm">
                             </div>
                             <div>
                                 <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 block">To Date</label>
-                                <input type="date" name="date_to" value="<?= $date_to ?>" class="form-input text-sm">
+                                <input type="date" name="date_to" value="<?= $date_to ?>" class="form-input text-sm" form="reportForm">
                             </div>
                             <div class="flex gap-2 items-end">
-                                <button class="btn btn-primary text-sm">Generate Report</button>
-                                <a href="reports.php" class="btn btn-outline text-sm">Reset</a>
+                                <button form="reportForm" class="btn btn-primary text-sm">Generate Report</button>
+                                <a href="purchasereport.php" class="btn btn-outline text-sm">Reset</a>
                             </div>
                         </div>
                         <button onclick="exportExcel()" class="btn btn-outline gap-2 text-sm whitespace-nowrap">
@@ -126,16 +151,18 @@ $page_title = "Purchase Reports";
                             Export Excel
                         </button>
                     </div>
+                    <form method="GET" id="reportForm"></form>
 
                     <!-- Summary Cards -->
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <!-- Total Purchases -->
                         <div class="stat-card bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-blue-600">Total Purchase</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($purchase_summary['total_purchases']) ?></p>
                                 </div>
                             </div>
@@ -143,10 +170,11 @@ $page_title = "Purchase Reports";
                         <!-- Total Purchase Amount -->
                         <div class="stat-card bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-emerald-600">Total Purchase Amount</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($purchase_summary['total_amount']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
@@ -154,23 +182,25 @@ $page_title = "Purchase Reports";
                         <!-- Outstanding Balance -->
                         <div class="stat-card bg-red-50 dark:bg-red-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($paid_stats['Unpaid']['amount']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
-                                    <p class="text-xs text-red-500 dark:text-red-400 mt-1"><?= $paid_stats['Unpaid']['count'] ?> purchases</p>
+                                    <p class="text-sm text-red-600">Outstanding Balance</p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($outstanding_balance) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-xs text-red-500 dark:text-red-400 mt-1"><?= $outstanding_count ?> purchases</p>
                                 </div>
                             </div>
                         </div>
                         <!-- Advance Payment -->
                         <div class="stat-card bg-amber-50 dark:bg-amber-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($paid_stats['Paid']['amount']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-sm text-amber-600">Paid Amount</p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($total_paid_amount) ?><span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1"><?= $paid_stats['Paid']['count'] ?> purchases</p>
                                 </div>
                             </div>
@@ -294,7 +324,7 @@ $page_title = "Purchase Reports";
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th class="text-left">Date</th>
+                                        <th claos="text-left">Date</th>
                                         <th class="num">Count</th>
                                         <th class="num">Total</th>
                                     </tr>

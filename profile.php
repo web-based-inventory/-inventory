@@ -1,19 +1,20 @@
 <?php
 include "includes/auth_check.php";
 include "config/database.php";
+include "config/helpers.php";
 $page_title = "My Profile";
 
 $success = '';
 $error = '';
 
-// Ensure profile_picture column exists
-$col_check = $conn->query("SHOW COLUMNS FROM users LIKE 'profile_picture'");
+// Ensure profile_image column exists
+$col_check = $conn->query("SHOW COLUMNS FROM users LIKE 'profile_image'");
 if ($col_check && $col_check->num_rows === 0) {
-    $conn->query("ALTER TABLE users ADD COLUMN profile_picture VARCHAR(255) DEFAULT NULL AFTER email");
+    $conn->query("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255) DEFAULT NULL AFTER email");
 }
 
 // Fetch current user data
-$stmt = $conn->prepare("SELECT id, name, username, email, profile_picture, role, created_at FROM users WHERE id = ? LIMIT 1");
+$stmt = $conn->prepare("SELECT id, name, username, email, profile_image, role, created_at FROM users WHERE id = ? LIMIT 1");
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -67,43 +68,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         $check->close();
     }
 
-    // Handle profile picture upload
-    $profile_pic = $user['profile_picture'];
-    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        $file_ext = strtolower(pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION));
+    // Handle profile image upload
+    $profile_img = $user['profile_image'];
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $file_ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
         if (!in_array($file_ext, $allowed)) {
-            $errors[] = 'Profile picture must be JPG, PNG, GIF, or WebP.';
-        } elseif ($_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
-            $errors[] = 'Profile picture must be under 2MB.';
+            $errors[] = 'Profile image must be JPG, JPEG, PNG, or WebP.';
+        } elseif ($_FILES['profile_image']['size'] > 2 * 1024 * 1024) {
+            $errors[] = 'Profile image must be under 2MB.';
         } else {
-            $upload_dir = 'uploads/profile_pictures/';
+            $upload_dir = 'uploads/profile/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
             $filename = 'user_' . $_SESSION['user_id'] . '_' . time() . '.' . $file_ext;
             $dest = $upload_dir . $filename;
-            if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $dest)) {
-                // Delete old picture if exists
-                if ($profile_pic && file_exists($profile_pic)) {
-                    unlink($profile_pic);
+            if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $dest)) {
+                // Delete old image if exists
+                if ($profile_img && file_exists($profile_img)) {
+                    unlink($profile_img);
                 }
-                $profile_pic = $dest;
+                $profile_img = $dest;
             } else {
-                $errors[] = 'Failed to upload profile picture.';
+                $errors[] = 'Failed to upload profile image.';
             }
         }
     }
 
     if (empty($errors)) {
-        $update = $conn->prepare("UPDATE users SET name = ?,  username = ?, profile_picture = ? WHERE id = ?");
-        $update->bind_param("sssi", $name, $username, $profile_pic, $_SESSION['user_id']);
+        $update = $conn->prepare("UPDATE users SET name = ?, username = ?, profile_image = ? WHERE id = ?");
+        $update->bind_param("sssi", $name, $username, $profile_img, $_SESSION['user_id']);
         if ($update->execute()) {
             $_SESSION['name'] = $name;
             $_SESSION['username'] = $username;
+            $_SESSION['profile_image'] = $profile_img;
             $user['name'] = $name;
             $user['username'] = $username;
-            $user['profile_picture'] = $profile_pic;
+            $user['profile_image'] = $profile_img;
             $success = 'Profile updated successfully.';
         } else {
             $error = 'Failed to update profile.';
@@ -120,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Smart Inventory</title>
+    <title>My Profile - <?= htmlspecialchars(getShopSettings($conn)['shop_name']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "includes/theme-init.php"; ?>
     <link rel="stylesheet" href="assets/css/style.css">
@@ -140,11 +142,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                         </div>
                         <div class="card-body">
                             <form method="POST" enctype="multipart/form-data" class="space-y-6" data-form-guard="true">
-                                <!-- Profile Picture -->
+                                <!-- Profile Image -->
                                 <div class="flex items-center gap-6">
                                     <div class="relative">
-                                        <?php if ($user['profile_picture'] && file_exists($user['profile_picture'])): ?>
-                                            <img src="<?= htmlspecialchars($user['profile_picture']) ?>" alt="Profile"
+                                        <?php if (!empty($user['profile_image']) && file_exists($user['profile_image'])): ?>
+                                            <img src="<?= htmlspecialchars($user['profile_image']) ?>" alt="Profile"
                                                 class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                                         <?php else: ?>
                                             <div class="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">
@@ -153,10 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                         <?php endif; ?>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
-                                        <input type="file" name="profile_picture" accept="image/jpeg,image/png,image/gif,image/webp"
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
+                                        <input type="file" name="profile_image" accept="image/jpeg,image/png,image/webp"
                                             class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition">
-                                        <p class="text-xs text-gray-400 mt-1">JPG, PNG, GIF, WebP. Max 2MB.</p>
+                                        <p class="text-xs text-gray-400 mt-1">JPG, JPEG, PNG, WebP. Max 2MB.</p>
                                     </div>
                                 </div>
 

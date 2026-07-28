@@ -64,6 +64,8 @@ $daily_profit = mysqli_query($conn, "
 ");
 
 $page_title = "Profit Reports";
+$report_settings = getShopSettings($conn);
+$report_shop_name = htmlspecialchars($report_settings['shop_name']);
 $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
 ?>
 <!DOCTYPE html>
@@ -72,40 +74,171 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profit Reports - Smart Inventory</title>
+    <title>Profit Reports - <?= $report_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        * { font-family: 'Inter', system-ui, sans-serif; }
-        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(229, 231, 235, 0.8); }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); border-color: rgba(99, 102, 241, 0.2); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
-        .delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; }
-        .delay-3 { animation-delay: 0.15s; } .delay-4 { animation-delay: 0.2s; }
-        .progress-bar { height: 10px; border-radius: 5px; background: #f3f4f6; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 5px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card { background: white; border-radius: 20px; border: 1px solid #f0f0f0; overflow: hidden; transition: all 0.3s ease; }
-        .card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
-        .card-header { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; background: linear-gradient(to right, #fafafa, #fff); }
-        .card-body { padding: 24px; }
-        .btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
-        .btn-primary { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3) !important; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important; }
-        .btn-outline { border: 1.5px solid #e5e7eb !important; }
-        .btn-outline:hover { border-color: #6366f1 !important; background: #f5f3ff !important; color: #4f46e5 !important; }
-        .form-input { border-radius: 12px !important; border: 1.5px solid #e5e7eb !important; padding: 10px 16px !important; transition: all 0.2s ease !important; }
-        .form-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important; }
-        .data-table thead th { background: #f8fafc !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b !important; padding: 14px 16px !important; font-weight: 600 !important; border-bottom: 2px solid #e2e8f0 !important; }
-        .data-table tbody td { padding: 14px 16px !important; font-size: 13px !important; }
-        .data-table tbody tr { transition: all 0.15s ease; }
-        .data-table tbody tr:hover { background: #f8faff !important; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .stat-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .delay-1 {
+            animation-delay: 0.05s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.15s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.2s;
+        }
+
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: #f3f4f6;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #f0f0f0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            background: linear-gradient(to right, #fafafa, #fff);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3) !important;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+        }
+
+        .btn-outline {
+            border: 1.5px solid #e5e7eb !important;
+        }
+
+        .btn-outline:hover {
+            border-color: #6366f1 !important;
+            background: #f5f3ff !important;
+            color: #4f46e5 !important;
+        }
+
+        .form-input {
+            border-radius: 12px !important;
+            border: 1.5px solid #e5e7eb !important;
+            padding: 10px 16px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .form-input:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+        }
+
+        .data-table thead th {
+            background: #f8fafc !important;
+            font-size: 11px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b !important;
+            padding: 14px 16px !important;
+            font-weight: 600 !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+
+        .data-table tbody td {
+            padding: 14px 16px !important;
+            font-size: 13px !important;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.15s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8faff !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
     </style>
 </head>
 
@@ -148,10 +281,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                         <!-- Total Revenue -->
                         <div class="stat-card bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-emerald-600">Total Revenue</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($profit_summary['revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
@@ -159,10 +293,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                         <!-- Total Cost -->
                         <div class="stat-card bg-orange-50 dark:bg-orange-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-orange-600 dark:text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-orange-600 dark:text-orange-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-orange-600">Total Cost</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($profit_summary['cost']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
@@ -170,10 +305,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                         <!-- Gross Profit -->
                         <div class="stat-card bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-blue-600">Gross Profit</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($gross_profit) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
@@ -181,10 +317,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                         <!-- Net Profit -->
                         <div class="stat-card bg-purple-50 dark:bg-purple-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-purple-600 dark:text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-purple-600 dark:text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-purple-600">Net Profit</p>
                                     <p class="text-2xl font-bold <?= $profit_summary['profit'] < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white' ?> leading-none"><?= number_format($profit_summary['profit']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs <?= $margin >= 20 ? 'text-emerald-600 dark:text-emerald-400' : ($margin >= 10 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400') ?> mt-1"><?= number_format($margin, 1) ?>% margin</p>
                                 </div>
@@ -257,7 +394,9 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                             <td colspan="8" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
-                                                        <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                                                        <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                        </svg>
                                                     </div>
                                                     <h3 class="text-base font-semibold text-gray-500">No sales data</h3>
                                                     <p class="text-sm text-gray-400 mt-1">No products were sold in this period.</p>
@@ -326,7 +465,9 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                             <td colspan="7" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-4">
-                                                        <svg class="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                                        <svg class="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                        </svg>
                                                     </div>
                                                     <h3 class="text-base font-semibold text-gray-500">No category data</h3>
                                                     <p class="text-sm text-gray-400 mt-1">No categories were sold in this period.</p>
@@ -368,8 +509,7 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                 type: 'line',
                 data: {
                     labels: <?= json_encode($chart_labels) ?>,
-                    datasets: [
-                        {
+                    datasets: [{
                             label: 'Revenue',
                             data: <?= json_encode($chart_revenue) ?>,
                             borderColor: 'rgb(16, 185, 129)',
@@ -402,7 +542,9 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' },
+                        legend: {
+                            position: 'top'
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(ctx) {
@@ -414,10 +556,20 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: function(val) { return val.toLocaleString(); } },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
+                            ticks: {
+                                callback: function(val) {
+                                    return val.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            }
                         },
-                        x: { grid: { display: false } }
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
                     }
                 }
             });
@@ -447,7 +599,9 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
             <?php endforeach; ?>
 
             const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csv], {
+                type: 'text/csv;charset=utf-8;'
+            });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'profit_report_<?= $date_from ?>_to_<?= $date_to ?>.csv';

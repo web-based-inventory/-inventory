@@ -38,6 +38,8 @@ $category_stock = mysqli_query($conn, "
 ");
 
 $page_title = "Inventory Reports";
+$report_settings = getShopSettings($conn);
+$report_shop_name = htmlspecialchars($report_settings['shop_name']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +47,7 @@ $page_title = "Inventory Reports";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Reports - Smart Inventory</title>
+    <title>Inventory Reports - <?= $report_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -237,10 +239,11 @@ $page_title = "Inventory Reports";
                         <!-- Total Products -->
                         <div class="stat-card bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-blue-600">Total Product</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($total_products['cnt']) ?></p>
                                 </div>
                             </div>
@@ -248,10 +251,11 @@ $page_title = "Inventory Reports";
                         <!-- Total Stock -->
                         <div class="stat-card bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                 </svg>
                                 <div>
+                                    <p class="text-green-700 text-sm">Total Stock</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($total_stock['total']) ?></p>
                                     <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1"><?= number_format($total_stock_value['total']) ?> Ks value</p>
                                 </div>
@@ -260,10 +264,11 @@ $page_title = "Inventory Reports";
                         <!-- Low Stock -->
                         <div class="stat-card bg-amber-50 dark:bg-amber-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
+                                    <p class="text-sm text-amber-600">Low Stock</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($low_stock_count) ?></p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">products low</p>
                                 </div>
@@ -272,7 +277,7 @@ $page_title = "Inventory Reports";
                         <!-- Out of Stock -->
                         <div class="stat-card bg-red-50 dark:bg-red-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
-                                <svg class="w-10 h-10 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
@@ -370,7 +375,7 @@ $page_title = "Inventory Reports";
                         </div>
                         <div class="table-wrap">
                             <table class="data-table w-full">
-                                <thead>
+                                <thead class="">
                                     <tr>
                                         <th>#</th>
                                         <th>Category</th>

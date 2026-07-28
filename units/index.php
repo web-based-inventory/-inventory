@@ -2,13 +2,9 @@
 include "../includes/auth_check.php";
 protectUnits('view');
 include "../config/database.php";
+require_once __DIR__ . '/../config/helpers.php';
 
 $action = $_GET['action'] ?? 'list';
-
-function columnExists($conn, $table, $column) {
-    $res = @mysqli_query($conn, "SHOW COLUMNS FROM `$table` LIKE '$column'");
-    return $res && mysqli_num_rows($res) > 0;
-}
 
 function tableExists($conn, $table) {
     $res = @mysqli_query($conn, "SHOW TABLES LIKE '$table'");

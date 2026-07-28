@@ -72,6 +72,8 @@ $result = mysqli_query($conn, $sql);
 $stats = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total_purchases, COALESCE(SUM(total_amount), 0) AS total_spent FROM purchases"));
 
 $page_title = "Purchase History";
+$pur_settings = getShopSettings($conn);
+$pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,7 +81,7 @@ $page_title = "Purchase History";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase History - Smart Inventory</title>
+    <title>Purchase History - <?= $pur_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">

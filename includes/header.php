@@ -384,9 +384,35 @@ if (isset($conn)) {
             <!-- User Profile -->
             <div class="relative">
                 <button onclick="toggleDropdown('userDropdown')" class="header-btn flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-500 bg-white dark:bg-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow">
-                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                        <?= strtoupper(substr($name, 0, 1)) ?>
-                    </div>
+                    <?php
+                    $header_profile_img = null;
+                    if (isset($conn) && isset($_SESSION['user_id'])) {
+                        $uid = (int)$_SESSION['user_id'];
+                        $pi_result = mysqli_query($conn, "SELECT profile_image FROM users WHERE id = $uid LIMIT 1");
+                        if ($pi_result && mysqli_num_rows($pi_result) > 0) {
+                            $pi_row = mysqli_fetch_assoc($pi_result);
+                            $header_profile_img = $pi_row['profile_image'] ?? null;
+                        }
+                    }
+                    // Resolve absolute path for file_exists check
+                    $_proj_root = str_replace('\\', '/', dirname(__DIR__));
+                    $_abs_check = $_proj_root . '/' . ltrim($header_profile_img ?? '', '/');
+                    $has_profile_img = !empty($header_profile_img) && file_exists($_abs_check);
+
+                    // Compute relative URL prefix: compare script dir to project root
+                    $_script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+                    $_rel = str_replace($_proj_root, '', $_script_dir);
+                    $_depth = $_rel === '' || $_rel === '/' ? 0 : substr_count(trim($_rel, '/'), '/') + 1;
+                    $_prefix = str_repeat('../', $_depth);
+                    ?>
+                    <?php if ($has_profile_img): ?>
+                        <img src="<?= htmlspecialchars($_prefix . $header_profile_img) ?>" alt="<?= htmlspecialchars($name) ?>"
+                            class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-slate-600 shadow-sm">
+                    <?php else: ?>
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                            <?= strtoupper(substr($name, 0, 1)) ?>
+                        </div>
+                    <?php endif; ?>
                     <div class="text-left hidden md:block">
                         <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 leading-tight"><?= htmlspecialchars($name) ?></p>
                         <p class="text-[11px] text-gray-500 dark:text-slate-400 capitalize leading-tight"><?= $role ?></p>

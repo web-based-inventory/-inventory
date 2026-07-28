@@ -46,13 +46,29 @@ HTML;
 
     <!-- Logo -->
     <div class="h-[4.2rem] flex items-center gap-3.5 px-5 border-b border-white/[0.06] flex-shrink-0">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-        </div>
+        <?php
+        // Fetch shop settings for sidebar
+        if (!function_exists('getShopSettings')) {
+            require_once __DIR__ . '/../config/database.php';
+            require_once __DIR__ . '/../config/helpers.php';
+        }
+        $sidebar_settings = getShopSettings($conn);
+        $sidebar_logo = trim($sidebar_settings['logo'] ?? '');
+        $sidebar_logo_path = !empty($sidebar_logo) ? dirname(__DIR__, 2) . '/img/' . $sidebar_logo : '';
+        $sidebar_has_logo = !empty($sidebar_logo) && !empty($sidebar_logo_path) && file_exists($sidebar_logo_path);
+        ?>
+        <?php if ($sidebar_has_logo): ?>
+            <img src="<?= htmlspecialchars('../img/' . $sidebar_logo) ?>" alt="<?= htmlspecialchars($sidebar_settings['shop_name']) ?>"
+                class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-lg shadow-blue-500/25">
+        <?php else: ?>
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+            </div>
+        <?php endif; ?>
         <div>
-            <h1 class="text-[13px] font-bold text-white leading-tight tracking-tight">Smart Inventory</h1>
+            <h1 class="text-[13px] font-bold text-white leading-tight tracking-tight"><?= htmlspecialchars($sidebar_settings['shop_name']) ?></h1>
             <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Management System</p>
         </div>
     </div>
