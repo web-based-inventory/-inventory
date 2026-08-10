@@ -35,6 +35,7 @@ if (isset($_GET['confirm_delete'])) {
     // Recalculate supplier outstanding balance after deletion
     if ($del_supplier_id > 0) {
         recalcSupplierBalance($conn, $del_supplier_id);
+        rebuildSupplierLedger($conn, $del_supplier_id);
     }
 
     header("Location: index.php?success=" . urlencode("Purchase deleted and stock rolled back."));
@@ -68,13 +69,23 @@ if (isset($_POST['update'])) {
         $new_total += $subtotal;
     }
 
+    $old_sup = mysqli_fetch_assoc(mysqli_query($conn, "SELECT supplier_id FROM purchases WHERE id='$id'"));
+    $old_supplier_id = $old_sup ? (int)$old_sup['supplier_id'] : 0;
+
     mysqli_query($conn, "UPDATE purchases SET supplier_id='$supplier_id', total_amount='$new_total' WHERE id='$id'");
 
     // Recalculate purchase payment tracking columns (total_paid, remaining_balance, payment_status)
     updatePurchasePaymentStatus($conn, $id);
 
-    // Recalculate supplier outstanding balance
-    recalcSupplierBalance($conn, $supplier_id);
+    // Recalculate supplier outstanding balance (old + new supplier in case supplier changed)
+    if ($old_supplier_id > 0 && $old_supplier_id !== $supplier_id) {
+        recalcSupplierBalance($conn, $old_supplier_id);
+        rebuildSupplierLedger($conn, $old_supplier_id);
+    }
+    if ($supplier_id > 0) {
+        recalcSupplierBalance($conn, $supplier_id);
+        rebuildSupplierLedger($conn, $supplier_id);
+    }
 
     header("Location: index.php?success=" . urlencode("Purchase #$id updated successfully."));
     exit;
@@ -209,9 +220,10 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                     <?php if (mysqli_num_rows($result) > 0): $count = 1;
                                         while ($row = mysqli_fetch_assoc($result)):
                                             $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
-                                            $total_paid_q = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($amtCol), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"));
+                                            $adv_expr = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(advance_applied, 0)" : "";
+                                            $total_paid_q = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($amtCol$adv_expr), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"));
                                             $total_paid = (float)$total_paid_q['tp'];
-                                            $remaining = (float)$row['total_amount'] - $total_paid;
+                                            $remaining = max(0, (float)$row['total_amount'] - $total_paid);
                                         ?>
                                             <tr>
                                                 <td><?= $count++ ?></td>
@@ -281,9 +293,13 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
         <?php
         $vp_total_paid = 0;
         $vpAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
-        while ($vp = mysqli_fetch_assoc($view_payments)) { $vp_total_paid += (float)$vp[$vpAmtCol]; }
+        $vpHasAdv = columnExists($conn, 'purchase_payments', 'advance_applied');
+        while ($vp = mysqli_fetch_assoc($view_payments)) {
+            $vp_total_paid += (float)$vp[$vpAmtCol];
+            if ($vpHasAdv) $vp_total_paid += (float)($vp['advance_applied'] ?? 0);
+        }
         mysqli_data_seek($view_payments, 0);
-        $vp_balance = (float)$view_purchase['total_amount'] - $vp_total_paid;
+        $vp_balance = max(0, (float)$view_purchase['total_amount'] - $vp_total_paid);
         ?>
         <div id="viewModal" class="modal-overlay">
             <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl relative mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">

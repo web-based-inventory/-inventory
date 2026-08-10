@@ -62,6 +62,10 @@ if (isset($conn)) {
     // Supplier payment due notifications (admin and staff)
     $spd_count = 0;
     if (in_array($role, ['admin', 'staff'])) {
+        // Refresh supplier balances from real-time data so notifications are accurate
+        if (isset($conn) && function_exists('recalcAllSupplierBalances')) {
+            recalcAllSupplierBalances($conn);
+        }
         $spd_count_result = mysqli_query($conn, "SELECT COUNT(*) AS count FROM suppliers WHERE outstanding_balance > 0 AND status = 'Active'");
         if ($spd_count_result) {
             $spd_count = (int)mysqli_fetch_assoc($spd_count_result)['count'];

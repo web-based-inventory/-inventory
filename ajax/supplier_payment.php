@@ -75,6 +75,10 @@ if (!$supplier) {
     exit;
 }
 
+// Recalculate balances from real-time data so advance/outstanding are current
+recalcSupplierBalance($conn, $supplier_id);
+$supplier = fetchOne($conn, "SELECT * FROM suppliers WHERE id = ? AND status = 'Active'", [$supplier_id], "i");
+
 $current_advance = (float)($supplier['advance_credit'] ?? $supplier['advance_balance'] ?? 0);
 $current_outstanding = (float)($supplier['outstanding_balance'] ?? 0);
 
@@ -214,12 +218,6 @@ try {
 
             // Update the purchase's payment tracking columns
             updatePurchasePaymentStatus($conn, $up['id']);
-
-            // Add ledger entry for advance applied
-            addSupplierLedgerEntry(
-                $conn, $supplier_id, 'Advance Applied', 'purchase', $up['id'], $up['invoice_no'],
-                0, $apply_now, "Advance of " . number_format($apply_now, 2) . " applied to {$up['invoice_no']}", $payment_date
-            );
             
             $advance_applied += $apply_now;
             $advance_remaining -= $apply_now;
@@ -287,15 +285,6 @@ try {
             // Update the purchase's payment tracking columns
             updatePurchasePaymentStatus($conn, $up['id']);
 
-            $payment_id = $conn->insert_id;
-            $debug_log[] = "STEP2_payment_id: $payment_id";
-            
-            // Add ledger entry for this payment
-            addSupplierLedgerEntry(
-                $conn, $supplier_id, 'Payment', 'purchase_payment', $payment_id, $up['invoice_no'],
-                0, $apply_now, "Payment of " . number_format($apply_now, 2) . " for {$up['invoice_no']} via $payment_method", $payment_date
-            );
-            
             $payments_made[] = [
                 'invoice_no' => $up['invoice_no'],
                 'amount' => $apply_now,
@@ -310,12 +299,6 @@ try {
     // Step 3: If there's still remaining payment, store as advance
     if ($remaining_to_pay > 0.01) {
         $advance_created = $remaining_to_pay;
-        
-        // Add ledger entry for advance created
-        addSupplierLedgerEntry(
-            $conn, $supplier_id, 'Advance Created', 'direct_payment', 0, $payment_ref_no,
-            0, $advance_created, "Advance credit of " . number_format($advance_created, 2) . " created from overpayment", $payment_date
-        );
     }
 
     // Step 4: Only record the overpayment (advance_created) in supplier_payments
@@ -345,6 +328,9 @@ try {
 
     // Step 5: Update supplier balance using single source of truth
     recalcSupplierBalance($conn, $supplier_id);
+
+    // Rebuild the supplier ledger from real-time data
+    rebuildSupplierLedger($conn, $supplier_id);
 
     // Verify the update worked
     $verify = fetchOne($conn, "SELECT outstanding_balance, advance_credit FROM suppliers WHERE id = ?", [$supplier_id], "i");

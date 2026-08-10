@@ -86,6 +86,8 @@ if (isset($_POST['save_purchase'])) {
             }
 
             // ── Auto-apply supplier advance credit ──
+            // Recalculate first so advance_credit is always real-time
+            recalcSupplierBalance($conn, $supplier_id);
             $sup_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT advance_credit FROM suppliers WHERE id = $supplier_id"));
             $available_advance = $sup_row ? (float)$sup_row['advance_credit'] : 0;
 
@@ -128,10 +130,7 @@ if (isset($_POST['save_purchase'])) {
                 throw new Exception('Failed to create purchase record.');
             }
 
-            createSupplierLedgerTable($conn);
-
             // ── Insert purchase_payments record (cash + advance) ──
-            $payment_id = null;
             $insAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
             $hasCash = columnExists($conn, 'purchase_payments', 'cash_amount');
             $hasNotes = columnExists($conn, 'purchase_payments', 'notes');
@@ -164,28 +163,13 @@ if (isset($_POST['save_purchase'])) {
                     }
                 }
                 mysqli_query($conn, "INSERT INTO purchase_payments($cols) VALUES($vals)");
-                $payment_id = mysqli_insert_id($conn);
-
-                if ($payment_id > 0 && $paid_amount > 0.01) {
-                    addPurchasePaymentLedgerEntry($conn, $supplier_id, $purchase_id, $payment_id, $invoice_no, $paid_amount, $payment_method, $purchase_date);
-                }
             }
 
-            // ── Purchase ledger entry ──
-            addPurchaseLedgerEntry($conn, $supplier_id, $purchase_id, $invoice_no, $total, $advance_applied, $purchase_date);
-
-            // ── Advance applied ledger entry ──
-            if ($advance_applied > 0.01) {
-                addSupplierLedgerEntry(
-                    $conn, $supplier_id, 'Advance Applied', 'purchase', $purchase_id, $invoice_no,
-                    0, $advance_applied, "Advance of " . number_format($advance_applied, 2) . " applied to {$invoice_no}", $purchase_date
-                );
-            }
-
-            // ── Advance created ledger entry (overpayment) ──
-            if ($advance_created > 0.01) {
-                addAdvanceCreatedLedgerEntry($conn, $supplier_id, 'purchase_payment', $payment_id, $invoice_no, $advance_created, $purchase_date);
-            }
+            // NOTE: No supplier_ledger rows are inserted here. The supplier
+            // ledger is rebuilt on every Supplier Ledger page view by
+            // rebuildSupplierLedger() from purchases, purchase_payments, and
+            // supplier_payments, so it always reflects real-time data without
+            // double-counting advances.
 
             // ── Insert product details ──
             foreach ($_SESSION['cart'] as $item) {

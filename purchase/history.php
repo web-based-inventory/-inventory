@@ -28,6 +28,7 @@ if (isset($_GET['confirm_delete']) && isAdmin()) {
     // Recalculate supplier balance after deletion
     if ($del_supplier_id > 0) {
         recalcSupplierBalance($conn, $del_supplier_id);
+        rebuildSupplierLedger($conn, $del_supplier_id);
     }
 
     header("Location: history.php?success=deleted");
@@ -41,9 +42,14 @@ $payment_status = $_GET['payment_status'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
 
-$sql = "SELECT p.*, s.supplier_name
+$histFilterAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
+$histFilterAdv = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(pp.advance_applied, 0)" : "";
+
+$sql = "SELECT p.*, s.supplier_name,
+        COALESCE(SUM(pp.$histFilterAmtCol$histFilterAdv), 0) AS computed_paid
         FROM purchases p
         LEFT JOIN suppliers s ON p.supplier_id = s.id
+        LEFT JOIN purchase_payments pp ON pp.purchase_id = p.id
         WHERE 1";
 
 if ($search !== '') {
@@ -54,15 +60,25 @@ if ($supplier !== '') {
     $safe = mysqli_real_escape_string($conn, $supplier);
     $sql .= " AND s.supplier_name LIKE '%$safe%'";
 }
-if ($payment_status !== '' && columnExists($conn, 'purchases', 'status')) {
-    $safe = mysqli_real_escape_string($conn, $payment_status);
-    $sql .= " AND p.status = '$safe'";
-}
 if ($date_from !== '') {
     $sql .= " AND DATE(p.purchase_date) >= '$date_from'";
 }
 if ($date_to !== '') {
     $sql .= " AND DATE(p.purchase_date) <= '$date_to'";
+}
+
+$sql .= " GROUP BY p.id";
+
+// Filter by real-time payment status (computed from purchase_payments)
+if ($payment_status !== '') {
+    $safe = mysqli_real_escape_string($conn, $payment_status);
+    if ($safe === 'Paid') {
+        $sql .= " HAVING computed_paid >= p.total_amount";
+    } elseif ($safe === 'Partial') {
+        $sql .= " HAVING computed_paid > 0 AND computed_paid < p.total_amount";
+    } elseif ($safe === 'Unpaid') {
+        $sql .= " HAVING computed_paid <= 0";
+    }
 }
 
 $sql .= " ORDER BY p.id DESC";
@@ -240,7 +256,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                                 <td class="center">
                                                     <?php
                                                     $histAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
-                                                    $hist_paid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($histAmtCol), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"))['tp'];
+                                                    $histAdv = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(advance_applied, 0)" : "";
+                                                    $hist_paid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($histAmtCol$histAdv), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"))['tp'];
                                                     $hist_ta = (float)$row['total_amount'];
                                                     if ($hist_ta > 0 && $hist_paid >= $hist_ta) $status = 'Paid';
                                                     elseif ($hist_paid > 0) $status = 'Partial';
@@ -302,7 +319,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                  WHERE d.purchase_id='$view_id'"
             );
             $histViewAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
-            $histViewPaid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($histViewAmtCol), 0) AS tp FROM purchase_payments WHERE purchase_id='$view_id'"))['tp'];
+            $histViewAdv = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(advance_applied, 0)" : "";
+            $histViewPaid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($histViewAmtCol$histViewAdv), 0) AS tp FROM purchase_payments WHERE purchase_id='$view_id'"))['tp'];
             $histViewTa = (float)$view_purchase['total_amount'];
             if ($histViewTa > 0 && $histViewPaid >= $histViewTa) $histViewStatus = 'Paid';
             elseif ($histViewPaid > 0) $histViewStatus = 'Partial';
@@ -390,8 +408,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             mysqli_data_seek($result, 0);
             $row_num = 1;
             $expAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
+            $expAdv = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(advance_applied, 0)" : "";
             while ($row = mysqli_fetch_assoc($result)):
-                $exp_paid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($expAmtCol), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"))['tp'];
+                $exp_paid = (float)mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($expAmtCol$expAdv), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"))['tp'];
                 $exp_ta = (float)$row['total_amount'];
                 if ($exp_ta > 0 && $exp_paid >= $exp_ta) $exp_status = 'Paid';
                 elseif ($exp_paid > 0) $exp_status = 'Partial';

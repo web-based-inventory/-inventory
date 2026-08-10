@@ -152,6 +152,12 @@ function ensurePurchasePaymentColumns($conn) {
     }
     if (!columnExists($conn, 'purchases', 'payment_status')) {
         mysqli_query($conn, "ALTER TABLE purchases ADD COLUMN payment_status ENUM('Unpaid','Partial','Paid') DEFAULT 'Unpaid' AFTER remaining_balance");
+    } else {
+        $col_info = mysqli_fetch_assoc(mysqli_query($conn, "SHOW COLUMNS FROM purchases LIKE 'payment_status'"));
+        $col_type = strtolower($col_info['Type'] ?? '');
+        if ($col_type !== '' && strpos($col_type, 'partial') === false) {
+            mysqli_query($conn, "ALTER TABLE purchases MODIFY COLUMN payment_status ENUM('Unpaid','Partial','Paid') DEFAULT 'Unpaid'");
+        }
     }
 }
 

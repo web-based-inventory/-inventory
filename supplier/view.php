@@ -35,8 +35,18 @@ if ($r) $total_advance_created = (float)$r['total'];
 // Last Purchase Date
 $last_purchase = fetchOne($conn, "SELECT purchase_date FROM purchases WHERE supplier_id = ? ORDER BY purchase_date DESC LIMIT 1", [$id], "i");
 
-// Recent Purchases (latest 5)
-$recent_purchases = fetchAll($conn, "SELECT * FROM purchases WHERE supplier_id = ? ORDER BY purchase_date DESC LIMIT 5", [$id], "i");
+// Recent Purchases (latest 5) — status computed from real-time payments
+$rec_amt_col = getPaymentAmountCol($conn, 'purchase_payments');
+$rec_adv = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(pp.advance_applied, 0)" : "";
+$recent_purchases = fetchAll($conn, "
+    SELECT p.*, COALESCE(t.total_paid, 0) AS computed_paid
+    FROM purchases p
+    LEFT JOIN (
+        SELECT purchase_id, SUM(pp.$rec_amt_col$rec_adv) AS total_paid
+        FROM purchase_payments pp GROUP BY purchase_id
+    ) t ON t.purchase_id = p.id
+    WHERE p.supplier_id = ?
+    ORDER BY p.purchase_date DESC LIMIT 5", [$id], "i");
 
 // Recent Payments (latest 5)
 $recent_payments = fetchAll($conn, "SELECT pp.*, pu.invoice_no FROM purchase_payments pp INNER JOIN purchases pu ON pp.purchase_id = pu.id WHERE pu.supplier_id = ? ORDER BY pp.payment_date DESC LIMIT 5", [$id], "i");
@@ -305,9 +315,16 @@ $advance_credit = (float)($supplier['advance_credit'] ?? 0);
                                                     <td class="text-sm"><?= date('d M Y', strtotime($p['purchase_date'])) ?></td>
                                                     <td class="num text-sm font-semibold"><?= number_format($p['total_amount'], 2) ?></td>
                                                     <td class="center">
-                                                        <?php if (($p['payment_status'] ?? '') === 'Paid'): ?>
+                                                        <?php
+                                                        $cp = (float)($p['computed_paid'] ?? 0);
+                                                        $cta = (float)$p['total_amount'];
+                                                        if ($cta > 0 && $cp >= $cta) $p_status = 'Paid';
+                                                        elseif ($cp > 0) $p_status = 'Partial';
+                                                        else $p_status = 'Unpaid';
+                                                        if ($p_status === 'Paid'):
+                                                        ?>
                                                             <span class="badge badge-success"><span class="badge-dot"></span> Paid</span>
-                                                        <?php elseif (($p['payment_status'] ?? '') === 'Partial'): ?>
+                                                        <?php elseif ($p_status === 'Partial'): ?>
                                                             <span class="badge badge-warning"><span class="badge-dot"></span> Partial</span>
                                                         <?php else: ?>
                                                             <span class="badge badge-danger"><span class="badge-dot"></span> Unpaid</span>
