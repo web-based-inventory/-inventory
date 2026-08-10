@@ -58,6 +58,26 @@ function getShopLogoPath($conn) {
     return dirname(__DIR__) . '/img/' . $logo;
 }
 
+/**
+ * Get the current profit margin percentage (%) from the settings table.
+ * Falls back to 10.00 if no settings row exists.
+ */
+function getProfitMargin($conn) {
+    $row = fetchOne($conn, "SELECT minimum_profit_margin FROM settings WHERE id = 1");
+    return $row ? (float)$row['minimum_profit_margin'] : 10;
+}
+
+/**
+ * Calculate the recommended selling price for a purchase price using the
+ * Settings profit margin:
+ * Selling Price = Purchase Price + (Purchase Price x Margin / 100)
+ */
+function calculateSellingPrice($conn, $purchase_price) {
+    $purchase_price = max(0, (float)$purchase_price);
+    $margin = getProfitMargin($conn);
+    return round($purchase_price + ($purchase_price * $margin / 100), 2);
+}
+
 function sanitize($conn, $value) {
     return mysqli_real_escape_string($conn, trim($value));
 }

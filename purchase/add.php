@@ -183,8 +183,13 @@ if (isset($_POST['save_purchase'])) {
 
                 $check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT selling_price FROM products WHERE id='$pid'"));
                 $sp = $check ? (float)$check['selling_price'] : 0;
-                $needs_update = ($sp > 0 && $price >= $sp) ? 1 : 0;
-                mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price', price_update_required = GREATEST(price_update_required, $needs_update) WHERE id='$pid'");
+
+                if ($sp <= $price) {
+                    $recommended = calculateSellingPrice($conn, $price);
+                    mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price', selling_price = $recommended, price_update_required = 0 WHERE id='$pid'");
+                } else {
+                    mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price' WHERE id='$pid'");
+                }
             }
 
             // ── Update supplier balance ──
@@ -791,6 +796,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 
     <script>
         // Product selling prices map: { product_id: selling_price }
+        const profitMargin = <?= (float)getProfitMargin($conn); ?>;
         const sellingPrices = {
             <?php
             $sp_res = @mysqli_query($conn, "SELECT id, selling_price FROM products WHERE status='Active'");
@@ -1001,7 +1007,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 
             let html = '';
             allWarnings.forEach(w => {
-                const suggestedPrice = Math.ceil(w.purchase * 1.1);
+                const suggestedPrice = Math.ceil(w.purchase * (1 + profitMargin / 100));
                 html += '<div class="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600">';
                 html += '<div class="flex-1 min-w-0">';
                 html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">' + w.name + '</p>';
@@ -1211,6 +1217,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             const totalPayment = paidAmount + advanceToApply;
             const remainingBalance = Math.max(0, effectiveTotal - paidAmount);
             const advanceCreated = Math.max(0, totalPayment - effectiveTotal);
+            const totalDue = selectedPrevBalance + grand;
             const status = document.getElementById('paymentStatusInput').value;
             const supplierName = document.getElementById('supplier_id').options[document.getElementById('supplier_id').selectedIndex].text;
             const today = new Date();

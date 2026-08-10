@@ -53,6 +53,16 @@ if (mysqli_num_rows($payments) > 0) {
     }
 }
 
+$payment_cash_received = 0;
+$payment_kbzpay_received = 0;
+$has_payment_split = columnExists($conn, 'sale_payments', 'cash_amount') && columnExists($conn, 'sale_payments', 'kbzpay_amount');
+if ($has_payment_split) {
+    foreach ($payment_details as $p) {
+        $payment_cash_received += (float)($p['cash_amount'] ?? 0);
+        $payment_kbzpay_received += (float)($p['kbzpay_amount'] ?? 0);
+    }
+}
+
 $discount = (float)($sale['discount'] ?? 0);
 $grand_total = (float)$sale['total_amount'];
 $change = max(0, $total_paid - $grand_total);
@@ -196,6 +206,16 @@ $invoice_has_logo = !empty($invoice_logo) && file_exists($invoice_logo_path);
                         <span class="text-gray-500">Amount Paid</span>
                         <span class="font-semibold text-gray-800"><?= number_format($total_paid) ?> Ks</span>
                     </div>
+                    <?php if ($has_payment_split && $payment_method_display === 'Mixed'): ?>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Cash</span>
+                            <span class="font-semibold text-gray-800"><?= number_format($payment_cash_received) ?> Ks</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">KBZPay</span>
+                            <span class="font-semibold text-gray-800"><?= number_format($payment_kbzpay_received) ?> Ks</span>
+                        </div>
+                    <?php endif; ?>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Change</span>
                         <span class="font-semibold <?= $change > 0 ? 'text-emerald-600' : 'text-gray-800' ?>"><?= number_format($change) ?> Ks</span>

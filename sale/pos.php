@@ -757,11 +757,16 @@ $page_title = "New Sale (POS)";
                 errorEl.textContent = 'Payment amount is not enough.';
                 errorEl.classList.remove('hidden');
                 btn.disabled = true;
-            } else {
+            } else if (method === 'Cash') {
                 balanceEl.className = 'font-bold text-amber-600';
                 errorEl.textContent = 'Payment amount exceeds total (change: ' + balance.toLocaleString() + ' Ks)';
                 errorEl.classList.remove('hidden');
                 btn.disabled = false;
+            } else {
+                balanceEl.className = 'font-bold text-red-600';
+                errorEl.textContent = 'Payment amount exceeds total.';
+                errorEl.classList.remove('hidden');
+                btn.disabled = true;
             }
         }
 

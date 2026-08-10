@@ -15,16 +15,20 @@ $today_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     FROM sales WHERE DATE(created_at) = CURDATE()
 "));
 
-// ============ WEEKLY SALES (last 7 days) ============
+// ============ WEEKLY SALES (current week: Monday 00:00 - Sunday 23:59:59) ============
+$week_start = date('Y-m-d', strtotime('monday this week'));
+$week_end = date('Y-m-d', strtotime('sunday this week'));
+$safe_week_start = mysqli_real_escape_string($conn, $week_start);
+$safe_week_end = mysqli_real_escape_string($conn, $week_end);
 $week_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
-    FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    FROM sales WHERE created_at >= '$safe_week_start 00:00:00' AND created_at <= '$safe_week_end 23:59:59'
 "));
 
-// ============ MONTHLY SALES (current month) ============
+// ============ MONTHLY SALES (selected report range) ============
 $month_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
-    FROM sales WHERE MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())
+    FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
 "));
 
 // ============ OVERALL REVENUE (filtered range) ============
@@ -71,10 +75,25 @@ $category_sales = mysqli_query($conn, "
 ");
 
 // ============ PAYMENT METHOD SUMMARY ============
-$spAmtCol = getPaymentAmountCol($conn, 'sale_payments');
+// Sum cash_amount / kbzpay_amount components separately so a Mixed payment is
+// counted once as its cash part + once as its KPay part, never double-counted.
+// Each sale's total_amount is attributed across its Cash/KPay components
+// (proportionally when the payment had both), so the sum always equals revenue
+// even when a cash payment included change. Legacy sales without a payment
+// record fall back to their full total as Cash.
 $payment_summary = mysqli_query($conn, "
     SELECT COALESCE(sp.payment_method, 'Cash') AS payment_method,
-           COALESCE(SUM(sp.$spAmtCol), s.total_amount) AS total, COUNT(*) AS count
+           COUNT(*) AS count,
+           COALESCE(SUM(CASE
+               WHEN sp.id IS NULL THEN s.total_amount
+               WHEN COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0) <= 0 THEN s.total_amount
+               ELSE ROUND(s.total_amount * COALESCE(sp.cash_amount, 0) / (COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0)), 2)
+           END), 0) AS cash_total,
+           COALESCE(SUM(CASE
+               WHEN sp.id IS NULL THEN 0
+               WHEN COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0) <= 0 THEN 0
+               ELSE ROUND(s.total_amount * COALESCE(sp.kbzpay_amount, 0) / (COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0)), 2)
+           END), 0) AS kbzpay_total
     FROM sales s
     LEFT JOIN sale_payments sp ON sp.id = (
         SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1
@@ -82,16 +101,47 @@ $payment_summary = mysqli_query($conn, "
     WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
     GROUP BY COALESCE(sp.payment_method, 'Cash')
 ");
-$payment_totals = ['Cash' => 0, 'KBZPay' => 0, 'Mixed' => 0];
-$payment_counts = ['Cash' => 0, 'KBZPay' => 0, 'Mixed' => 0];
+
+$cash_received = 0;
+$kbzpay_received = 0;
+$mixed_combined = 0;
+$cash_count = 0;
+$kbzpay_count = 0;
+$mixed_count = 0;
 while ($pt = mysqli_fetch_assoc($payment_summary)) {
     $pm = $pt['payment_method'] ?? 'Cash';
-    if (!isset($payment_totals[$pm])) $payment_totals[$pm] = 0;
-    if (!isset($payment_counts[$pm])) $payment_counts[$pm] = 0;
-    $payment_totals[$pm] += (float)$pt['total'];
-    $payment_counts[$pm] += (int)$pt['count'];
+    $cash_total = (float)$pt['cash_total'];
+    $kbzpay_total = (float)$pt['kbzpay_total'];
+    $cnt = (int)$pt['count'];
+
+    if ($pm === 'KBZPay') {
+        $kbzpay_received += $kbzpay_total;
+        $kbzpay_count += $cnt;
+    } elseif ($pm === 'Mixed') {
+        $cash_received += $cash_total;
+        $kbzpay_received += $kbzpay_total;
+        $mixed_combined += $cash_total + $kbzpay_total;
+        $cash_count += $cnt;
+        $kbzpay_count += $cnt;
+        $mixed_count += $cnt;
+    } else { // Cash (includes legacy sales with no payment record)
+        $cash_received += $cash_total;
+        $cash_count += $cnt;
+    }
 }
-$has_payments = array_sum($payment_totals) > 0;
+
+// Grand total = Cash + KPay = revenue (never double-counts Mixed)
+$payment_totals = [
+    'Cash' => $cash_received,
+    'KBZPay' => $kbzpay_received,
+    'Mixed' => $mixed_combined,
+];
+$payment_counts = [
+    'Cash' => $cash_count,
+    'KBZPay' => $kbzpay_count,
+    'Mixed' => $mixed_count,
+];
+$has_payments = ($cash_received + $kbzpay_received) > 0;
 
 // ============ DAILY SALES ============
 $daily_sales = mysqli_query($conn, "
@@ -428,7 +478,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             <div class="card-body">
                                 <div class="space-y-5">
                                     <?php
-                                    $total_payment = array_sum($payment_totals);
+                                    $total_payment = $cash_received + $kbzpay_received;
                                     $payment_colors = [
                                         'Cash' => ['gradient' => 'from-emerald-50 to-emerald-100/50', 'border' => 'border-emerald-200/50', 'icon_bg' => 'from-emerald-500 to-emerald-600', 'text' => 'text-emerald-700', 'fill' => 'bg-gradient-to-r from-emerald-500 to-emerald-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>'],
                                         'KBZPay' => ['gradient' => 'from-blue-50 to-blue-100/50', 'border' => 'border-blue-200/50', 'icon_bg' => 'from-blue-500 to-blue-600', 'text' => 'text-blue-700', 'fill' => 'bg-gradient-to-r from-blue-500 to-blue-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>'],

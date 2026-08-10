@@ -50,21 +50,29 @@ if (isset($_GET['view_id'])) {
     $payments = mysqli_query($conn, "SELECT * FROM sale_payments WHERE sale_id = $vid");
     $total_paid = 0;
     $payment_method = 'Cash';
+    $cash_received = 0;
+    $kbzpay_received = 0;
     if (mysqli_num_rows($payments) > 0) {
         while ($p = mysqli_fetch_assoc($payments)) {
             $total_paid += $p[$amtCol];
             $payment_method = $p['payment_method'] ?? 'Cash';
+            $cash_received += (float)($p['cash_amount'] ?? 0);
+            $kbzpay_received += (float)($p['kbzpay_amount'] ?? 0);
         }
     }
     $grand_total = floatval($sale['total_amount']);
     $change = max(0, $total_paid - $grand_total);
+    $has_split = columnExists($conn, 'sale_payments', 'cash_amount') && columnExists($conn, 'sale_payments', 'kbzpay_amount');
 
     echo json_encode([
         'sale' => $sale,
         'items' => $items,
         'total_paid' => $total_paid,
         'payment_method' => $payment_method,
-        'change' => $change
+        'change' => $change,
+        'cash_received' => $cash_received,
+        'kbzpay_received' => $kbzpay_received,
+        'has_split' => $has_split
     ]);
     exit;
 }
@@ -487,6 +495,10 @@ $page_title = "Sales History";
                     html += '<div class="flex justify-between text-sm"><span class="text-gray-500 dark:text-gray-400">' + profitLabel + '</span><span class="font-semibold ' + profitColor + '">' + totalProfit.toLocaleString() + ' Ks</span></div>';
                     html += '<div class="border-t border-dashed border-gray-300 dark:border-slate-600 my-2"></div>';
                     html += '<div class="flex justify-between text-sm"><span class="text-gray-500 dark:text-gray-400">Amount Paid</span><span class="font-semibold text-gray-800 dark:text-gray-200">' + totalPaid.toLocaleString() + ' Ks</span></div>';
+                    if (data.has_split && data.payment_method === 'Mixed') {
+                        html += '<div class="flex justify-between text-sm"><span class="text-gray-500 dark:text-gray-400">Cash</span><span class="font-semibold text-gray-800 dark:text-gray-200">' + (parseFloat(data.cash_received) || 0).toLocaleString() + ' Ks</span></div>';
+                        html += '<div class="flex justify-between text-sm"><span class="text-gray-500 dark:text-gray-400">KBZPay</span><span class="font-semibold text-gray-800 dark:text-gray-200">' + (parseFloat(data.kbzpay_received) || 0).toLocaleString() + ' Ks</span></div>';
+                    }
                     html += '<div class="flex justify-between text-sm"><span class="text-gray-500 dark:text-gray-400">Change</span><span class="font-semibold ' + (change > 0 ? 'text-emerald-600' : 'text-gray-800 dark:text-gray-200') + '">' + change.toLocaleString() + ' Ks</span></div>';
                     html += '</div>';
 
