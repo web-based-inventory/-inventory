@@ -11,7 +11,8 @@ if (session_status() === PHP_SESSION_NONE) {
  * Actions: view, add, edit, delete, export, update_price
  */
 
-function getPermissions() {
+function getPermissions()
+{
     return [
         'admin' => [
             'dashboard'  => ['view'],
@@ -20,7 +21,7 @@ function getPermissions() {
             'products'   => ['view', 'add', 'edit', 'delete', 'update_price', 'export'],
             'suppliers'  => ['view', 'add', 'edit', 'delete'],
             'purchases'  => ['view', 'add', 'edit', 'delete', 'export'],
-            'sales'      => ['view', 'add', 'delete', 'export'],
+            'sales'      => [],
             'reports'    => ['view', 'export'],
             'forecast'   => ['view'],
             'users'      => ['view', 'add', 'edit', 'delete'],
@@ -30,8 +31,8 @@ function getPermissions() {
             'dashboard'  => ['view'],
             'categories' => ['view'],
             'units'      => ['view'],
-            'products'   => ['view', 'add', 'edit'],
-            'suppliers'  => ['view', 'add', 'edit'],
+            'products'   => ['view'],
+            'suppliers'  => ['view'],
             'purchases'  => ['view', 'add', 'edit'],
             'sales'      => [],
             'reports'    => ['view'],
@@ -58,7 +59,8 @@ function getPermissions() {
 /**
  * Check if current user has permission for a module and action
  */
-function checkPermission($module, $action = 'view') {
+function checkPermission($module, $action = 'view')
+{
     if (!isset($_SESSION['role'])) {
         return false;
     }
@@ -76,7 +78,8 @@ function checkPermission($module, $action = 'view') {
 /**
  * Get allowed actions for a module
  */
-function getAllowedActions($module) {
+function getAllowedActions($module)
+{
     if (!isset($_SESSION['role'])) {
         return [];
     }
@@ -90,7 +93,8 @@ function getAllowedActions($module) {
 /**
  * Check if user can access a specific page (maps pages to modules)
  */
-function canAccessPage($page) {
+function canAccessPage($page)
+{
     $pageMap = [
         'dashboard'       => ['module' => 'dashboard',  'action' => 'view'],
         'categories'      => ['module' => 'categories', 'action' => 'view'],
@@ -103,7 +107,7 @@ function canAccessPage($page) {
         'suppliers'       => ['module' => 'suppliers',  'action' => 'view'],
         'suppliers/add'   => ['module' => 'suppliers',  'action' => 'add'],
         'suppliers/edit'  => ['module' => 'suppliers',  'action' => 'edit'],
-        'suppliers/ledger'=> ['module' => 'suppliers',  'action' => 'view'],
+        'suppliers/ledger' => ['module' => 'suppliers',  'action' => 'view'],
         'purchases'       => ['module' => 'purchases',  'action' => 'view'],
         'purchases/add'   => ['module' => 'purchases',  'action' => 'add'],
         'sales'           => ['module' => 'sales',      'action' => 'view'],

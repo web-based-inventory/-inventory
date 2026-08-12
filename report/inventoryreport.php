@@ -170,30 +170,6 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
         }
 
-        .data-table thead th {
-            background: #f8fafc !important;
-            font-size: 11px !important;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b !important;
-            padding: 14px 16px !important;
-            font-weight: 600 !important;
-            border-bottom: 2px solid #e2e8f0 !important;
-        }
-
-        .data-table tbody td {
-            padding: 14px 16px !important;
-            font-size: 13px !important;
-        }
-
-        .data-table tbody tr {
-            transition: all 0.15s ease;
-        }
-
-        .data-table tbody tr:hover {
-            background: #f8faff !important;
-        }
-
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;

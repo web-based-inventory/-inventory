@@ -135,6 +135,19 @@ $period_stats = mysqli_fetch_assoc(mysqli_query($conn, $period_sql));
 
 $avg_sale = $period_stats['total_sales'] > 0 ? round($period_stats['total_revenue'] / $period_stats['total_sales']) : 0;
 
+// Compact money format for display only (exact value is never changed):
+// 11,247,506 -> 11.25M | 850,000 -> 850K | 25,500 -> 25.5K | 950 -> 950
+function compactMoney($amount) {
+    $amount = (float)$amount;
+    if (abs($amount) >= 999950) {
+        return rtrim(rtrim(number_format($amount / 1000000, 2), '0'), '.') . 'M';
+    }
+    if (abs($amount) >= 1000) {
+        return rtrim(rtrim(number_format($amount / 1000, 1), '0'), '.') . 'K';
+    }
+    return number_format($amount);
+}
+
 // Cashier list for filter dropdown
 $cashiers = mysqli_query($conn, "SELECT DISTINCT u.id, u.name, u.role FROM sales s JOIN users u ON s.user_id = u.id WHERE u.name IS NOT NULL ORDER BY u.name");
 
@@ -215,7 +228,8 @@ $page_title = "Sales History";
                                 </div>
                                 <div>
                                     <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Total Revenue</p>
-                                    <p class="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5"><?= number_format($period_stats['total_revenue']) ?> Ks</p>
+                                    <?php $full_revenue = $period_stats['total_revenue']; ?>
+                                    <p class="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5 truncate" title="Full amount: <?= number_format($full_revenue) ?> Ks"><?= compactMoney($full_revenue) ?> Ks</p>
                                     <p class="text-sm text-emerald-600/70 dark:text-emerald-400/70"><?= $date_from || $date_to ? 'Filtered period' : 'All time' ?></p>
                                 </div>
                             </div>

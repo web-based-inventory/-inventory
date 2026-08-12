@@ -265,7 +265,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                             <span class="text-sm text-gray-500">Purchase Price</span>
                                             <span class="text-sm font-semibold text-gray-900 dark:text-white"><?= number_format($view_product['purchase_price']) ?> Ks</span>
                                         </div>
-                                        <?php if ($view_product['purchase_price'] > 0): ?>
+                                        <?php if ($view_product['purchase_price'] > 0 && (!isset($_SESSION['role']) || $_SESSION['role'] !== 'staff')): ?>
                                         <div class="flex justify-between py-2">
                                             <span class="text-sm text-gray-500">Margin</span>
                                             <span class="text-sm font-semibold text-emerald-600"><?= number_format($view_product['selling_price'] - $view_product['purchase_price']) ?> Ks (<?= number_format((($view_product['selling_price'] - $view_product['purchase_price']) / $view_product['purchase_price']) * 100, 1) ?>%)</span>

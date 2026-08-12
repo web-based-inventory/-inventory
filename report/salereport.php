@@ -75,71 +75,39 @@ $category_sales = mysqli_query($conn, "
 ");
 
 // ============ PAYMENT METHOD SUMMARY ============
-// Sum cash_amount / kbzpay_amount components separately so a Mixed payment is
-// counted once as its cash part + once as its KPay part, never double-counted.
-// Each sale's total_amount is attributed across its Cash/KPay components
-// (proportionally when the payment had both), so the sum always equals revenue
-// even when a cash payment included change. Legacy sales without a payment
+// Sum the actual cash_amount / kbzpay_amount stored in sale_payments so a
+// Mixed payment is counted once as its cash part + once as its KPay part,
+// never as a separate "Mixed" category. Legacy sales without a payment
 // record fall back to their full total as Cash.
-$payment_summary = mysqli_query($conn, "
-    SELECT COALESCE(sp.payment_method, 'Cash') AS payment_method,
-           COUNT(*) AS count,
-           COALESCE(SUM(CASE
-               WHEN sp.id IS NULL THEN s.total_amount
-               WHEN COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0) <= 0 THEN s.total_amount
-               ELSE ROUND(s.total_amount * COALESCE(sp.cash_amount, 0) / (COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0)), 2)
-           END), 0) AS cash_total,
-           COALESCE(SUM(CASE
-               WHEN sp.id IS NULL THEN 0
-               WHEN COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0) <= 0 THEN 0
-               ELSE ROUND(s.total_amount * COALESCE(sp.kbzpay_amount, 0) / (COALESCE(sp.cash_amount, 0) + COALESCE(sp.kbzpay_amount, 0)), 2)
-           END), 0) AS kbzpay_total
+$payment_summary = mysqli_fetch_assoc(mysqli_query($conn, "
+    SELECT COALESCE(SUM(CASE WHEN sp.id IS NULL THEN s.total_amount ELSE 0 END), 0) AS legacy_cash,
+           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL THEN COALESCE(sp.cash_amount, 0) ELSE 0 END), 0) AS cash_from_payments,
+           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL THEN COALESCE(sp.kbzpay_amount, 0) ELSE 0 END), 0) AS kbzpay_total,
+           COALESCE(SUM(CASE WHEN sp.id IS NULL THEN 1 ELSE 0 END), 0) AS legacy_count,
+           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL AND COALESCE(sp.cash_amount, 0) > 0 THEN 1 ELSE 0 END), 0) AS cash_sales_count,
+           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL AND COALESCE(sp.kbzpay_amount, 0) > 0 THEN 1 ELSE 0 END), 0) AS kbzpay_sales_count
     FROM sales s
     LEFT JOIN sale_payments sp ON sp.id = (
         SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1
     )
     WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
-    GROUP BY COALESCE(sp.payment_method, 'Cash')
-");
+"));
 
-$cash_received = 0;
-$kbzpay_received = 0;
-$mixed_combined = 0;
-$cash_count = 0;
-$kbzpay_count = 0;
-$mixed_count = 0;
-while ($pt = mysqli_fetch_assoc($payment_summary)) {
-    $pm = $pt['payment_method'] ?? 'Cash';
-    $cash_total = (float)$pt['cash_total'];
-    $kbzpay_total = (float)$pt['kbzpay_total'];
-    $cnt = (int)$pt['count'];
+// Cash = actual cash paid (Cash-only sales + cash part of Mixed) + legacy sales
+// with no payment record. KPay = actual KPay paid (KPay-only sales + KPay part
+// of Mixed). Mixed itself is only a payment combination, never a report category.
+$cash_received = (float)$payment_summary['legacy_cash'] + (float)$payment_summary['cash_from_payments'];
+$kbzpay_received = (float)$payment_summary['kbzpay_total'];
+$cash_count = (int)$payment_summary['legacy_count'] + (int)$payment_summary['cash_sales_count'];
+$kbzpay_count = (int)$payment_summary['kbzpay_sales_count'];
 
-    if ($pm === 'KBZPay') {
-        $kbzpay_received += $kbzpay_total;
-        $kbzpay_count += $cnt;
-    } elseif ($pm === 'Mixed') {
-        $cash_received += $cash_total;
-        $kbzpay_received += $kbzpay_total;
-        $mixed_combined += $cash_total + $kbzpay_total;
-        $cash_count += $cnt;
-        $kbzpay_count += $cnt;
-        $mixed_count += $cnt;
-    } else { // Cash (includes legacy sales with no payment record)
-        $cash_received += $cash_total;
-        $cash_count += $cnt;
-    }
-}
-
-// Grand total = Cash + KPay = revenue (never double-counts Mixed)
 $payment_totals = [
     'Cash' => $cash_received,
     'KBZPay' => $kbzpay_received,
-    'Mixed' => $mixed_combined,
 ];
 $payment_counts = [
     'Cash' => $cash_count,
     'KBZPay' => $kbzpay_count,
-    'Mixed' => $mixed_count,
 ];
 $has_payments = ($cash_received + $kbzpay_received) > 0;
 
@@ -284,30 +252,6 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
         .form-input:focus {
             border-color: #6366f1 !important;
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
-        }
-
-        .data-table thead th {
-            background: #f8fafc !important;
-            font-size: 11px !important;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b !important;
-            padding: 14px 16px !important;
-            font-weight: 600 !important;
-            border-bottom: 2px solid #e2e8f0 !important;
-        }
-
-        .data-table tbody td {
-            padding: 14px 16px !important;
-            font-size: 13px !important;
-        }
-
-        .data-table tbody tr {
-            transition: all 0.15s ease;
-        }
-
-        .data-table tbody tr:hover {
-            background: #f8faff !important;
         }
 
         ::-webkit-scrollbar {
@@ -481,8 +425,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     $total_payment = $cash_received + $kbzpay_received;
                                     $payment_colors = [
                                         'Cash' => ['gradient' => 'from-emerald-50 to-emerald-100/50', 'border' => 'border-emerald-200/50', 'icon_bg' => 'from-emerald-500 to-emerald-600', 'text' => 'text-emerald-700', 'fill' => 'bg-gradient-to-r from-emerald-500 to-emerald-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>'],
-                                        'KBZPay' => ['gradient' => 'from-blue-50 to-blue-100/50', 'border' => 'border-blue-200/50', 'icon_bg' => 'from-blue-500 to-blue-600', 'text' => 'text-blue-700', 'fill' => 'bg-gradient-to-r from-blue-500 to-blue-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>'],
-                                        'Mixed' => ['gradient' => 'from-purple-50 to-purple-100/50', 'border' => 'border-purple-200/50', 'icon_bg' => 'from-purple-500 to-purple-600', 'text' => 'text-purple-700', 'fill' => 'bg-gradient-to-r from-purple-500 to-purple-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>']
+                                        'KBZPay' => ['gradient' => 'from-blue-50 to-blue-100/50', 'border' => 'border-blue-200/50', 'icon_bg' => 'from-blue-500 to-blue-600', 'text' => 'text-blue-700', 'fill' => 'bg-gradient-to-r from-blue-500 to-blue-600', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>']
                                     ];
                                     foreach ($payment_totals as $method => $amount):
                                         $pct = $total_payment > 0 ? ($amount / $total_payment) * 100 : 0;
@@ -512,14 +455,22 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                     <!-- Best Selling Products -->
                     <div class="card mb-6">
                         <div class="card-header">
-                            <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            <div class="flex items-center justify-between gap-3">
+                                <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                        </svg>
+                                    </div>
+                                    Best Selling Products
+                                </h2>
+                                <a href="best-selling-products.php?date_from=<?= urlencode($date_from) ?>&date_to=<?= urlencode($date_to) ?>" class="btn btn-outline gap-2 text-sm whitespace-nowrap ">
+                                    View All
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
-                                </div>
-                                Best Selling Products
-                            </h2>
+                                </a>
+                            </div>
                         </div>
                         <div class="table-wrap">
                             <table class="data-table w-full">

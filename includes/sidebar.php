@@ -138,6 +138,7 @@ HTML;
             </div>
 
             <!-- Sales Group -->
+            <?php if (checkPermission('sales', 'view')): ?>
             <?php $sale_active = isGroupActive('sale'); ?>
             <div class="sidebar-group">
                 <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
@@ -158,6 +159,7 @@ HTML;
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Analytics Section -->
             <div class="pt-4 mt-2 border-t border-white/[0.06]">
