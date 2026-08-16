@@ -228,18 +228,6 @@ if ($selected_id > 0) {
                                         Make Payment
                                     </button>
                                 <?php endif; ?>
-                                <button onclick="window.print()" class="btn btn-outline gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                    Print
-                                </button>
-                                <button onclick="exportPDF()" class="btn btn-primary gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Export PDF
-                                </button>
                             </div>
                         </div>
 
@@ -261,7 +249,7 @@ if ($selected_id > 0) {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Outstanding Balance</p>
+                                                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Outstanding Credit</p>
                                                 <p class="text-2xl font-extrabold <?= $outstanding_balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' ?>">
                                                     <?= number_format($outstanding_balance, 2) ?> MMK
                                                 </p>
@@ -563,23 +551,23 @@ if ($selected_id > 0) {
                                             <div class="flex items-center justify-between text-xs">
                                                 <span class="text-gray-500 dark:text-gray-400"><?= htmlspecialchars($s['phone'] ?? '-') ?></span>
                                                 <?php if ($s_outstanding > 0): ?>
-                                                    <span class="badge badge-danger text-[11px]">Outstanding</span>
+                                                    <span class="badge badge-danger text-[11px]">Outstanding Balance</span>
                                                 <?php elseif ($s_advance > 0): ?>
-                                                    <span class="badge badge-success text-[11px]">Credit</span>
+                                                    <span class="badge badge-success text-[11px]">Advance Balance</span>
                                                 <?php else: ?>
                                                     <span class="badge badge-success text-[11px]">Clear</span>
                                                 <?php endif; ?>
                                             </div>
 
                                             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">Outstanding</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">Outstanding Balance</span>
                                                 <span class="text-sm font-bold <?= $s_outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' ?>">
                                                     <?= number_format($s_outstanding, 2) ?> MMK
                                                 </span>
                                             </div>
                                             <?php if ($s_advance > 0): ?>
                                                 <div class="mt-2 flex items-center justify-between">
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400">Credit</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">Advance Balance</span>
                                                     <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                                         <?= number_format($s_advance, 2) ?> MMK
                                                     </span>

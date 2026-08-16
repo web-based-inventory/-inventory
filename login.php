@@ -2,7 +2,9 @@
 session_start();
 if (isset($_SESSION['user_id'])) {
     $redirect = match ($_SESSION['role'] ?? '') {
-        'cashier' => 'sale/pos.php',
+        'admin' => 'dashboard/index.php',
+        'staff' => 'dashboard/index.php',
+        'cashier' => 'dashboard/index.php',
         default => 'dashboard/index.php'
     };
     header("Location: $redirect");
@@ -68,7 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $redirect = match ($user['role']) {
-                'cashier' => 'sale/pos.php',
+                'admin' => 'dashboard/index.php',
+                'staff' => 'dashboard/index.php',
+                'cashier' => 'dashboard/index.php',
                 default => 'dashboard/index.php'
             };
             header("Location: $redirect");

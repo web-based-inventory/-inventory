@@ -241,71 +241,73 @@ $result = mysqli_query($conn, $sql);
                 <!-- Table -->
                 <div class="bg-white rounded-2xl shadow mt-8 p-6">
                     <div class="table-wrap">
-                    <table class="data-table w-full">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Supplier</th>
-                                <th>Contact Person</th>
-                                <th>Phone</th>
-                                <th class="center">Status</th>
-                                <th class="center">Outstanding</th>
-                                <th class="center">Advance Credit</th>
-                                <th class="center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $count = 1;
-                            while ($row = mysqli_fetch_assoc($result)) {
-                            ?>
+                        <table class="data-table w-full">
+                            <thead>
                                 <tr>
-                                    <td><?= $count++ ?></td>
-                                    <td class="font-semibold"><?= htmlspecialchars($row['supplier_name']) ?></td>
-                                    <td><?= htmlspecialchars($row['contact_person'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($row['phone']) ?></td>
-                                    <td class="center">
-                                        <?php if ($row['status'] == "Active") { ?>
-                                            <span class="badge badge-success"><span class="badge-dot"></span> Active</span>
-                                        <?php } else { ?>
-                                            <span class="badge badge-danger"><span class="badge-dot"></span> Inactive</span>
-                                        <?php } ?>
-                                    </td>
-                                    <td class="center">
-                                        <?php
-                                        $outstanding = (float)($row['outstanding_balance'] ?? 0);
-                                        if ($outstanding > 0) { ?>
-                                            <span class="badge badge-danger"><span class="badge-dot"></span> <?= number_format($outstanding, 0) ?> MMK</span>
-                                        <?php } else { ?>
-                                            <span class="badge badge-success"><span class="badge-dot"></span> 0 MMK</span>
-                                        <?php } ?>
-                                    </td>
-                                    <td class="center">
-                                        <?php
-                                        $adv_credit = (float)($row['advance_credit'] ?? 0);
-                                        if ($adv_credit > 0) { ?>
-                                            <span class="badge badge-success"><span class="badge-dot"></span> <?= number_format($adv_credit, 0) ?> MMK</span>
-                                        <?php } else { ?>
-                                            <span class="text-sm text-gray-500 dark:text-gray-400">0 MMK</span>
-                                        <?php } ?>
-                                    </td>
-                                    <td class="center">
-                                        <div class="actions flex gap-1">
-                                            <a href="view.php?id=<?= $row['id'] ?>" class="btn btn-sm bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-lg">View</a>
-                                            <?php if (checkPermission('suppliers', 'edit')): ?>
-                                            <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg">Edit</a>
-                                            <?php endif; ?>
-                                            <?php if (checkPermission('suppliers', 'delete')): ?>
-                                            <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['supplier_name'])) ?>', 'index.php')" title="Delete" class="btn btn-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
+                                    <th>#</th>
+                                    <th>Supplier</th>
+                                    <th>Contact Person</th>
+                                    <th>Phone</th>
+                                    <th class="center">Status</th>
+                                    <th class="center">Outstanding Balance</th>
+                                    <th class="center">Advance Credit</th>
+                                    <th class="center">Action</th>
                                 </tr>
-                            <?php } ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $count = 1;
+                                while ($row = mysqli_fetch_assoc($result)) {
+                                ?>
+                                    <tr>
+                                        <td><?= $count++ ?></td>
+                                        <td class="font-semibold"><?= htmlspecialchars($row['supplier_name']) ?></td>
+                                        <td><?= htmlspecialchars($row['contact_person'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($row['phone']) ?></td>
+                                        <td class="center">
+                                            <?php if ($row['status'] == "Active") { ?>
+                                                <span class="badge badge-success"><span class="badge-dot"></span> Active</span>
+                                            <?php } else { ?>
+                                                <span class="badge badge-danger"><span class="badge-dot"></span> Inactive</span>
+                                            <?php } ?>
+                                        </td>
+                                        <td class="center">
+                                            <?php
+                                            $outstanding = (float)($row['outstanding_balance'] ?? 0);
+                                            if ($outstanding > 0) { ?>
+                                                <span class="badge badge-danger"><span class="badge-dot"></span> <?= number_format($outstanding, 0) ?> MMK</span>
+                                            <?php } else { ?>
+                                                <span class="badge badge-success"><span class="badge-dot"></span> 0 MMK</span>
+                                            <?php } ?>
+                                        </td>
+                                        <td class="center">
+                                            <?php
+                                            $adv_credit = (float)($row['advance_credit'] ?? 0);
+                                            if ($adv_credit > 0) { ?>
+                                                <span class="badge badge-success"><span class="badge-dot"></span> <?= number_format($adv_credit, 0) ?> MMK</span>
+                                            <?php } else { ?>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">0 MMK</span>
+                                            <?php } ?>
+                                        </td>
+                                        <td class="center">
+                                            <div class="actions flex gap-1">
+                                                <a href="view.php?id=<?= $row['id'] ?>" class="btn btn-sm bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-lg">View</a>
+                                                <?php if (checkPermission('suppliers', 'edit')): ?>
+                                                    <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg">Edit</a>
+                                                <?php endif; ?>
+                                                <?php if (checkPermission('suppliers', 'delete')): ?>
+                                                    <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['supplier_name'])) ?>', 'index.php')" title="Delete" class="btn btn-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
                     </div>
 
                 </div>

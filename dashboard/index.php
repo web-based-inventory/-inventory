@@ -875,7 +875,7 @@ if ($role === 'cashier') {
                                 </div>
                                 <div>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-slate-100"><?= $today_stats['orders'] ?? 0 ?></p>
-                                    <p class="text-sm text-gray-500 dark:text-slate-400">Today's Orders</p>
+                                    <p class="text-sm text-gray-500 dark:text-slate-400">Today's Sale</p>
                                 </div>
                             </div>
                         </div>

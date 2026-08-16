@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Only consume token if validation succeeds or we are handling a real submit
         $supplier_name = trim($_POST['supplier_name'] ?? '');
         $contact_person = trim($_POST['contact_person'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
+        $phone = preg_replace('/\s+/', '', trim($_POST['phone'] ?? ''));
         $email = trim($_POST['email'] ?? '');
         $address = trim($_POST['address'] ?? '');
         $status = $_POST['status'] ?? 'Active';
@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($phone === '') {
             $errors['phone'] = 'Phone number is required.';
+        } elseif (!preg_match('/^[0-9]{7,11}$/', $phone)) {
+            $errors['phone'] = 'Phone number must be between 7 and 11 digits.';
         }
 
         if (empty($errors)) {
@@ -112,8 +114,9 @@ $save_token = $_SESSION['supplier_save_token'];
 
                                     <div>
                                         <label for="phone" class="form-label">Phone Number <span class="text-red-500">*</span></label>
-                                        <input type="text" id="phone" name="phone" value="<?= htmlspecialchars($phone) ?>"
+                                        <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($phone) ?>"
                                             placeholder="Enter phone number"
+                                            maxlength="11" inputmode="numeric" pattern="[0-9]{7,11}"
                                             class="form-input <?= isset($errors['phone']) ? 'error' : '' ?>">
                                         <?php if (isset($errors['phone'])): ?>
                                             <p class="form-error text-red-500 text-xs mt-1"><?= $errors['phone'] ?></p>

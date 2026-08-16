@@ -10,21 +10,64 @@ $action = $_GET['action'] ?? 'dashboard';
 // Calculate forecast for a product using moving average (last N days)
 function calculateForecast($conn, $product_id, $days = 30)
 {
-    $result = mysqli_query($conn, "
-        SELECT SUM(sd.quantity) AS total_qty
+    // Retrieve historical sales aggregated by day
+    $query = "
+        SELECT DATE(s.created_at) as sale_date, SUM(sd.quantity) AS daily_qty
         FROM sale_details sd
         JOIN sales s ON sd.sale_id = s.id
         WHERE sd.product_id = '$product_id'
         AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL $days DAY)
-    ");
-    $row = mysqli_fetch_assoc($result);
-    $total = (int)$row['total_qty'];
-    $daily_avg = $days > 0 ? $total / $days : 0;
+        GROUP BY DATE(s.created_at)
+        ORDER BY sale_date ASC
+    ";
+    $result = mysqli_query($conn, $query);
+    
+    $historical_quantities = [];
+    $total = 0;
+    $sales_count = 0;
+    
+    while ($row = mysqli_fetch_assoc($result)) {
+        $qty = (int)$row['daily_qty'];
+        $historical_quantities[$row['sale_date']] = $qty;
+        $total += $qty;
+        $sales_count++;
+    }
+
+    // Handle Insufficient Data (e.g. no sales at all)
+    if ($sales_count == 0) {
+        $daily_avg = 0;
+        $forecast_30 = 0;
+        $insufficient = true;
+    } else {
+        $daily_avg = $days > 0 ? $total / $days : 0;
+        $forecast_30 = round($daily_avg * 30);
+        $insufficient = false;
+    }
+
+    // Debugging info to verify forecasting input for the user
+    $debug_info = [
+        'product_id' => $product_id,
+        'historical_sales_days_count' => $sales_count,
+        'historical_quantities' => $historical_quantities,
+        'forecast_input_total_sold' => $total,
+        'forecast_result_30_days' => $forecast_30,
+        'insufficient_data' => $insufficient
+    ];
+    
+    // Write debug info to a file (append)
+    $debug_log_path = __DIR__ . '/forecast_debug.log';
+    if (!file_exists($debug_log_path) || filesize($debug_log_path) == 0) {
+        file_put_contents($debug_log_path, "=== Forecast Debug Log ===\n");
+    }
+    file_put_contents($debug_log_path, json_encode($debug_info, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
+
     return [
         'total_sold' => $total,
         'daily_avg' => round($daily_avg, 2),
         'forecast_7' => round($daily_avg * 7),
-        'forecast_30' => round($daily_avg * 30),
+        'forecast_30' => $forecast_30,
+        'insufficient' => $insufficient,
+        'debug' => $debug_info
     ];
 }
 
@@ -34,26 +77,40 @@ if ($action === 'generate') {
 
     // Clear old forecasts for today so we can regenerate
     mysqli_query($conn, "DELETE FROM forecasts WHERE forecast_date = CURDATE()");
+    
+    // Clear debug log on new generation
+    $debug_log_path = __DIR__ . '/forecast_debug.log';
+    file_put_contents($debug_log_path, "=== Forecast Debug Log (Generated: " . date('Y-m-d H:i:s') . ") ===\n\n");
 
     while ($p = mysqli_fetch_assoc($products)) {
         $forecast = calculateForecast($conn, $p['id'], 30);
-        $daily_avg = $forecast['daily_avg'];
+        
+        if ($forecast['insufficient']) {
+            $demand = 'Insufficient';
+            $forecast_qty = 0;
+            // Provide a fallback recommendation
+            $recommended = max(0, $p['reorder_level'] * 2 - $p['current_stock']);
+        } else {
+            $daily_avg = $forecast['daily_avg'];
+            
+            // Determine demand level based on daily average
+            if ($daily_avg >= 5) $demand = 'High';
+            elseif ($daily_avg >= 1) $demand = 'Medium';
+            else $demand = 'Low';
 
-        // Determine demand level based on daily average
-        if ($daily_avg >= 5) $demand = 'High';
-        elseif ($daily_avg >= 1) $demand = 'Medium';
-        else $demand = 'Low';
-
-        // Recommended stock: at least 2x min_stock, or enough to cover 30-day forecast
-        $recommended = max($forecast['forecast_30'], $p['reorder_level'] * 2);
-        if ($p['current_stock'] < $p['reorder_level']) {
-            $recommended = max($recommended, $p['reorder_level'] * 3 - $p['current_stock']);
+            $forecast_qty = $forecast['forecast_30'];
+            
+            // Recommended stock: at least 2x min_stock, or enough to cover 30-day forecast
+            $recommended = max($forecast_qty, $p['reorder_level'] * 2);
+            if ($p['current_stock'] < $p['reorder_level']) {
+                $recommended = max($recommended, $p['reorder_level'] * 3 - $p['current_stock']);
+            }
         }
 
         $stmt = $conn->prepare("INSERT INTO forecasts (product_id, forecast_date, forecast_quantity, demand_level, recommended_stock, method)
             VALUES (?, CURDATE(), ?, ?, ?, 'moving_average')
             ON DUPLICATE KEY UPDATE forecast_quantity = VALUES(forecast_quantity), demand_level = VALUES(demand_level), recommended_stock = VALUES(recommended_stock)");
-        $stmt->bind_param("iisi", $p['id'], $forecast['forecast_30'], $demand, $recommended);
+        $stmt->bind_param("iisi", $p['id'], $forecast_qty, $demand, $recommended);
         $stmt->execute();
     }
 
@@ -499,7 +556,7 @@ if ($accuracy_count > 0) {
                                     <tbody>
                                         <?php
                                         $all_forecasts = mysqli_query($conn, "
-                                        SELECT p.product_name, p.current_stock, f.forecast_quantity
+                                        SELECT p.product_name, p.current_stock, f.forecast_quantity, f.demand_level, f.recommended_stock
                                         FROM forecasts f
                                         JOIN products p ON f.product_id = p.id
                                         WHERE f.forecast_date = CURDATE()
@@ -509,17 +566,25 @@ if ($accuracy_count > 0) {
                                         if (mysqli_num_rows($all_forecasts) > 0): while ($f = mysqli_fetch_assoc($all_forecasts)):
                                                 $current_stock = (int)$f['current_stock'];
                                                 $forecast_qty = (int)$f['forecast_quantity'];
-                                                $recommended_purchase = max(0, $forecast_qty - $current_stock);
-                                                $needs_reorder = $recommended_purchase > 0;
+                                                $recommended_stock = (int)$f['recommended_stock'];
+                                                $recommended_purchase = max(0, $recommended_stock - $current_stock);
+                                                $insufficient = ($f['demand_level'] === 'Insufficient');
+                                                $needs_reorder = $recommended_purchase > 0 && !$insufficient;
                                         ?>
                                                 <tr class="<?= $needs_reorder ? 'bg-red-50 dark:bg-red-900/10' : '' ?>">
                                                     <td class="text-gray-400 font-mono"><?= $af_count++ ?></td>
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($f['product_name']) ?></td>
                                                     <td class="num <?= $current_stock < 5 ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $current_stock ?></td>
-                                                    <td class="num font-semibold"><?= number_format($forecast_qty) ?></td>
-                                                    <td class="num font-bold <?= $needs_reorder ? 'text-red-600' : 'text-gray-500' ?>"><?= number_format($recommended_purchase) ?></td>
+                                                    <?php if ($insufficient): ?>
+                                                        <td colspan="2" class="text-center text-gray-500 text-sm italic py-2">Insufficient historical data</td>
+                                                    <?php else: ?>
+                                                        <td class="num font-semibold"><?= number_format($forecast_qty) ?></td>
+                                                        <td class="num font-bold <?= $needs_reorder ? 'text-red-600' : 'text-gray-500' ?>"><?= number_format($recommended_purchase) ?></td>
+                                                    <?php endif; ?>
                                                     <td class="center">
-                                                        <?php if ($needs_reorder): ?>
+                                                        <?php if ($insufficient): ?>
+                                                            <span class="badge badge-secondary" style="background-color: #f3f4f6; color: #6b7280;"><span class="badge-dot" style="background-color: #9ca3af;"></span> No Data</span>
+                                                        <?php elseif ($needs_reorder): ?>
                                                             <span class="badge badge-danger"><span class="badge-dot"></span> Reorder Required</span>
                                                         <?php else: ?>
                                                             <span class="badge badge-success"><span class="badge-dot"></span> Enough Stock</span>

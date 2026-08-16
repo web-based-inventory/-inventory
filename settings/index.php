@@ -8,9 +8,16 @@ $page_title = "Settings";
 $setting = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM settings WHERE id=1"));
 
 if (isset($_POST['save'])) {
+    $error = '';
     $shop_name = trim(mysqli_real_escape_string($conn, $_POST['shop_name']));
     if (empty($shop_name)) $shop_name = 'Smart Inventory';
-    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
+    
+    $phone_raw = preg_replace('/\s+/', '', trim($_POST['phone'] ?? ''));
+    if ($phone_raw !== '' && !preg_match('/^[0-9]{7,11}$/', $phone_raw)) {
+        $error = "Phone number must be between 7 and 11 digits.";
+    }
+    $phone = mysqli_real_escape_string($conn, $phone_raw);
+    
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $currency = mysqli_real_escape_string($conn, $_POST['currency']);
@@ -29,17 +36,19 @@ if (isset($_POST['save'])) {
         move_uploaded_file($_FILES['logo']['tmp_name'], "../img/" . $logo);
     }
 
-    if ($setting) {
-        mysqli_query($conn, "UPDATE settings SET shop_name='$shop_name', logo='$logo', phone='$phone', email='$email', address='$address', currency='$currency', tax_rate=$tax_rate, minimum_profit_margin=$minimum_profit_margin WHERE id=1");
-    } else {
-        mysqli_query($conn, "INSERT INTO settings (shop_name, logo, phone, email, address, currency, tax_rate, minimum_profit_margin) VALUES ('$shop_name', '$logo', '$phone', '$email', '$address', '$currency', $tax_rate, $minimum_profit_margin)");
-    }
+    if (empty($error)) {
+        if ($setting) {
+            mysqli_query($conn, "UPDATE settings SET shop_name='$shop_name', logo='$logo', phone='$phone', email='$email', address='$address', currency='$currency', tax_rate=$tax_rate, minimum_profit_margin=$minimum_profit_margin WHERE id=1");
+        } else {
+            mysqli_query($conn, "INSERT INTO settings (shop_name, logo, phone, email, address, currency, tax_rate, minimum_profit_margin) VALUES ('$shop_name', '$logo', '$phone', '$email', '$address', '$currency', $tax_rate, $minimum_profit_margin)");
+        }
 
-    // Clear the getShopSettings cache so the sidebar picks up changes immediately
-    $setting = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM settings WHERE id=1"));
-    // Force cache refresh
-    getShopSettings($conn);
-    $success = "Settings updated successfully.";
+        // Clear the getShopSettings cache so the sidebar picks up changes immediately
+        $setting = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM settings WHERE id=1"));
+        // Force cache refresh
+        getShopSettings($conn);
+        $success = "Settings updated successfully.";
+    }
 }
 
 ?>
@@ -65,6 +74,9 @@ if (isset($_POST['save'])) {
                 <div class="max-w-4xl mx-auto">
                     <?php if (isset($success)): ?>
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6"><?= $success ?></div>
+                    <?php endif; ?>
+                    <?php if (isset($error) && $error !== ''): ?>
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6"><?= $error ?></div>
                     <?php endif; ?>
 
                     <form method="POST" enctype="multipart/form-data" class="bg-white shadow-xl rounded-2xl p-8" data-form-guard="true">
@@ -96,7 +108,7 @@ if (isset($_POST['save'])) {
                         <div class="grid grid-cols-2 gap-5">
                             <div>
                                 <label class="font-semibold">Phone</label>
-                                <input type="text" name="phone" value="<?= $setting['phone'] ?? '' ?>" class="w-full border rounded-lg p-3 mt-2" placeholder="Phone number">
+                                <input type="tel" name="phone" value="<?= htmlspecialchars($setting['phone'] ?? '') ?>" maxlength="11" inputmode="numeric" pattern="[0-9]{7,11}" class="w-full border rounded-lg p-3 mt-2" placeholder="Phone number">
                             </div>
                             <div>
                                 <label class="font-semibold">Email</label>

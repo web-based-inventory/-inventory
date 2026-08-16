@@ -420,10 +420,10 @@ $page_title = "New Sale (POS)";
                                 $oos = $stock <= 0;
                                 $low_stock = $stock <= $reorder && !$oos;
                         ?>
-                                <div class="bg-white rounded-xl border border-gray-200 p-3 product-card slide-up <?= $oos ? 'out-of-stock' : '' ?>">
-                                    <div class="h-26 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                                <div class="bg-white rounded-xl border border-gray-200 p-3 product-card slide-up <?= $oos ? 'out-of-stock' : '' ?> h-full flex flex-col">
+                                    <div class="h-32 w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden shrink-0">
                                         <?php if ($p['image']): ?>
-                                            <img src="../img/<?= htmlspecialchars($p['image']) ?>" alt="" class="h-full w-full object-cover rounded-lg" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                            <img src="../img/<?= htmlspecialchars($p['image']) ?>" alt="" class="h-full w-full object-contain p-2" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
 
                                         <?php else: ?>
                                             <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,14 +431,16 @@ $page_title = "New Sale (POS)";
                                             </svg>
                                         <?php endif; ?>
                                     </div>
-                                    <h3 class="font-semibold text-xs text-gray-800 truncate" title="<?= htmlspecialchars($p['product_name']) ?>"><?= htmlspecialchars($p['product_name']) ?></h3>
-                                    <p class="text-[11px] text-gray-400 mt-0.5">SKU: <?= htmlspecialchars($p['sku'] ?? 'N/A') ?></p>
-                                    <p class="text-[11px] <?= $low_stock ? 'text-amber-500 font-medium' : ($oos ? 'text-red-500 font-medium' : 'text-gray-400') ?>">
-                                        Stock: <?= $stock ?>
-                                        <?= $oos ? ' (Out)' : ($low_stock ? ' (Low)' : '') ?>
-                                    </p>
-                                    <p class="text-indigo-600 font-bold text-sm mt-1"><?= number_format($p['selling_price']) ?> Ks</p>
-                                    <form method="POST" class="mt-2 flex gap-1">
+                                    <div class="flex-1 flex flex-col">
+                                        <h3 class="font-semibold text-xs text-gray-800 line-clamp-2 min-h-[2.5rem]" title="<?= htmlspecialchars($p['product_name']) ?>"><?= htmlspecialchars($p['product_name']) ?></h3>
+                                        <p class="text-[11px] text-gray-400 mt-1">SKU: <?= htmlspecialchars($p['sku'] ?? 'N/A') ?></p>
+                                        <p class="text-[11px] <?= $low_stock ? 'text-amber-500 font-medium' : ($oos ? 'text-red-500 font-medium' : 'text-gray-400') ?> mt-0.5">
+                                            Stock: <?= $stock ?>
+                                            <?= $oos ? ' (Out)' : ($low_stock ? ' (Low)' : '') ?>
+                                        </p>
+                                        <p class="text-indigo-600 font-bold text-sm mt-1.5"><?= number_format($p['selling_price']) ?> Ks</p>
+                                    </div>
+                                    <form method="POST" class="mt-auto pt-3 flex gap-1 w-full">
                                         <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
                                         <input type="number" name="quantity" value="1" min="1" max="<?= $stock ?>" class="border border-gray-300 rounded-lg w-14 text-center p-1.5 text-xs focus:outline-none focus:border-indigo-400">
                                         <button name="add_cart" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-700 flex-1 transition <?= $oos ? 'opacity-50' : '' ?>">+ Add</button>
