@@ -13,28 +13,28 @@ $safe_to = mysqli_real_escape_string($conn, $date_to);
 $today_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
     FROM sales WHERE DATE(created_at) = CURDATE()
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
-// ============ WEEKLY SALES (current week: Monday 00:00 - Sunday 23:59:59) ============
-$week_start = date('Y-m-d', strtotime('monday this week'));
-$week_end = date('Y-m-d', strtotime('sunday this week'));
-$safe_week_start = mysqli_real_escape_string($conn, $week_start);
-$safe_week_end = mysqli_real_escape_string($conn, $week_end);
+// ============ WEEKLY SALES (Last 7 Days) ============
 $week_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
-    FROM sales WHERE created_at >= '$safe_week_start 00:00:00' AND created_at <= '$safe_week_end 23:59:59'
+    FROM sales WHERE DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(created_at) <= CURDATE()
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
 // ============ MONTHLY SALES (selected report range) ============
 $month_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
     FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
 // ============ OVERALL REVENUE (filtered range) ============
 $revenue_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS total_sales, COALESCE(SUM(total_amount), 0) AS total_revenue
     FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
 // ============ PROFIT ============
@@ -91,6 +91,7 @@ $payment_summary = mysqli_fetch_assoc(mysqli_query($conn, "
         SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1
     )
     WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = s.id)
 "));
 
 // Cash = actual cash paid (Cash-only sales + cash part of Mixed) + legacy sales
@@ -115,7 +116,34 @@ $has_payments = ($cash_received + $kbzpay_received) > 0;
 $daily_sales = mysqli_query($conn, "
     SELECT DATE(created_at) AS day, COUNT(*) AS count, SUM(total_amount) AS total
     FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
     GROUP BY DATE(created_at) ORDER BY day DESC
+");
+
+// ============ BEST SELLING PRODUCT (single top product by qty) ============
+$best_selling = mysqli_fetch_assoc(mysqli_query($conn, "
+    SELECT p.product_name, SUM(sd.quantity) AS total_qty
+    FROM sale_details sd
+    JOIN products p ON sd.product_id = p.id
+    JOIN sales s ON sd.sale_id = s.id
+    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    GROUP BY p.id, p.product_name
+    ORDER BY total_qty DESC
+    LIMIT 1
+"));
+
+// ============ PRODUCT SALES ANALYSIS (daily breakdown per product) ============
+$product_sales_analysis = mysqli_query($conn, "
+    SELECT DATE(s.created_at) AS sale_date,
+           p.product_name,
+           SUM(sd.quantity) AS total_quantity,
+           SUM(sd.subtotal) AS total_amount
+    FROM sales s
+    JOIN sale_details sd ON sd.sale_id = s.id
+    JOIN products p ON p.id = sd.product_id
+    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    GROUP BY DATE(s.created_at), p.id, p.product_name
+    ORDER BY sale_date DESC, total_quantity DESC
 ");
 
 $page_title = "Sales Reports";
@@ -306,7 +334,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                     <form method="GET" id="reportForm"></form>
 
                     <!-- Quick Stats Row -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="exportArea">
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6" id="exportArea">
                         <!-- Today's Sales -->
                         <div class="stat-card bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
@@ -327,7 +355,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <div>
-                                    <p class="text-sm text-blue-600">Weekly Sales</p>
+                                    <p class="text-sm text-blue-600">Last 7 Days</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($week_stats['count']) ?></p>
                                     <p class="text-xs text-blue-600 dark:text-blue-400 mt-1 truncate" title="Full amount: <?= number_format($week_stats['revenue']) ?> Ks"><?= compactMoney($week_stats['revenue']) ?> Ks</p>
                                 </div>
@@ -356,6 +384,23 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     <p class="text-sm text-amber-600">Period Revenue</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($revenue_stats['total_revenue']) ?> Ks"><?= compactMoney($revenue_stats['total_revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1"><?= $revenue_stats['total_sales'] ?> sales</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Best Selling Product -->
+                        <div class="stat-card bg-rose-50 dark:bg-rose-900/30 rounded-xl p-5">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-12 h-12 text-rose-600 dark:text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-rose-600">Best Selling Product</p>
+                                    <?php if ($best_selling && $best_selling['total_qty'] > 0): ?>
+                                        <p class="text-lg font-bold text-gray-900 dark:text-white leading-tight truncate" title="<?= htmlspecialchars($best_selling['product_name']) ?>"><?= htmlspecialchars($best_selling['product_name']) ?></p>
+                                        <p class="text-xs text-rose-600 dark:text-rose-400 mt-1"><?= number_format($best_selling['total_qty']) ?> units sold</p>
+                                    <?php else: ?>
+                                        <p class="text-lg font-bold text-gray-900 dark:text-white leading-tight">No sales data</p>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -473,16 +518,16 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </div>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th class="num">Qty Sold</th>
-                                        <th class="num">Revenue</th>
-                                        <th class="num">Profit</th>
-                                        <th class="w-40">Share</th>
+                                        <th class="w-[5%]">#</th>
+                                        <th class="w-[25%]">Product</th>
+                                        <th class="w-[14%]">SKU</th>
+                                        <th class="num w-[10%]">Qty Sold</th>
+                                        <th class="num w-[16%]">Revenue</th>
+                                        <th class="num w-[16%]">Profit</th>
+                                        <th class="num w-[14%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -500,19 +545,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     ?>
                                         <tr>
                                             <td><?= $rank++ ?></td>
-                                            <td><?= htmlspecialchars($tp['product_name']) ?></td>
-                                            <td><?= htmlspecialchars($tp['sku'] ?? 'N/A') ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($tp['product_name']) ?>"><?= htmlspecialchars($tp['product_name']) ?></td>
+                                            <td class="truncate-cell" title="<?= htmlspecialchars($tp['sku'] ?? 'N/A') ?>"><?= htmlspecialchars($tp['sku'] ?? 'N/A') ?></td>
                                             <td class="num"><?= number_format($tp['total_qty']) ?></td>
                                             <td class="num"><?= number_format($tp['total_revenue']) ?> Ks</td>
                                             <td class="num <?= $tp['total_profit'] < 0 ? 'text-red-600' : '' ?>"><?= ($tp['total_profit'] < 0 ? 'Loss ' : '') . number_format($tp['total_profit']) ?> Ks</td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="progress-bar flex-1">
-                                                        <div class="progress-fill bg-indigo-500" style="width: <?= $share ?>%"></div>
-                                                    </div>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400 w-10 text-right"><?= number_format($share, 1) ?>%</span>
-                                                </div>
-                                            </td>
+                                            <td class="num"><?= number_format($share, 1) ?>%</td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($tp_rows)): ?>
@@ -535,6 +573,61 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                         </div>
                     </div>
 
+                    <!-- Product Sales Analysis -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-sm">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                Product Sales Analysis
+                            </h2>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-[18%]">Date</th>
+                                        <th class="w-[30%]">Product</th>
+                                        <th class="num w-[20%]">Quantity Sold</th>
+                                        <th class="num w-[32%]">Sales Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $psa_rows = [];
+                                    while ($psa = mysqli_fetch_assoc($product_sales_analysis)) $psa_rows[] = $psa;
+                                    foreach ($psa_rows as $psa):
+                                    ?>
+                                        <tr>
+                                            <td><?= date('d-M', strtotime($psa['sale_date'])) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($psa['product_name']) ?>"><?= htmlspecialchars($psa['product_name']) ?></td>
+                                            <td class="num"><?= number_format($psa['total_quantity']) ?></td>
+                                            <td class="num"><?= number_format($psa['total_amount']) ?> Ks</td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <?php if (empty($psa_rows)): ?>
+                                        <tr>
+                                            <td colspan="4" class="text-center py-16">
+                                                <div class="flex flex-col items-center">
+                                                    <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
+                                                        <svg class="w-7 h-7 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h3 class="text-base font-semibold text-gray-500">No sales data</h3>
+                                                    <p class="text-sm text-gray-400 mt-1">No product sales found for this period.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Sales by Category -->
                     <div class="card mb-6">
                         <div class="card-header">
@@ -548,15 +641,15 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Category</th>
-                                        <th class="num">Count</th>
-                                        <th class="num">Qty Sold</th>
-                                        <th class="num">Revenue</th>
-                                        <th class="w-48">Share</th>
+                                        <th class="w-[6%]">#</th>
+                                        <th class="w-[28%]">Category</th>
+                                        <th class="num w-[14%]">Count</th>
+                                        <th class="num w-[14%]">Qty Sold</th>
+                                        <th class="num w-[18%]">Revenue</th>
+                                        <th class="num w-[20%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -573,17 +666,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     ?>
                                         <tr>
                                             <td><?= $ci ?></td>
-                                            <td><?= htmlspecialchars($cs['category_name']) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($cs['category_name']) ?>"><?= htmlspecialchars($cs['category_name']) ?></td>
                                             <td class="num"><?= number_format($cs['sale_count']) ?></td>
                                             <td class="num"><?= number_format($cs['total_qty']) ?></td>
                                             <td class="num"><?= number_format($cs['total_revenue']) ?> Ks</td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="progress-bar flex-1">
-                                                        <div class="progress-fill <?= $color ?>" style="width: <?= $share ?>%"></div>
-                                                    </div>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400 w-10 text-right"><?= number_format($share, 1) ?>%</span>
-                                                </div>
+                                            <td class="num">
+                                                <?= number_format($share, 1) ?>%
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -624,12 +712,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <canvas id="dailyChart"></canvas>
                             </div>
                             <div class="table-wrap">
-                                <table class="data-table w-full">
+                                <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>Date</th>
-                                            <th class="num">Sales</th>
-                                            <th class="num">Revenue</th>
+                                            <th class="w-[40%]">Date</th>
+                                            <th class="num w-[2%]">Sales</th>
+                                            <th class="num w-[27%]">Revenue</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -739,6 +827,16 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
             <?php foreach ($tp_rows as $tp): ?>
                 rows.push(['<?= addslashes($tp['product_name']) ?>', <?= $tp['total_qty'] ?>, <?= $tp['total_revenue'] ?>, <?= $tp['total_profit'] ?>]);
             <?php endforeach; ?>
+            rows.push([]);
+            rows.push(['Best Selling Product', '<?= $best_selling ? addslashes($best_selling['product_name']) : 'No sales data' ?>', '<?= $best_selling ? number_format($best_selling['total_qty']) . ' units sold' : '' ?>']);
+            rows.push([]);
+            rows.push(['Product Sales Analysis', 'Date', 'Product', 'Quantity Sold', 'Sales Amount']);
+            <?php
+            mysqli_data_seek($product_sales_analysis, 0);
+            while ($psa = mysqli_fetch_assoc($product_sales_analysis)):
+            ?>
+                rows.push(['', '<?= date('d-M', strtotime($psa['sale_date'])) ?>', '<?= addslashes($psa['product_name']) ?>', <?= $psa['total_quantity'] ?>, <?= $psa['total_amount'] ?>]);
+            <?php endwhile; ?>
 
             const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
             const blob = new Blob([csv], {

@@ -50,6 +50,12 @@ if ($action === 'edit' && isset($_POST['update'])) {
         move_uploaded_file($_FILES['image']['tmp_name'], "../img/" . $image);
     }
 
+    $sku_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM products WHERE sku='$sku' AND id != $id"));
+    if ($sku_check) {
+        header("Location:index.php?action=edit&id=$id&error=" . urlencode("SKU already exists. Please use a different SKU."));
+        exit;
+    }
+
     mysqli_query($conn, "UPDATE products SET category_id=$category_id, product_name='$product_name', sku='$sku', barcode='$barcode', unit_id=$unit_id, reorder_level=$reorder_level, selling_price=$selling_price, price_update_required = CASE WHEN $selling_price > purchase_price THEN 0 ELSE price_update_required END, image='$image', status='$status' WHERE id=$id");
     header("Location:index.php");
     exit;
@@ -70,6 +76,12 @@ if ($action === 'add' && isset($_POST['save'])) {
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $image = 'prod_' . time() . '.' . $ext;
         move_uploaded_file($_FILES['image']['tmp_name'], "../img/" . $image);
+    }
+
+    $sku_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM products WHERE sku='$sku'"));
+    if ($sku_check) {
+        header("Location:index.php?action=add&error=" . urlencode("SKU already exists. Please use a different SKU."));
+        exit;
     }
 
     mysqli_query($conn, "INSERT INTO products (category_id, product_name, sku, barcode, unit_id, reorder_level, selling_price, image, status) VALUES ($category_id, '$product_name', '$sku', '$barcode', $unit_id, $reorder_level, $selling_price, '$image', '$status')");

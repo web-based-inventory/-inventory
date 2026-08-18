@@ -333,17 +333,17 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th class="num">Qty Sold</th>
-                                        <th class="num">Revenue</th>
-                                        <th class="num">Cost</th>
-                                        <th class="num">Profit</th>
-                                        <th class="num">Margin</th>
+                                        <th class="w-[4%]">#</th>
+                                        <th class="w-[22%]">Product</th>
+                                        <th class="w-[12%]">SKU</th>
+                                        <th class="num w-[8%]">Qty Sold</th>
+                                        <th class="num w-[14%]">Revenue</th>
+                                        <th class="num w-[14%]">Cost</th>
+                                        <th class="num w-[14%]">Profit</th>
+                                        <th class="num w-[12%]">Margin</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -356,8 +356,8 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                     ?>
                                         <tr>
                                             <td><?= $rank++ ?></td>
-                                            <td class="font-medium"><?= htmlspecialchars($pr['product_name']) ?></td>
-                                            <td><?= htmlspecialchars($pr['sku'] ?? 'N/A') ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($pr['product_name']) ?>"><?= htmlspecialchars($pr['product_name']) ?></td>
+                                            <td class="truncate-cell" title="<?= htmlspecialchars($pr['sku'] ?? 'N/A') ?>"><?= htmlspecialchars($pr['sku'] ?? 'N/A') ?></td>
                                             <td class="num"><?= number_format($pr['total_qty']) ?></td>
                                             <td class="num"><?= number_format($pr['revenue']) ?> Ks</td>
                                             <td class="num"><?= number_format($pr['cost']) ?> Ks</td>
@@ -396,16 +396,16 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Category</th>
-                                        <th class="num">Qty Sold</th>
-                                        <th class="num">Revenue</th>
-                                        <th class="num">Cost</th>
-                                        <th class="num">Profit</th>
-                                        <th class="w-48">Margin</th>
+                                        <th class="w-[6%]">#</th>
+                                        <th class="w-[24%]">Category</th>
+                                        <th class="num w-[12%]">Qty Sold</th>
+                                        <th class="num w-[16%]">Revenue</th>
+                                        <th class="num w-[14%]">Cost</th>
+                                        <th class="num w-[14%]">Profit</th>
+                                        <th class="num w-[14%]">Margin</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -421,18 +421,13 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                     ?>
                                         <tr>
                                             <td><?= $ci ?></td>
-                                            <td class="font-medium"><?= htmlspecialchars($cr['category_name']) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($cr['category_name']) ?>"><?= htmlspecialchars($cr['category_name']) ?></td>
                                             <td class="num"><?= number_format($cr['total_qty']) ?></td>
                                             <td class="num"><?= number_format($cr['revenue']) ?> Ks</td>
                                             <td class="num"><?= number_format($cr['cost']) ?> Ks</td>
                                             <td class="num font-semibold <?= $cr['profit'] < 0 ? 'text-red-600' : 'text-emerald-600' ?>"><?= number_format($cr['profit']) ?> Ks</td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="progress-bar flex-1">
-                                                        <div class="progress-fill <?= $cm >= 20 ? 'bg-emerald-500' : ($cm >= 10 ? 'bg-amber-500' : 'bg-red-500') ?>" style="width: <?= min(100, max(0, $cm)) ?>%"></div>
-                                                    </div>
-                                                    <span class="text-xs text-gray-500 w-10 text-right"><?= number_format($cm, 1) ?>%</span>
-                                                </div>
+                                            <td class="num">
+                                                <?= number_format($cm, 1) ?>%
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

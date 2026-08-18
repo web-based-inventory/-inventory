@@ -484,6 +484,7 @@ nav a[class*="bg-blue"] {
    ============================================ */
 .data-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
 }
@@ -596,6 +597,12 @@ nav a[class*="bg-blue"] {
     font-size: 0.75rem;
     white-space: nowrap;
     border-radius: 0.5rem;
+}
+
+.data-table td.truncate-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .table-wrap {

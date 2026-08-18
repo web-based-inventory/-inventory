@@ -248,14 +248,14 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th class="num">Total Qty</th>
-                                        <th class="num">Total Spent</th>
-                                        <th class="num">Avg Price</th>
+                                        <th class="w-[6%]">#</th>
+                                        <th class="w-[30%]">Product</th>
+                                        <th class="num w-[14%]">Total Qty</th>
+                                        <th class="num w-[21%]">Total Spent</th>
+                                        <th class="num w-[21%]">Avg Price</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -263,7 +263,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     while ($tp = mysqli_fetch_assoc($top_products)): ?>
                                         <tr>
                                             <td><?= $tp_count++ ?></td>
-                                            <td class="font-semibold"><?= htmlspecialchars($tp['product_name']) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($tp['product_name']) ?>"><?= htmlspecialchars($tp['product_name']) ?></td>
                                             <td class="num"><?= number_format($tp['total_qty']) ?></td>
                                             <td class="num"><?= number_format($tp['total_cost']) ?> Ks</td>
                                             <td class="num"><?= $tp['total_qty'] > 0 ? number_format($tp['total_cost'] / $tp['total_qty'], 2) : '0.00' ?> Ks</td>
@@ -285,13 +285,13 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Supplier</th>
-                                        <th class="num">Purchases Count</th>
-                                        <th class="num">Total Spent</th>
+                                        <th class="w-[25%]">#</th>
+                                        <th class="w-[25%]">Supplier</th>
+                                        <th class="num w-[25%]">Purchases Count</th>
+                                        <th class="num w-[25%]">Total Spent</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -299,7 +299,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     while ($ts = mysqli_fetch_assoc($top_suppliers)): ?>
                                         <tr>
                                             <td><?= $ts_count++ ?></td>
-                                            <td class="font-semibold"><?= htmlspecialchars($ts['supplier_name']) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($ts['supplier_name']) ?>"><?= htmlspecialchars($ts['supplier_name']) ?></td>
                                             <td class="num"><?= $ts['purchase_count'] ?></td>
                                             <td class="num"><?= number_format($ts['total_spent']) ?> Ks</td>
                                         </tr>
@@ -320,13 +320,13 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th claos="text-left">Date</th>
-                                        <th class="num">Count</th>
-                                        <th class="num">Total</th>
+                                        <th class="w-[8%]">#</th>
+                                        <th class="w-[42%]">Date</th>
+                                        <th class="num w-[20%]">Count</th>
+                                        <th class="num w-[30%]">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -334,7 +334,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     while ($dp = mysqli_fetch_assoc($daily_purchases)): ?>
                                         <tr>
                                             <td><?= $dc++ ?></td>
-                                            <td class="font-semibold"><?= date('d M Y (D)', strtotime($dp['day'])) ?></td>
+                                            <td class="font-medium"><?= date('d M Y (D)', strtotime($dp['day'])) ?></td>
                                             <td class="num"><?= $dp['count'] ?></td>
                                             <td class="num"><?= number_format($dp['total']) ?> Ks</td>
                                         </tr>

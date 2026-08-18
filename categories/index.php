@@ -30,7 +30,7 @@ if ($search !== '') {
     $types .= "s";
 }
 if ($status_filter !== '') {
-    $where .= " AND status = ?";
+    $where .= " AND c.status = ?";
     $params[] = $status_filter;
     $types .= "s";
 }

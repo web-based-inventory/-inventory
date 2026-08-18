@@ -1,8 +1,8 @@
-=== Forecast Debug Log (Generated: 2026-08-17 05:32:38) ===
+=== Forecast Debug Log (Generated: 2026-08-18 14:52:08) ===
 
 {
     "product_id": "17",
-    "historical_sales_days_count": 11,
+    "historical_sales_days_count": 12,
     "historical_quantities": {
         "2026-07-20": 27,
         "2026-07-22": 31,
@@ -14,10 +14,11 @@
         "2026-08-05": 12,
         "2026-08-14": 1,
         "2026-08-15": 6,
-        "2026-08-16": 2
+        "2026-08-16": 2,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 129,
-    "forecast_result_30_days": 129,
+    "forecast_input_total_sold": 130,
+    "forecast_result_30_days": 130,
     "insufficient_data": false
 }
 
@@ -108,7 +109,7 @@
 
 {
     "product_id": "23",
-    "historical_sales_days_count": 8,
+    "historical_sales_days_count": 9,
     "historical_quantities": {
         "2026-07-20": 25,
         "2026-07-21": 1,
@@ -117,10 +118,11 @@
         "2026-07-26": 8,
         "2026-07-27": 7,
         "2026-08-03": 19,
-        "2026-08-11": 8
+        "2026-08-11": 8,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 86,
-    "forecast_result_30_days": 86,
+    "forecast_input_total_sold": 87,
+    "forecast_result_30_days": 87,
     "insufficient_data": false
 }
 
@@ -226,7 +228,7 @@
 
 {
     "product_id": "30",
-    "historical_sales_days_count": 7,
+    "historical_sales_days_count": 8,
     "historical_quantities": {
         "2026-07-20": 10,
         "2026-07-21": 10,
@@ -234,16 +236,17 @@
         "2026-07-23": 20,
         "2026-07-24": 40,
         "2026-07-28": 26,
-        "2026-08-03": 28
+        "2026-08-03": 28,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 144,
-    "forecast_result_30_days": 144,
+    "forecast_input_total_sold": 145,
+    "forecast_result_30_days": 145,
     "insufficient_data": false
 }
 
 {
     "product_id": "33",
-    "historical_sales_days_count": 7,
+    "historical_sales_days_count": 8,
     "historical_quantities": {
         "2026-07-24": 10,
         "2026-07-27": 20,
@@ -251,10 +254,11 @@
         "2026-08-10": 20,
         "2026-08-13": 2,
         "2026-08-14": 11,
-        "2026-08-16": 2
+        "2026-08-16": 2,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 85,
-    "forecast_result_30_days": 85,
+    "forecast_input_total_sold": 86,
+    "forecast_result_30_days": 86,
     "insufficient_data": false
 }
 
@@ -272,12 +276,13 @@
 
 {
     "product_id": "36",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-03": 28
+        "2026-08-03": 28,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 28,
-    "forecast_result_30_days": 28,
+    "forecast_input_total_sold": 29,
+    "forecast_result_30_days": 29,
     "insufficient_data": false
 }
 
@@ -360,11 +365,13 @@
 
 {
     "product_id": "45",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
@@ -378,12 +385,13 @@
 
 {
     "product_id": "47",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-15": 10
+        "2026-08-15": 10,
+        "2026-08-18": 3
     },
-    "forecast_input_total_sold": 10,
-    "forecast_result_30_days": 10,
+    "forecast_input_total_sold": 13,
+    "forecast_result_30_days": 13,
     "insufficient_data": false
 }
 
@@ -415,18 +423,9 @@
 
 {
     "product_id": "50",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
-}
-
-{
-    "product_id": "51",
     "historical_sales_days_count": 1,
     "historical_quantities": {
-        "2026-08-15": 1
+        "2026-08-18": 1
     },
     "forecast_input_total_sold": 1,
     "forecast_result_30_days": 1,
@@ -434,12 +433,26 @@
 }
 
 {
+    "product_id": "51",
+    "historical_sales_days_count": 2,
+    "historical_quantities": {
+        "2026-08-15": 1,
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 2,
+    "forecast_result_30_days": 2,
+    "insufficient_data": false
+}
+
+{
     "product_id": "52",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 2
+    },
+    "forecast_input_total_sold": 2,
+    "forecast_result_30_days": 2,
+    "insufficient_data": false
 }
 
 {
@@ -564,12 +577,13 @@
 
 {
     "product_id": "70",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-15": 7
+        "2026-08-15": 7,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 7,
-    "forecast_result_30_days": 7,
+    "forecast_input_total_sold": 8,
+    "forecast_result_30_days": 8,
     "insufficient_data": false
 }
 
@@ -593,11 +607,13 @@
 
 {
     "product_id": "73",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
@@ -623,12 +639,13 @@
 
 {
     "product_id": "76",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 1
+        "2026-08-16": 1,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 1,
-    "forecast_result_30_days": 1,
+    "forecast_input_total_sold": 2,
+    "forecast_result_30_days": 2,
     "insufficient_data": false
 }
 
@@ -679,23 +696,25 @@
 
 {
     "product_id": "82",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 2
+        "2026-08-16": 2,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 2,
-    "forecast_result_30_days": 2,
+    "forecast_input_total_sold": 3,
+    "forecast_result_30_days": 3,
     "insufficient_data": false
 }
 
 {
     "product_id": "83",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 2
+        "2026-08-16": 2,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 2,
-    "forecast_result_30_days": 2,
+    "forecast_input_total_sold": 3,
+    "forecast_result_30_days": 3,
     "insufficient_data": false
 }
 
@@ -719,20 +738,24 @@
 
 {
     "product_id": "86",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
     "product_id": "87",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
@@ -800,11 +823,13 @@
 
 {
     "product_id": "95",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
@@ -829,11 +854,13 @@
 
 {
     "product_id": "98",
-    "historical_sales_days_count": 0,
-    "historical_quantities": [],
-    "forecast_input_total_sold": 0,
-    "forecast_result_30_days": 0,
-    "insufficient_data": true
+    "historical_sales_days_count": 1,
+    "historical_quantities": {
+        "2026-08-18": 1
+    },
+    "forecast_input_total_sold": 1,
+    "forecast_result_30_days": 1,
+    "insufficient_data": false
 }
 
 {
@@ -847,23 +874,25 @@
 
 {
     "product_id": "101",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 5
+        "2026-08-16": 5,
+        "2026-08-18": 4
     },
-    "forecast_input_total_sold": 5,
-    "forecast_result_30_days": 5,
+    "forecast_input_total_sold": 9,
+    "forecast_result_30_days": 9,
     "insufficient_data": false
 }
 
 {
     "product_id": "102",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 5
+        "2026-08-16": 5,
+        "2026-08-18": 7
     },
-    "forecast_input_total_sold": 5,
-    "forecast_result_30_days": 5,
+    "forecast_input_total_sold": 12,
+    "forecast_result_30_days": 12,
     "insufficient_data": false
 }
 
@@ -925,12 +954,13 @@
 
 {
     "product_id": "115",
-    "historical_sales_days_count": 1,
+    "historical_sales_days_count": 2,
     "historical_quantities": {
-        "2026-08-16": 3
+        "2026-08-16": 3,
+        "2026-08-18": 1
     },
-    "forecast_input_total_sold": 3,
-    "forecast_result_30_days": 3,
+    "forecast_input_total_sold": 4,
+    "forecast_result_30_days": 4,
     "insufficient_data": false
 }
 

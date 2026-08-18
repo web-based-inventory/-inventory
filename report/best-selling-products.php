@@ -179,16 +179,16 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </div>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th class="num">Qty Sold</th>
-                                        <th class="num">Revenue</th>
-                                        <th class="num">Profit</th>
-                                        <th class="w-40">Share</th>
+                                        <th class="w-[5%]">#</th>
+                                        <th class="w-[25%]">Product</th>
+                                        <th class="w-[14%]">SKU</th>
+                                        <th class="num w-[10%]">Qty Sold</th>
+                                        <th class="num w-[16%]">Revenue</th>
+                                        <th class="num w-[16%]">Profit</th>
+                                        <th class="num w-[14%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -206,19 +206,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     ?>
                                         <tr>
                                             <td><?= $rank++ ?></td>
-                                            <td class="font-medium"><?= htmlspecialchars($tp['product_name']) ?></td>
-                                            <td><?= htmlspecialchars($tp['sku'] ?? 'N/A') ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($tp['product_name']) ?>"><?= htmlspecialchars($tp['product_name']) ?></td>
+                                            <td class="truncate-cell" title="<?= htmlspecialchars($tp['sku'] ?? 'N/A') ?>"><?= htmlspecialchars($tp['sku'] ?? 'N/A') ?></td>
                                             <td class="num"><?= number_format($tp['total_qty']) ?></td>
                                             <td class="num"><?= number_format($tp['total_revenue']) ?> Ks</td>
                                             <td class="num <?= $tp['total_profit'] < 0 ? 'text-red-600' : '' ?>"><?= ($tp['total_profit'] < 0 ? 'Loss ' : '') . number_format($tp['total_profit']) ?> Ks</td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="progress-bar flex-1">
-                                                        <div class="progress-fill bg-indigo-500" style="width: <?= $share ?>%"></div>
-                                                    </div>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400 w-10 text-right"><?= number_format($share, 1) ?>%</span>
-                                                </div>
-                                            </td>
+                                            <td class="num"><?= number_format($share, 1) ?>%</td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($tp_rows)): ?>

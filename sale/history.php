@@ -90,7 +90,7 @@ $sql = "SELECT s.*, u.name AS cashier_name,
                COALESCE(sp.payment_method, 'Cash') AS payment_method
         FROM sales s
         LEFT JOIN users u ON s.user_id = u.id
-        LEFT JOIN (
+        INNER JOIN (
             SELECT sale_id, COUNT(*) AS items_count, SUM(quantity) AS total_qty, SUM(subtotal) AS subtotal
             FROM sale_details GROUP BY sale_id
         ) d ON d.sale_id = s.id

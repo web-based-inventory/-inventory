@@ -284,16 +284,16 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Category</th>
-                                        <th class="num">Stock</th>
-                                        <th class="num">Cost Price</th>
-                                        <th class="num">Retail Price</th>
+                                        <th class="w-[5%]">#</th>
+                                        <th class="w-[22%]">Product</th>
+                                        <th class="w-[14%]">SKU</th>
+                                        <th class="w-[16%]">Category</th>
+                                        <th class="num w-[10%]">Stock</th>
+                                        <th class="num w-[16%]">Cost Price</th>
+                                        <th class="num w-[17%]">Retail Price</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -301,9 +301,9 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     while ($row = mysqli_fetch_assoc($low_stock)): ?>
                                         <tr>
                                             <td><?= $i++ ?></td>
-                                            <td class="font-medium"><?= htmlspecialchars($row['product_name']) ?></td>
-                                            <td><?= htmlspecialchars($row['sku'] ?? 'N/A') ?></td>
-                                            <td><?= htmlspecialchars($row['category_name'] ?? 'N/A') ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($row['product_name']) ?>"><?= htmlspecialchars($row['product_name']) ?></td>
+                                            <td class="truncate-cell" title="<?= htmlspecialchars($row['sku'] ?? 'N/A') ?>"><?= htmlspecialchars($row['sku'] ?? 'N/A') ?></td>
+                                            <td class="truncate-cell" title="<?= htmlspecialchars($row['category_name'] ?? 'N/A') ?>"><?= htmlspecialchars($row['category_name'] ?? 'N/A') ?></td>
                                             <td class="num">
                                                 <?php if ($row['current_stock'] == 0): ?>
                                                     <span class="text-red-600 font-bold">0 (Out of Stock)</span>
@@ -346,15 +346,15 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </h2>
                         </div>
                         <div class="table-wrap">
-                            <table class="data-table w-full">
-                                <thead class="">
+                            <table class="data-table">
+                                <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Category</th>
-                                        <th class="num">Products</th>
-                                        <th class="num">Total Stock</th>
-                                        <th class="num">Stock Value</th>
-                                        <th class="w-48">Share</th>
+                                        <th class="w-[6%]">#</th>
+                                        <th class="w-[28%]">Category</th>
+                                        <th class="num w-[14%]">Products</th>
+                                        <th class="num w-[16%]">Total Stock</th>
+                                        <th class="num w-[18%]">Stock Value</th>
+                                        <th class="num w-[18%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -371,17 +371,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     ?>
                                         <tr>
                                             <td><?= $ci ?></td>
-                                            <td class="font-medium"><?= htmlspecialchars($cs['category_name']) ?></td>
+                                            <td class="font-medium truncate-cell" title="<?= htmlspecialchars($cs['category_name']) ?>"><?= htmlspecialchars($cs['category_name']) ?></td>
                                             <td class="num"><?= number_format($cs['product_count']) ?></td>
                                             <td class="num"><?= number_format($cs['total_stock']) ?></td>
                                             <td class="num"><?= number_format($cs['stock_value']) ?> Ks</td>
-                                            <td>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="progress-bar flex-1">
-                                                        <div class="progress-fill <?= $color ?>" style="width: <?= $share ?>%"></div>
-                                                    </div>
-                                                    <span class="text-xs text-gray-500 w-10 text-right"><?= number_format($share, 1) ?>%</span>
-                                                </div>
+                                            <td class="num">
+                                                <?= number_format($share, 1) ?>%
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
