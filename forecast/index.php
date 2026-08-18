@@ -155,17 +155,17 @@ $high_demand = mysqli_fetch_assoc(mysqli_query($conn, "
     AND f.demand_level = 'High'
 "))['count'];
 
-// Need Restock: current stock < forecast_quantity (for any demand level)
+// Need Restock: current stock <= reorder_level (system restocking rule)
 $need_restock = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count FROM forecasts f
     JOIN products p ON f.product_id = p.id
     WHERE f.forecast_date = CURDATE()
-    AND p.current_stock < f.forecast_quantity
+    AND p.current_stock <= p.reorder_level
 "))['count'];
 
 // ============ High Demand Products ============
 $high_demand_products = mysqli_query($conn, "
-    SELECT p.product_name, p.current_stock, f.forecast_quantity, f.recommended_stock, f.demand_level
+    SELECT p.product_name, p.current_stock, p.reorder_level, f.forecast_quantity, f.recommended_stock, f.demand_level
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
     WHERE f.forecast_date = CURDATE()
@@ -180,7 +180,7 @@ $need_restock_products = mysqli_query($conn, "
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
     WHERE f.forecast_date = CURDATE()
-    AND p.current_stock < f.forecast_quantity
+    AND p.current_stock <= p.reorder_level
     ORDER BY (f.forecast_quantity - p.current_stock) DESC LIMIT 10
 ");
 
@@ -467,13 +467,15 @@ if ($accuracy_count > 0) {
                                         </thead>
                                         <tbody>
                                             <?php $hd_count = 1;
-                                            while ($h = mysqli_fetch_assoc($high_demand_products)): ?>
+                                            while ($h = mysqli_fetch_assoc($high_demand_products)): 
+                                                $rec_purch = max(0, $h['forecast_quantity'] - $h['current_stock']);
+                                            ?>
                                                 <tr>
                                                     <td class="text-gray-400 font-mono"><?= $hd_count++ ?></td>
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($h['product_name']) ?></td>
-                                                    <td class="num <?= $h['current_stock'] < 10 ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $h['current_stock'] ?></td>
+                                                    <td class="num <?= $h['current_stock'] <= $h['reorder_level'] ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $h['current_stock'] ?></td>
                                                     <td class="num font-bold text-red-600"><?= number_format($h['forecast_quantity']) ?></td>
-                                                    <td class="num font-bold text-emerald-600"><?= number_format($h['recommended_stock']) ?></td>
+                                                    <td class="num font-bold text-emerald-600"><?= number_format($rec_purch) ?></td>
                                                     <td class="center">
                                                         <span class="badge badge-danger"><span class="badge-dot"></span> <?= $h['demand_level'] ?></span>
                                                     </td>
@@ -513,15 +515,16 @@ if ($accuracy_count > 0) {
                                         <tbody>
                                             <?php $rs_count = 1;
                                             while ($l = mysqli_fetch_assoc($need_restock_products)):
-                                                $shortage = max(0, $l['forecast_quantity'] - $l['current_stock']);
+                                                $rec_purch = max(0, $l['forecast_quantity'] - $l['current_stock']);
+                                                $shortage = $rec_purch;
                                             ?>
                                                 <tr>
                                                     <td class="text-gray-400 font-mono"><?= $rs_count++ ?></td>
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($l['product_name']) ?></td>
-                                                    <td class="num <?= $l['current_stock'] < $l['reorder_level'] ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $l['current_stock'] ?></td>
+                                                    <td class="num <?= $l['current_stock'] <= $l['reorder_level'] ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $l['current_stock'] ?></td>
                                                     <td class="num text-gray-500 dark:text-gray-400"><?= $l['reorder_level'] ?></td>
                                                     <td class="num font-semibold text-amber-600"><?= number_format($l['forecast_quantity']) ?></td>
-                                                    <td class="num font-semibold text-emerald-600"><?= number_format($l['recommended_stock']) ?></td>
+                                                    <td class="num font-semibold text-emerald-600"><?= number_format($rec_purch) ?></td>
                                                     <td class="num font-bold text-red-600"><?= number_format($shortage) ?></td>
                                                 </tr>
                                             <?php endwhile; ?>
@@ -556,7 +559,7 @@ if ($accuracy_count > 0) {
                                     <tbody>
                                         <?php
                                         $all_forecasts = mysqli_query($conn, "
-                                        SELECT p.product_name, p.current_stock, f.forecast_quantity, f.demand_level, f.recommended_stock
+                                        SELECT p.product_name, p.current_stock, p.reorder_level, f.forecast_quantity, f.demand_level, f.recommended_stock
                                         FROM forecasts f
                                         JOIN products p ON f.product_id = p.id
                                         WHERE f.forecast_date = CURDATE()
@@ -565,11 +568,11 @@ if ($accuracy_count > 0) {
                                         $af_count = 1;
                                         if (mysqli_num_rows($all_forecasts) > 0): while ($f = mysqli_fetch_assoc($all_forecasts)):
                                                 $current_stock = (int)$f['current_stock'];
+                                                $reorder_level = (int)$f['reorder_level'];
                                                 $forecast_qty = (int)$f['forecast_quantity'];
-                                                $recommended_stock = (int)$f['recommended_stock'];
-                                                $recommended_purchase = max(0, $recommended_stock - $current_stock);
+                                                $recommended_purchase = max(0, $forecast_qty - $current_stock);
                                                 $insufficient = ($f['demand_level'] === 'Insufficient');
-                                                $needs_reorder = $recommended_purchase > 0 && !$insufficient;
+                                                $needs_reorder = ($current_stock <= $reorder_level) && !$insufficient;
                                         ?>
                                                 <tr class="<?= $needs_reorder ? 'bg-red-50 dark:bg-red-900/10' : '' ?>">
                                                     <td class="text-gray-400 font-mono"><?= $af_count++ ?></td>

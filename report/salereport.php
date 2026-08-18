@@ -316,7 +316,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <div>
                                     <p class="text-sm text-emerald-600">Today's Sales</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($today_stats['count']) ?></p>
-                                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1"><?= number_format($today_stats['revenue']) ?> Ks</p>
+                                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 truncate" title="Full amount: <?= number_format($today_stats['revenue']) ?> Ks"><?= compactMoney($today_stats['revenue']) ?> Ks</p>
                                 </div>
                             </div>
                         </div>
@@ -329,7 +329,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <div>
                                     <p class="text-sm text-blue-600">Weekly Sales</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($week_stats['count']) ?></p>
-                                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-1"><?= number_format($week_stats['revenue']) ?> Ks</p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-1 truncate" title="Full amount: <?= number_format($week_stats['revenue']) ?> Ks"><?= compactMoney($week_stats['revenue']) ?> Ks</p>
                                 </div>
                             </div>
                         </div>
@@ -342,7 +342,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <div>
                                     <p class="text-sm text-indigo-600">Monthly Sales</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($month_stats['count']) ?></p>
-                                    <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1"><?= number_format($month_stats['revenue']) ?> Ks</p>
+                                    <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 truncate" title="Full amount: <?= number_format($month_stats['revenue']) ?> Ks"><?= compactMoney($month_stats['revenue']) ?> Ks</p>
                                 </div>
                             </div>
                         </div>
@@ -354,7 +354,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </svg>
                                 <div>
                                     <p class="text-sm text-amber-600">Period Revenue</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($revenue_stats['total_revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($revenue_stats['total_revenue']) ?> Ks"><?= compactMoney($revenue_stats['total_revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1"><?= $revenue_stats['total_sales'] ?> sales</p>
                                 </div>
                             </div>

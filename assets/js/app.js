@@ -155,6 +155,7 @@ function closeModal(id) {
 function toggleMobileSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
+        sidebar.classList.add('sidebar-transition');
         sidebar.classList.toggle('-translate-x-full');
     }
 }

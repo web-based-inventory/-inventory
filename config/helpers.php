@@ -318,3 +318,18 @@ function recalcAllSupplierBalances($conn) {
         }
     }
 }
+
+/**
+ * Compact money format for display only (exact value is never changed):
+ * 11,247,506 -> 11.25M | 850,000 -> 850K | 25,500 -> 25.5K | 950 -> 950
+ */
+function compactMoney($amount) {
+    $amount = (float)$amount;
+    if (abs($amount) >= 999950) {
+        return rtrim(rtrim(number_format($amount / 1000000, 2), '0'), '.') . 'M';
+    }
+    if (abs($amount) >= 1000) {
+        return rtrim(rtrim(number_format($amount / 1000, 1), '0'), '.') . 'K';
+    }
+    return number_format($amount);
+}

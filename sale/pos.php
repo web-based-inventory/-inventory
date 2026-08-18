@@ -420,7 +420,7 @@ $page_title = "New Sale (POS)";
                                 $oos = $stock <= 0;
                                 $low_stock = $stock <= $reorder && !$oos;
                         ?>
-                                <div class="bg-white rounded-xl border border-gray-200 p-3 product-card slide-up <?= $oos ? 'out-of-stock' : '' ?> h-full flex flex-col">
+                                <div class="bg-white rounded-xl border border-gray-200 p-3 product-card <?= $oos ? 'out-of-stock' : '' ?> h-full flex flex-col">
                                     <div class="h-32 w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden shrink-0">
                                         <?php if ($p['image']): ?>
                                             <img src="../img/<?= htmlspecialchars($p['image']) ?>" alt="" class="h-full w-full object-contain p-2" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -440,10 +440,10 @@ $page_title = "New Sale (POS)";
                                         </p>
                                         <p class="text-indigo-600 font-bold text-sm mt-1.5"><?= number_format($p['selling_price']) ?> Ks</p>
                                     </div>
-                                    <form method="POST" class="mt-auto pt-3 flex gap-1 w-full">
+                                    <form method="POST" class="mt-auto pt-3 flex gap-1 w-full add-cart-form">
                                         <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
-                                        <input type="number" name="quantity" value="1" min="1" max="<?= $stock ?>" class="border border-gray-300 rounded-lg w-14 text-center p-1.5 text-xs focus:outline-none focus:border-indigo-400">
-                                        <button name="add_cart" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-700 flex-1 transition <?= $oos ? 'opacity-50' : '' ?>">+ Add</button>
+                                        <input type="number" name="quantity" value="1" min="1" max="<?= $stock ?>" class="border border-gray-300 rounded-lg w-14 text-center p-1.5 text-xs focus:outline-none focus:border-indigo-400 shrink-0">
+                                        <button name="add_cart" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-700 flex-1 transition <?= $oos ? 'opacity-50' : '' ?> shrink-0 whitespace-nowrap">+ Add</button>
                                     </form>
                                 </div>
                             <?php endwhile;
@@ -458,7 +458,7 @@ $page_title = "New Sale (POS)";
                 </div>
 
                 <!-- Right: Cart Sidebar -->
-                <div class="w-[380px] bg-white border-l border-gray-200 flex flex-col flex-shrink-0">
+                <div id="cartSidebarContainer" class="w-[380px] bg-white border-l border-gray-200 flex flex-col flex-shrink-0">
                     <!-- Cart Header -->
                     <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                         <div>
@@ -466,7 +466,7 @@ $page_title = "New Sale (POS)";
                             <p class="text-xs text-gray-500"><?= count($_SESSION['sale_cart'] ?? []) ?> item(s) in cart</p>
                         </div>
                         <?php if (count($_SESSION['sale_cart'] ?? []) > 0): ?>
-                            <a href="?clear_cart=1" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded-lg hover:bg-red-50 transition" onclick="return confirm('Clear entire cart?')">Clear All</a>
+                            <a href="?clear_cart=1" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded-lg hover:bg-red-50 transition clear-cart-btn">Clear All</a>
                         <?php endif; ?>
                     </div>
 
@@ -475,13 +475,13 @@ $page_title = "New Sale (POS)";
                         <?php if (count($_SESSION['sale_cart'] ?? []) > 0): ?>
                             <form method="POST" id="cartForm">
                                 <?php foreach ($_SESSION['sale_cart'] as $key => $item): ?>
-                                    <div class="cart-item rounded-lg p-3 mb-2 border border-gray-100 slide-up">
+                                    <div class="cart-item rounded-lg p-3 mb-2 border border-gray-100">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1 min-w-0">
                                                 <p class="font-semibold text-sm text-gray-800 truncate"><?= htmlspecialchars($item['product_name']) ?></p>
                                                 <p class="text-indigo-600 font-bold text-sm"><?= number_format($item['price']) ?> Ks</p>
                                             </div>
-                                            <a href="?remove=<?= $key ?>" class="text-gray-300 hover:text-red-500 ml-2 transition p-1" title="Remove">
+                                            <a href="?remove=<?= $key ?>" class="text-gray-300 hover:text-red-500 ml-2 transition p-1 remove-cart-btn" title="Remove">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
@@ -493,7 +493,7 @@ $page_title = "New Sale (POS)";
                                                 <input type="number" name="quantity[<?= $key ?>]" value="<?= $item['quantity'] ?>" min="1" data-price="<?= $item['price'] ?>" data-key="<?= $key ?>" class="cart-qty border border-gray-200 rounded-lg w-14 p-1 text-center text-sm focus:outline-none focus:border-indigo-400">
                                                 <button type="button" class="qty-btn bg-gray-100 text-gray-600 hover:bg-gray-200" onclick="changeQty(this, 1)">+</button>
                                             </div>
-                                            <span class="font-bold text-sm text-gray-800 item-total-<?= $key ?>"><?= number_format($item['total']) ?> Ks</span>
+                                            <span class="font-bold text-sm text-gray-800 text-right min-w-[80px] shrink-0 item-total-<?= $key ?>"><?= number_format($item['total']) ?> Ks</span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -572,32 +572,34 @@ $page_title = "New Sale (POS)";
                         </div>
                         <input type="hidden" name="payment_method" id="paymentMethod" value="Cash">
 
-                        <div id="cashSection">
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 text-sm font-medium text-gray-700">Cash</div>
-                                <input type="number" name="payment_cash" id="paymentCash" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
-                                <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                        <div class="min-h-[105px]">
+                            <div id="cashSection">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-16 text-sm font-medium text-gray-700">Cash</div>
+                                    <input type="number" name="payment_cash" id="paymentCash" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
+                                    <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="kbzSection" class="hidden">
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 text-sm font-medium text-gray-700">KBZPay</div>
-                                <input type="number" name="payment_kbzpay" id="paymentKBZPay" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
-                                <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                            <div id="kbzSection" class="hidden">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-16 text-sm font-medium text-gray-700">KBZPay</div>
+                                    <input type="number" name="payment_kbzpay" id="paymentKBZPay" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
+                                    <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="mixedSection" class="hidden space-y-2">
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 text-sm font-medium text-gray-700">Cash</div>
-                                <input type="number" name="mixed_cash" id="mixedCash" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
-                                <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 text-sm font-medium text-gray-700">KBZPay</div>
-                                <input type="number" name="mixed_kbzpay" id="mixedKBZPay" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
-                                <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                            <div id="mixedSection" class="hidden space-y-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-16 text-sm font-medium text-gray-700">Cash</div>
+                                    <input type="number" name="mixed_cash" id="mixedCash" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
+                                    <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-16 text-sm font-medium text-gray-700">KBZPay</div>
+                                    <input type="number" name="mixed_kbzpay" id="mixedKBZPay" value="0" min="0" step="0.01" class="payment-input flex-1 border border-gray-200 rounded-xl p-2.5 text-sm" oninput="calculatePayments()">
+                                    <span class="text-xs text-gray-400 w-8 text-right">Ks</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -782,14 +784,6 @@ $page_title = "New Sale (POS)";
                     }
                     autoUpdateCart(this);
                 });
-                input.addEventListener('change', function() {
-                    let val = parseInt(this.value) || 1;
-                    if (val < 1) {
-                        val = 1;
-                        this.value = 1;
-                    }
-                    autoUpdateCart(this);
-                });
                 input.addEventListener('wheel', function(e) {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? -1 : 1;
@@ -802,6 +796,55 @@ $page_title = "New Sale (POS)";
         }
 
         document.addEventListener('DOMContentLoaded', setupCartQtyListeners);
+
+        // AJAX Cart Handling
+        function refreshCartSidebar(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newCart = doc.getElementById('cartSidebarContainer');
+            if (newCart) {
+                document.getElementById('cartSidebarContainer').innerHTML = newCart.innerHTML;
+                setupCartQtyListeners();
+                updateTotals();
+            }
+        }
+
+        document.addEventListener('submit', function(e) {
+            if (e.target.closest('.add-cart-form')) {
+                e.preventDefault();
+                const form = e.target.closest('.add-cart-form');
+                const formData = new FormData(form);
+                formData.append('add_cart', '1');
+                
+                fetch('pos.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.text())
+                .then(html => refreshCartSidebar(html));
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const removeBtn = e.target.closest('.remove-cart-btn');
+            if (removeBtn) {
+                e.preventDefault();
+                fetch(removeBtn.href)
+                .then(res => res.text())
+                .then(html => refreshCartSidebar(html));
+            }
+
+            const clearBtn = e.target.closest('.clear-cart-btn');
+            if (clearBtn) {
+                e.preventDefault();
+                if (!confirm('Clear entire cart?')) {
+                    return;
+                }
+                fetch(clearBtn.href)
+                .then(res => res.text())
+                .then(html => refreshCartSidebar(html));
+            }
+        });
 
         // Keyboard shortcut: F2 to focus search
         document.addEventListener('keydown', function(e) {

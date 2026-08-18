@@ -42,7 +42,7 @@ HTML;
 }
 
 ?>
-<aside id="sidebar" class="w-60 bg-[#0a0f1e] border-r border-white/[0.06] flex flex-col h-screen fixed lg:sticky top-0 z-40 -translate-x-full lg:translate-x-0 sidebar-transition" style="background: linear-gradient(180deg, #0a0f1e 0%, #0d1326 100%);">
+<aside id="sidebar" class="w-60 bg-[#0a0f1e] border-r border-white/[0.06] flex flex-col h-screen fixed lg:sticky top-0 z-40 -translate-x-full lg:translate-x-0" style="background: linear-gradient(180deg, #0a0f1e 0%, #0d1326 100%);">
 
     <!-- Logo -->
     <div class="h-[4.2rem] flex items-center gap-3.5 px-5 border-b border-white/[0.06] flex-shrink-0">
@@ -362,11 +362,5 @@ HTML;
                 }, 300);
             }
         };
-
-        /* ── On load: open any group that has an active child ── */
-        document.querySelectorAll('.sidebar-group-items:not(.collapsed)').forEach(function(el) {
-            el.style.maxHeight = 'none';
-            el.style.opacity = '1';
-        });
     })();
 </script>

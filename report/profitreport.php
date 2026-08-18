@@ -262,7 +262,7 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                 </svg>
                                 <div>
                                     <p class="text-sm text-emerald-600">Total Revenue</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($profit_summary['revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($profit_summary['revenue']) ?> Ks"><?= compactMoney($profit_summary['revenue']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
                         </div>
@@ -274,7 +274,7 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                 </svg>
                                 <div>
                                     <p class="text-sm text-orange-600">Total Cost</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($profit_summary['cost']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($profit_summary['cost']) ?> Ks"><?= compactMoney($profit_summary['cost']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
                         </div>
@@ -286,7 +286,7 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                 </svg>
                                 <div>
                                     <p class="text-sm text-blue-600">Gross Profit</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($gross_profit) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($gross_profit) ?> Ks"><?= compactMoney($gross_profit) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
                         </div>
@@ -298,7 +298,7 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                 </svg>
                                 <div>
                                     <p class="text-sm text-purple-600">Net Profit</p>
-                                    <p class="text-2xl font-bold <?= $profit_summary['profit'] < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white' ?> leading-none"><?= number_format($profit_summary['profit']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold <?= $profit_summary['profit'] < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white' ?> leading-none truncate" title="Full amount: <?= number_format($profit_summary['profit']) ?> Ks"><?= compactMoney($profit_summary['profit']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs <?= $margin >= 20 ? 'text-emerald-600 dark:text-emerald-400' : ($margin >= 10 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400') ?> mt-1"><?= number_format($margin, 1) ?>% margin</p>
                                 </div>
                             </div>

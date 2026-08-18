@@ -229,7 +229,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <div>
                                     <p class="text-green-700 text-sm">Total Stock</p>
                                     <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($total_stock['total']) ?></p>
-                                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1"><?= number_format($total_stock_value['total']) ?> Ks value</p>
+                                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 truncate" title="Full amount: <?= number_format($total_stock_value['total']) ?> Ks"><?= compactMoney($total_stock_value['total']) ?> Ks value</p>
                                 </div>
                             </div>
                         </div>

@@ -175,7 +175,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </svg>
                                 <div>
                                     <p class="text-sm text-emerald-600">Total Purchase Amount</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($purchase_summary['total_amount']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($purchase_summary['total_amount']) ?> Ks"><?= compactMoney($purchase_summary['total_amount']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                 </div>
                             </div>
                         </div>
@@ -187,7 +187,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </svg>
                                 <div>
                                     <p class="text-sm text-red-600">Outstanding Balance</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($outstanding_balance) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($outstanding_balance) ?> Ks"><?= compactMoney($outstanding_balance) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs text-red-500 dark:text-red-400 mt-1"><?= $outstanding_count ?> purchases</p>
                                 </div>
                             </div>
@@ -200,7 +200,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </svg>
                                 <div>
                                     <p class="text-sm text-amber-600">Paid Amount</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none"><?= number_format($total_paid_amount) ?><span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white leading-none truncate" title="Full amount: <?= number_format($total_paid_amount) ?> Ks"><?= compactMoney($total_paid_amount) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1"><?= $paid_stats['Paid']['count'] ?> purchases</p>
                                 </div>
                             </div>
