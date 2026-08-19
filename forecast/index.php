@@ -7,54 +7,93 @@ include "../config/helpers.php";
 $page_title = "Demand Forecast";
 $action = $_GET['action'] ?? 'dashboard';
 
-// Calculate forecast for a product using moving average (last N days)
+/**
+ * Calculate demand forecast for a product using Moving Average on actual daily sales.
+ *
+ * Algorithm:
+ * 1. Query actual sales from sale_details joined with sales for the last 30 days.
+ * 2. Group sales by calendar date, summing quantity sold per day.
+ * 3. Create a complete 30-day date range in PHP; assign 0 to dates with no sales.
+ * 4. Daily Average = Total quantity sold / 30 (always divides by 30).
+ * 5. 7-Day Forecast = Daily Average × 7
+ * 6. 30-Day Forecast = Daily Average × 30
+ *
+ * Uses prepared statements for the product_id parameter (no SQL injection).
+ *
+ * @param mysqli $conn      Database connection
+ * @param int    $product_id Product to forecast
+ * @param int    $days       Look-back window (default 30)
+ * @return array Forecast metrics including total_sold, daily_avg, forecast_7, forecast_30
+ */
 function calculateForecast($conn, $product_id, $days = 30)
 {
-    // Retrieve historical sales aggregated by day
+    // Step 1: Retrieve actual sales aggregated by day using prepared statement
     $query = "
-        SELECT DATE(s.created_at) as sale_date, SUM(sd.quantity) AS daily_qty
+        SELECT DATE(s.created_at) AS sale_date, SUM(sd.quantity) AS daily_qty
         FROM sale_details sd
         JOIN sales s ON sd.sale_id = s.id
-        WHERE sd.product_id = '$product_id'
-        AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL $days DAY)
+        WHERE sd.product_id = ?
+        AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        AND s.created_at < CURDATE()
         GROUP BY DATE(s.created_at)
         ORDER BY sale_date ASC
     ";
-    $result = mysqli_query($conn, $query);
-    
-    $historical_quantities = [];
-    $total = 0;
-    $sales_count = 0;
-    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ii", $product_id, $days);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Step 2: Map actual sales by date
+    $daily_sales = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        $qty = (int)$row['daily_qty'];
-        $historical_quantities[$row['sale_date']] = $qty;
-        $total += $qty;
-        $sales_count++;
+        $daily_sales[$row['sale_date']] = (int)$row['daily_qty'];
+    }
+    $stmt->close();
+
+    // Step 3: Create complete 30-day date range; fill missing days with 0
+    $full_range = [];
+    for ($i = $days; $i >= 1; $i--) {
+        $date = date('Y-m-d', strtotime("-{$i} days"));
+        $full_range[$date] = $daily_sales[$date] ?? 0;
     }
 
-    // Handle Insufficient Data (e.g. no sales at all)
-    if ($sales_count == 0) {
-        $daily_avg = 0;
-        $forecast_30 = 0;
-        $insufficient = true;
+    // Step 4: Calculate total quantity across all 30 days (including zero-sales days)
+    $total = array_sum($full_range);
+    $has_any_sales = count($daily_sales) > 0;
+
+    // Step 5: Daily Average = Total / 30 (always divide by full period, not just sales days)
+    $daily_avg = $has_any_sales ? $total / $days : 0;
+
+    // Step 6: Future demand forecasts (rounded to whole units)
+    $forecast_7  = (int)round($daily_avg * 7);
+    $forecast_30 = (int)round($daily_avg * 30);
+
+    // Step 7: Determine demand level from real daily average
+    //   High: daily average >= 5 units/day
+    //   Medium: daily average >= 1 and < 5 units/day
+    //   Low: daily average < 1 unit/day
+    //   Insufficient: only when there is genuinely no usable historical sales data
+    if (!$has_any_sales) {
+        $demand_level = 'Insufficient';
+    } elseif ($daily_avg >= 5) {
+        $demand_level = 'High';
+    } elseif ($daily_avg >= 1) {
+        $demand_level = 'Medium';
     } else {
-        $daily_avg = $days > 0 ? $total / $days : 0;
-        $forecast_30 = round($daily_avg * 30);
-        $insufficient = false;
+        $demand_level = 'Low';
     }
 
-    // Debugging info to verify forecasting input for the user
+    // Debug info for verification
     $debug_info = [
-        'product_id' => $product_id,
-        'historical_sales_days_count' => $sales_count,
-        'historical_quantities' => $historical_quantities,
-        'forecast_input_total_sold' => $total,
-        'forecast_result_30_days' => $forecast_30,
-        'insufficient_data' => $insufficient
+        'product_id'             => $product_id,
+        'days_with_sales'        => count($daily_sales),
+        'total_quantity_sold'    => $total,
+        'daily_average'          => round($daily_avg, 4),
+        'forecast_7_days'        => $forecast_7,
+        'forecast_30_days'       => $forecast_30,
+        'demand_level'           => $demand_level,
     ];
-    
-    // Write debug info to a file (append)
+
     $debug_log_path = __DIR__ . '/forecast_debug.log';
     if (!file_exists($debug_log_path) || filesize($debug_log_path) == 0) {
         file_put_contents($debug_log_path, "=== Forecast Debug Log ===\n");
@@ -62,12 +101,13 @@ function calculateForecast($conn, $product_id, $days = 30)
     file_put_contents($debug_log_path, json_encode($debug_info, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
 
     return [
-        'total_sold' => $total,
-        'daily_avg' => round($daily_avg, 2),
-        'forecast_7' => round($daily_avg * 7),
+        'total_sold'  => $total,
+        'daily_avg'   => round($daily_avg, 2),
+        'forecast_7'  => $forecast_7,
         'forecast_30' => $forecast_30,
-        'insufficient' => $insufficient,
-        'debug' => $debug_info
+        'insufficient'=> ($demand_level === 'Insufficient'),
+        'demand_level'=> $demand_level,
+        'debug'       => $debug_info
     ];
 }
 
@@ -89,7 +129,7 @@ if ($action === 'generate') {
             $demand = 'Insufficient';
             $forecast_qty = 0;
             // Provide a fallback recommendation
-            $recommended = max(0, $p['reorder_level'] * 2 - $p['current_stock']);
+            $recommended = max(0, $p['reorder_level'] - $p['current_stock']);
         } else {
             $daily_avg = $forecast['daily_avg'];
             
@@ -100,11 +140,8 @@ if ($action === 'generate') {
 
             $forecast_qty = $forecast['forecast_30'];
             
-            // Recommended stock: at least 2x min_stock, or enough to cover 30-day forecast
-            $recommended = max($forecast_qty, $p['reorder_level'] * 2);
-            if ($p['current_stock'] < $p['reorder_level']) {
-                $recommended = max($recommended, $p['reorder_level'] * 3 - $p['current_stock']);
-            }
+            // Recommended purchase quantity based on forecast - current stock
+            $recommended = max(0, $forecast_qty - $p['current_stock']);
         }
 
         $stmt = $conn->prepare("INSERT INTO forecasts (product_id, forecast_date, forecast_quantity, demand_level, recommended_stock, method)
@@ -186,21 +223,31 @@ $need_restock_products = mysqli_query($conn, "
 
 // ============ All Forecasts (for chart + table, deduplicated) ============
 $products_forecast = mysqli_query($conn, "
-    SELECT p.product_name, p.current_stock, f.forecast_quantity, f.demand_level, f.recommended_stock
+    SELECT p.product_name, p.current_stock, f.forecast_quantity, f.demand_level, f.recommended_stock,
+           COALESCE((
+               SELECT SUM(sd.quantity)
+               FROM sale_details sd
+               JOIN sales s ON sd.sale_id = s.id
+               WHERE sd.product_id = p.id
+                 AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                 AND s.created_at < CURDATE()
+           ), 0) AS historical_demand
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
     WHERE f.forecast_date = CURDATE()
-    ORDER BY f.forecast_quantity DESC LIMIT 15
+    ORDER BY f.forecast_quantity DESC LIMIT 10
 ");
 
 // Chart data
 $chart_labels = [];
 $chart_forecast = [];
 $chart_current = [];
+$chart_historical = [];
 while ($p = mysqli_fetch_assoc($products_forecast)) {
     $chart_labels[] = $p['product_name'];
     $chart_forecast[] = (int)$p['forecast_quantity'];
     $chart_current[] = (int)$p['current_stock'];
+    $chart_historical[] = (int)$p['historical_demand'];
 }
 
 // ============ Sales Trend (30 days) ============
@@ -218,40 +265,81 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
 }
 
 // ============ Forecast Accuracy ============
-// Compare past forecasts with actual sales
-$accuracy_data = mysqli_query($conn, "
-    SELECT f.forecast_quantity, f.forecast_date, f.product_id,
+// 1. Completed Forecasts (Evaluation period finished)
+//    Only forecasts whose 30-day evaluation window has fully elapsed.
+//    actual_sold is summed per-product within each forecast's own 30-day window.
+$completed_forecasts_query = mysqli_query($conn, "
+    SELECT f.id,
+           f.forecast_quantity,
+           f.forecast_date,
+           f.product_id,
+           p.product_name,
+           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end,
            COALESCE((
-               SELECT SUM(sd.quantity)
-               FROM sale_details sd
-               JOIN sales s ON sd.sale_id = s.id
-               WHERE sd.product_id = f.product_id
-               AND s.created_at >= f.forecast_date
-               AND s.created_at < DATE_ADD(f.forecast_date, INTERVAL 30 DAY)
+               SELECT SUM(sd2.quantity)
+               FROM sale_details sd2
+               JOIN sales s2 ON sd2.sale_id = s2.id
+               WHERE sd2.product_id = f.product_id
+                 AND DATE(s2.created_at) >= f.forecast_date
+                 AND DATE(s2.created_at) <  DATE_ADD(f.forecast_date, INTERVAL 30 DAY)
            ), 0) AS actual_sold
     FROM forecasts f
-    WHERE f.forecast_date >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)
-    AND f.forecast_quantity > 0
-    LIMIT 50
+    JOIN products p ON f.product_id = p.id
+    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) <= CURDATE()
+    ORDER BY f.forecast_date DESC
 ");
 
-$total_error = 0;
+$total_accuracy = 0;
 $accuracy_count = 0;
-while ($a = mysqli_fetch_assoc($accuracy_data)) {
-    $diff = abs($a['forecast_quantity'] - $a['actual_sold']);
-    $total_error += $diff / max($a['forecast_quantity'], 1);
+$completed_forecasts = [];
+
+while ($c = mysqli_fetch_assoc($completed_forecasts_query)) {
+    $forecast_qty = (float)$c['forecast_quantity'];
+    $actual_sold  = (float)$c['actual_sold'];
+    $error = abs($actual_sold - $forecast_qty);
+
+    if ($forecast_qty == $actual_sold) {
+        $error_percentage = 0;
+        $acc = 100;
+    } elseif ($actual_sold > 0) {
+        $error_percentage = ($error / $actual_sold) * 100;
+        $acc = max(0, 100 - $error_percentage);
+    } else {
+        $error_percentage = 100;
+        $acc = 0;
+    }
+
+    $c['error']           = $error;
+    $c['error_percentage'] = $error_percentage;
+    $c['accuracy']        = $acc;
+    $completed_forecasts[] = $c;
+
+    $total_accuracy += $acc;
     $accuracy_count++;
 }
 
-// Only show accuracy if we have actual sales data to compare
 if ($accuracy_count > 0) {
-    $accuracy = max(0, min(100, 100 - ($total_error / $accuracy_count) * 100));
+    $accuracy = $total_accuracy / $accuracy_count;
     $accuracy_display = number_format($accuracy, 1) . '%';
     $accuracy_class = $accuracy >= 70 ? 'text-emerald-600' : ($accuracy >= 50 ? 'text-amber-600' : 'text-red-600');
 } else {
     $accuracy = null;
     $accuracy_display = 'N/A';
     $accuracy_class = 'text-gray-400';
+}
+
+// 2. Pending Forecasts (Evaluation period ongoing)
+$pending_forecasts = [];
+$pending_query = mysqli_query($conn, "
+    SELECT f.id, f.forecast_quantity, f.forecast_date, f.product_id, p.product_name,
+           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end
+    FROM forecasts f
+    JOIN products p ON f.product_id = p.id
+    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) > CURDATE()
+    ORDER BY f.forecast_date DESC
+");
+while ($p = mysqli_fetch_assoc($pending_query)) {
+    $pending_forecasts[] = $p;
 }
 ?>
 <!DOCTYPE html>
@@ -605,6 +693,102 @@ if ($accuracy_count > 0) {
                             </div>
                         </div>
 
+                        <!-- Completed Forecasts Accuracy -->
+                        <div class="card mt-6">
+                            <div class="card-header">
+                                <h2 class="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Completed Forecasts (Accuracy Report)
+                                </h2>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Forecast Date</th>
+                                            <th class="num">Eval End</th>
+                                            <th class="num">Forecast Qty</th>
+                                            <th class="num">Actual Sold</th>
+                                            <th class="num">Abs Error</th>
+                                            <th class="num">Error %</th>
+                                            <th class="num">Accuracy %</th>
+                                            <th class="center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (count($completed_forecasts) > 0): ?>
+                                            <?php foreach ($completed_forecasts as $c): ?>
+                                                <tr>
+                                                    <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($c['product_name']) ?></td>
+                                                    <td class="text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($c['forecast_date'])) ?></td>
+                                                    <td class="num text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($c['evaluation_end'])) ?></td>
+                                                    <td class="num font-semibold text-indigo-600"><?= number_format($c['forecast_quantity']) ?></td>
+                                                    <td class="num font-semibold text-emerald-600"><?= number_format($c['actual_sold']) ?></td>
+                                                    <td class="num font-bold text-red-600"><?= number_format($c['error']) ?></td>
+                                                    <td class="num font-bold text-red-500"><?= $c['error_percentage'] === 100 && $c['actual_sold'] == 0 && $c['forecast_quantity'] > 0 ? 'N/A' : number_format($c['error_percentage'], 2) . '%' ?></td>
+                                                    <td class="num font-bold <?= $c['accuracy'] >= 70 ? 'text-emerald-600' : ($c['accuracy'] >= 50 ? 'text-amber-600' : 'text-red-600') ?>"><?= number_format($c['accuracy'], 2) ?>%</td>
+                                                    <td class="center">
+                                                        <span class="badge badge-success" style="background-color: #d1fae5; color: #047857;"><span class="badge-dot" style="background-color: #10b981;"></span> Completed</span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="8" class="text-center py-8 text-gray-400">No completed forecasts available yet.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Pending Forecasts -->
+                        <div class="card mt-6 mb-6">
+                            <div class="card-header">
+                                <h2 class="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Pending Forecasts
+                                </h2>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Forecast Date</th>
+                                            <th class="num">Forecast Qty</th>
+                                            <th class="num">Evaluation End Date</th>
+                                            <th class="center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (count($pending_forecasts) > 0): ?>
+                                            <?php foreach ($pending_forecasts as $p): ?>
+                                                <tr>
+                                                    <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($p['product_name']) ?></td>
+                                                    <td class="text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($p['forecast_date'])) ?></td>
+                                                    <td class="num font-semibold text-indigo-600"><?= number_format($p['forecast_quantity']) ?></td>
+                                                    <td class="num text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($p['evaluation_end'])) ?></td>
+                                                    <td class="center">
+                                                        <span class="badge badge-warning" style="background-color: #fef3c7; color: #b45309;"><span class="badge-dot" style="background-color: #f59e0b;"></span> Pending</span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="5" class="text-center py-8 text-gray-400">No pending forecasts.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     <?php endif; ?>
                 </div>
             </main>
@@ -734,10 +918,10 @@ if ($accuracy_count > 0) {
                     data: {
                         labels: <?= json_encode($chart_labels) ?>,
                         datasets: [{
-                                label: 'Current Stock',
-                                data: <?= json_encode($chart_current) ?>,
-                                backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                                borderColor: '#6366f1',
+                                label: 'Historical Actual Demand',
+                                data: <?= json_encode($chart_historical) ?>,
+                                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                                borderColor: '#10b981',
                                 borderWidth: 1,
                                 borderRadius: 4,
                             },
@@ -746,6 +930,14 @@ if ($accuracy_count > 0) {
                                 data: <?= json_encode($chart_forecast) ?>,
                                 backgroundColor: 'rgba(245, 158, 11, 0.7)',
                                 borderColor: '#f59e0b',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Current Stock',
+                                data: <?= json_encode($chart_current) ?>,
+                                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                                borderColor: '#6366f1',
                                 borderWidth: 1,
                                 borderRadius: 4,
                             }
@@ -791,4 +983,4 @@ if ($accuracy_count > 0) {
     </script>
 </body>
 
-</html>
+</html> 

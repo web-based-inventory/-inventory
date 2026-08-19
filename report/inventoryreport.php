@@ -375,9 +375,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                             <td class="num"><?= number_format($cs['product_count']) ?></td>
                                             <td class="num"><?= number_format($cs['total_stock']) ?></td>
                                             <td class="num"><?= number_format($cs['stock_value']) ?> Ks</td>
-                                            <td class="num">
-                                                <?= number_format($share, 1) ?>%
-                                            </td>
+                                            <td class="num"><?= number_format($share, 1) ?>%</td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($cat_rows)): ?>

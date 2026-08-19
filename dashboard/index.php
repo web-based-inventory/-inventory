@@ -21,7 +21,7 @@ if ($role === 'admin') {
     $today_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE DATE(s.created_at)=CURDATE()"))['c'];
     $monthly_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE MONTH(s.created_at)=MONTH(CURDATE()) AND YEAR(s.created_at)=YEAR(CURDATE())"))['c'];
     $yearly_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE YEAR(s.created_at)=YEAR(CURDATE())"))['c'];
-    $forecast_summary = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total, SUM(CASE WHEN demand_level='High' THEN 1 ELSE 0 END) AS high_d, SUM(CASE WHEN demand_level='Medium' THEN 1 ELSE 0 END) AS med_d, SUM(CASE WHEN demand_level='Low' THEN 1 ELSE 0 END) AS low_d FROM forecasts"));
+    $forecast_summary = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(forecast_quantity), 0) AS total, SUM(CASE WHEN demand_level='High' THEN 1 ELSE 0 END) AS high_d, SUM(CASE WHEN demand_level='Medium' THEN 1 ELSE 0 END) AS med_d, SUM(CASE WHEN demand_level='Low' THEN 1 ELSE 0 END) AS low_d FROM forecasts WHERE forecast_date = CURDATE()"));
 
     $low_stock_products = [];
     $ls_res = mysqli_query($conn, "SELECT id, product_name, current_stock, reorder_level FROM products WHERE current_stock<=reorder_level AND status='Active' ORDER BY current_stock ASC LIMIT 5");
@@ -46,7 +46,7 @@ if ($role === 'admin') {
 // ── Staff-only Queries ──
 if ($role === 'staff') {
     $today_stock_in = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS cnt, COALESCE(SUM(total_amount),0) AS total FROM purchases WHERE purchase_date=CURDATE()"));
-    $forecast_summary = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total, SUM(CASE WHEN demand_level='High' THEN 1 ELSE 0 END) AS high_d, SUM(CASE WHEN demand_level='Medium' THEN 1 ELSE 0 END) AS med_d, SUM(CASE WHEN demand_level='Low' THEN 1 ELSE 0 END) AS low_d FROM forecasts"));
+    $forecast_summary = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(forecast_quantity), 0) AS total, SUM(CASE WHEN demand_level='High' THEN 1 ELSE 0 END) AS high_d, SUM(CASE WHEN demand_level='Medium' THEN 1 ELSE 0 END) AS med_d, SUM(CASE WHEN demand_level='Low' THEN 1 ELSE 0 END) AS low_d FROM forecasts WHERE forecast_date = CURDATE()"));
 
     $recent_purchases = [];
     $dashPurAmtCol = getPaymentAmountCol($conn, 'purchase_payments');
@@ -229,8 +229,8 @@ if ($role === 'cashier') {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= $forecast_summary['total'] ?? 0 ?></p>
-                                    <p class="text-sm text-cyan-700 dark:text-cyan-300">Forecast Summary</p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= number_format($forecast_summary['total'] ?? 0) ?></p>
+                                    <p class="text-sm text-cyan-700 dark:text-cyan-300">Forecast Demand (Units)</p>
                                     <p class="text-[11px] text-cyan-600/70 dark:text-cyan-400/70 mt-0.5">
                                         High: <?= $forecast_summary['high_d'] ?? 0 ?> · Med: <?= $forecast_summary['med_d'] ?? 0 ?> · Low: <?= $forecast_summary['low_d'] ?? 0 ?>
                                     </p>
@@ -335,7 +335,7 @@ if ($role === 'cashier') {
                             <div class="p-4">
                                 <?php
                                 $recent_forecasts = [];
-                                $rf_res = mysqli_query($conn, "SELECT f.forecast_quantity, f.demand_level, p.product_name FROM forecasts f JOIN products p ON f.product_id = p.id ORDER BY f.created_at DESC LIMIT 5");
+                                $rf_res = mysqli_query($conn, "SELECT f.forecast_quantity, f.demand_level, p.product_name FROM forecasts f JOIN products p ON f.product_id = p.id WHERE f.forecast_date = CURDATE() ORDER BY f.forecast_quantity DESC LIMIT 5");
                                 while ($r = mysqli_fetch_assoc($rf_res)) $recent_forecasts[] = $r;
                                 ?>
                                 <?php if (count($recent_forecasts) > 0): ?>
@@ -357,7 +357,7 @@ if ($role === 'cashier') {
                                                             <?php if ($rf['demand_level'] === 'High'): ?>
                                                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400">
                                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              mo                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                                                     </svg>
                                                                     Restock
                                                                 </span>
