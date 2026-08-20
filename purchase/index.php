@@ -211,17 +211,17 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 
                     <!-- Table -->
                     <div class="card overflow-hidden">
-                        <div class="table-wrap">
-                            <table class="data-table w-full">
+                        <div class="table-wrap overflow-x-auto">
+                            <table class="data-table w-full table-fixed min-w-[1000px]">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Invoice</th>
-                                        <th>Date</th>
-                                        <th>Supplier</th>
-                                        <th class="num">Amount</th>
-                                        <th class="center">Payment</th>
-                                        <th class="center">Action</th>
+                                        <th style="width: 5%">#</th>
+                                        <th style="width: 15%">Invoice</th>
+                                        <th style="width: 12%">Date</th>
+                                        <th style="width: 1%">Supplier</th>
+                                        <th class="num" style="width: 15%">Amount</th>
+                                        <th class="center" style="width: 10%">Payment</th>
+                                        <th class="center" style="width: 23%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -232,10 +232,10 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                             $total_paid_q = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($amtCol$adv_expr), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"));
                                             $total_paid = (float)$total_paid_q['tp'];
                                             $remaining = max(0, (float)$row['total_amount'] - $total_paid);
-                                        ?>
+                                    ?>
                                             <tr>
                                                 <td><?= $count++ ?></td>
-                                                <td class="font-semibold"><?= htmlspecialchars($row['invoice_no'] ?? '#' . $row['id']) ?></td>
+                                                <td class="font-semibold whitespace-nowrap"><?= htmlspecialchars($row['invoice_no'] ?? '#' . $row['id']) ?></td>
                                                 <td><?= $row['purchase_date'] ?></td>
                                                 <td><?= htmlspecialchars($row['supplier_name']) ?></td>
                                                 <td class="num">
@@ -250,7 +250,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                                     if ($ta > 0 && $total_paid >= $ta) $row_status = 'Paid';
                                                     elseif ($total_paid > 0) $row_status = 'Partial';
                                                     else $row_status = 'Unpaid';
-                                                    $statusClass = match($row_status) {
+                                                    $statusClass = match ($row_status) {
                                                         'Paid' => 'badge-success',
                                                         'Partial' => 'badge-warning',
                                                         default => 'badge-danger'
@@ -262,7 +262,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                                     </span>
                                                 </td>
                                                 <td class="center">
-                                                    <div class="actions">
+                                                    <div class="flex items-center justify-center gap-2 whitespace-nowrap">
                                                         <a href="?view_id=<?= $row['id'] ?>" class="btn btn-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg">View</a>
                                                         <?php if (checkPermission('purchases', 'edit')): ?>
                                                             <a href="?edit_id=<?= $row['id'] ?>" class="btn btn-sm bg-green-50 text-green-600 hover:bg-green-100 rounded-lg">Edit</a>
@@ -325,7 +325,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             if ($vp_ta > 0 && $vp_total_paid >= $vp_ta) $vp_status = 'Paid';
                             elseif ($vp_total_paid > 0) $vp_status = 'Partial';
                             else $vp_status = 'Unpaid';
-                            $statusBadgeClass = match($vp_status) {
+                            $statusBadgeClass = match ($vp_status) {
                                 'Paid' => 'bg-emerald-500',
                                 'Partial' => 'bg-amber-500',
                                 default => 'bg-red-500'
@@ -337,17 +337,23 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2 mt-4">
                         <button onclick="window.print()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
                             Print
                         </button>
                         <?php if ($vp_balance > 0): ?>
-                        <a href="../supplier/ledger.php?id=<?= $view_purchase['supplier_id'] ?>" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium transition flex items-center gap-1.5 text-white">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Make Payment
-                        </a>
+                            <a href="../supplier/ledger.php?id=<?= $view_purchase['supplier_id'] ?>" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium transition flex items-center gap-1.5 text-white">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Make Payment
+                            </a>
                         <?php endif; ?>
                         <a href="index.php" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
                             Back
                         </a>
                     </div>
@@ -358,7 +364,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
                             <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
                                 Supplier Information
                             </h4>
                             <p class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($view_purchase['supplier_name']) ?></p>
@@ -371,7 +379,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                         </div>
                         <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
                             <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                                 Purchase Details
                             </h4>
                             <p class="text-sm text-gray-600 dark:text-gray-300">Date: <span class="font-semibold text-gray-900 dark:text-gray-100"><?= date('d M Y', strtotime($view_purchase['purchase_date'])) ?></span></p>
@@ -383,21 +393,27 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
                             <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">Grand Total</p>
                             <p class="text-xl font-bold text-blue-700 dark:text-blue-300 mt-1"><?= number_format($view_purchase['total_amount'], 2) ?> Ks</p>
                         </div>
                         <div class="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
                             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
                             <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Total Paid</p>
                             <p class="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-1"><?= number_format($vp_total_paid, 2) ?> Ks</p>
                         </div>
                         <div class="bg-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-50 dark:bg-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-900/30 border border-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-200 dark:border-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow">
                             <div class="w-10 h-10 bg-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-100 dark:bg-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-800 rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg class="w-5 h-5 text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-600 dark:text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-5 h-5 text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-600 dark:text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
                             <p class="text-xs text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-600 dark:text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-400 font-medium">Remaining Balance</p>
                             <p class="text-xl font-bold text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-700 dark:text-<?= $vp_balance > 0 ? 'red' : 'emerald' ?>-300 mt-1"><?= number_format($vp_balance, 2) ?> Ks</p>
@@ -407,7 +423,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <!-- Purchased Items Table -->
                     <div class="mb-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
                             Purchased Items
                         </h4>
                         <div class="table-wrap rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700">
@@ -422,7 +440,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $vi = 1; while ($row = mysqli_fetch_assoc($view_details)): ?>
+                                    <?php $vi = 1;
+                                    while ($row = mysqli_fetch_assoc($view_details)): ?>
                                         <tr class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors">
                                             <td class="text-gray-500"><?= $vi++ ?></td>
                                             <td class="font-medium text-gray-900 dark:text-gray-100"><?= htmlspecialchars($row['product_name']) ?></td>
@@ -445,7 +464,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <!-- Payment History -->
                     <div class="mb-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                             Payment History
                         </h4>
                         <?php if (mysqli_num_rows($view_payments) > 0): ?>
@@ -464,7 +485,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php $pi = 1; while ($pmt = mysqli_fetch_assoc($view_payments)): ?>
+                                        <?php $pi = 1;
+                                        while ($pmt = mysqli_fetch_assoc($view_payments)): ?>
                                             <tr class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors">
                                                 <td class="text-gray-500"><?= $pi++ ?></td>
                                                 <td class="text-gray-700 dark:text-gray-300"><?= date('d M Y', strtotime($pmt['payment_date'])) ?></td>
@@ -496,7 +518,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             </div>
                         <?php else: ?>
                             <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-8 text-center border border-dashed border-gray-300 dark:border-slate-600">
-                                <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
                                 <p class="text-gray-500 dark:text-gray-400 font-medium">No payments recorded yet</p>
                                 <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Payments will appear here once recorded.</p>
                             </div>
@@ -565,7 +589,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $edit_total = 0; $ei = 1;
+                                <?php $edit_total = 0;
+                                $ei = 1;
                                 while ($row = mysqli_fetch_assoc($edit_details)): $edit_total += $row['subtotal']; ?>
                                     <tr>
                                         <td><?= $ei++ ?></td>

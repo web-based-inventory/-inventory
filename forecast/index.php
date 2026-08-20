@@ -27,19 +27,26 @@ $action = $_GET['action'] ?? 'dashboard';
  */
 function calculateForecast($conn, $product_id, $days = 30)
 {
+    // The cutoff date is 2026-07-20 to avoid using deleted sales data
+    $cutoff_date = '2026-07-20';
+    $target_start_date = date('Y-m-d', strtotime("-{$days} days"));
+
+    // We start from whichever is later: 30 days ago or the cutoff date
+    $start_date = max($cutoff_date, $target_start_date);
+
     // Step 1: Retrieve actual sales aggregated by day using prepared statement
     $query = "
         SELECT DATE(s.created_at) AS sale_date, SUM(sd.quantity) AS daily_qty
         FROM sale_details sd
         JOIN sales s ON sd.sale_id = s.id
         WHERE sd.product_id = ?
-        AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        AND s.created_at >= ?
         AND s.created_at < CURDATE()
         GROUP BY DATE(s.created_at)
         ORDER BY sale_date ASC
     ";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $product_id, $days);
+    $stmt->bind_param("is", $product_id, $start_date);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -50,19 +57,31 @@ function calculateForecast($conn, $product_id, $days = 30)
     }
     $stmt->close();
 
-    // Step 3: Create complete 30-day date range; fill missing days with 0
-    $full_range = [];
-    for ($i = $days; $i >= 1; $i--) {
-        $date = date('Y-m-d', strtotime("-{$i} days"));
-        $full_range[$date] = $daily_sales[$date] ?? 0;
+    // Calculate actual number of days in the period
+    $datetime1 = new DateTime($start_date);
+    $datetime2 = new DateTime(date('Y-m-d')); // CURDATE
+    $actual_days = $datetime1->diff($datetime2)->days;
+
+    if ($actual_days <= 0) {
+        $actual_days = 1; // Prevent division by zero
     }
 
-    // Step 4: Calculate total quantity across all 30 days (including zero-sales days)
+    // Step 3: Create complete date range; fill missing days with 0
+    $full_range = [];
+    for ($i = $actual_days; $i >= 1; $i--) {
+        $date = date('Y-m-d', strtotime("-{$i} days"));
+        // Only include dates >= start_date
+        if ($date >= $start_date) {
+            $full_range[$date] = $daily_sales[$date] ?? 0;
+        }
+    }
+
+    // Step 4: Calculate total quantity across the actual period
     $total = array_sum($full_range);
     $has_any_sales = count($daily_sales) > 0;
 
-    // Step 5: Daily Average = Total / 30 (always divide by full period, not just sales days)
-    $daily_avg = $has_any_sales ? $total / $days : 0;
+    // Step 5: Daily Average = Total / actual_days
+    $daily_avg = $has_any_sales ? $total / count($full_range) : 0;
 
     // Step 6: Future demand forecasts (rounded to whole units)
     $forecast_7  = (int)round($daily_avg * 7);
@@ -105,8 +124,8 @@ function calculateForecast($conn, $product_id, $days = 30)
         'daily_avg'   => round($daily_avg, 2),
         'forecast_7'  => $forecast_7,
         'forecast_30' => $forecast_30,
-        'insufficient'=> ($demand_level === 'Insufficient'),
-        'demand_level'=> $demand_level,
+        'insufficient' => ($demand_level === 'Insufficient'),
+        'demand_level' => $demand_level,
         'debug'       => $debug_info
     ];
 }
@@ -115,16 +134,19 @@ function calculateForecast($conn, $product_id, $days = 30)
 if ($action === 'generate') {
     $products = mysqli_query($conn, "SELECT id, product_name, current_stock, reorder_level FROM products WHERE status='Active'");
 
+    // Clear old obsolete forecasts from before the valid period
+    mysqli_query($conn, "DELETE FROM forecasts WHERE forecast_date < '2026-07-20'");
+
     // Clear old forecasts for today so we can regenerate
     mysqli_query($conn, "DELETE FROM forecasts WHERE forecast_date = CURDATE()");
-    
+
     // Clear debug log on new generation
     $debug_log_path = __DIR__ . '/forecast_debug.log';
     file_put_contents($debug_log_path, "=== Forecast Debug Log (Generated: " . date('Y-m-d H:i:s') . ") ===\n\n");
 
     while ($p = mysqli_fetch_assoc($products)) {
         $forecast = calculateForecast($conn, $p['id'], 30);
-        
+
         if ($forecast['insufficient']) {
             $demand = 'Insufficient';
             $forecast_qty = 0;
@@ -132,14 +154,14 @@ if ($action === 'generate') {
             $recommended = max(0, $p['reorder_level'] - $p['current_stock']);
         } else {
             $daily_avg = $forecast['daily_avg'];
-            
+
             // Determine demand level based on daily average
             if ($daily_avg >= 5) $demand = 'High';
             elseif ($daily_avg >= 1) $demand = 'Medium';
             else $demand = 'Low';
 
             $forecast_qty = $forecast['forecast_30'];
-            
+
             // Recommended purchase quantity based on forecast - current stock
             $recommended = max(0, $forecast_qty - $p['current_stock']);
         }
@@ -221,33 +243,24 @@ $need_restock_products = mysqli_query($conn, "
     ORDER BY (f.forecast_quantity - p.current_stock) DESC LIMIT 10
 ");
 
-// ============ All Forecasts (for chart + table, deduplicated) ============
+// ============ Top 10 Product Demand Forecast Chart ============
 $products_forecast = mysqli_query($conn, "
-    SELECT p.product_name, p.current_stock, f.forecast_quantity, f.demand_level, f.recommended_stock,
-           COALESCE((
-               SELECT SUM(sd.quantity)
-               FROM sale_details sd
-               JOIN sales s ON sd.sale_id = s.id
-               WHERE sd.product_id = p.id
-                 AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                 AND s.created_at < CURDATE()
-           ), 0) AS historical_demand
+    SELECT 
+        p.product_name,
+        f.forecast_quantity
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
     WHERE f.forecast_date = CURDATE()
-    ORDER BY f.forecast_quantity DESC LIMIT 10
+    ORDER BY f.forecast_quantity DESC
+    LIMIT 10
 ");
 
 // Chart data
 $chart_labels = [];
 $chart_forecast = [];
-$chart_current = [];
-$chart_historical = [];
 while ($p = mysqli_fetch_assoc($products_forecast)) {
     $chart_labels[] = $p['product_name'];
     $chart_forecast[] = (int)$p['forecast_quantity'];
-    $chart_current[] = (int)$p['current_stock'];
-    $chart_historical[] = (int)$p['historical_demand'];
 }
 
 // ============ Sales Trend (30 days) ============
@@ -264,83 +277,7 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
     $trend_values[] = (float)$t['total'];
 }
 
-// ============ Forecast Accuracy ============
-// 1. Completed Forecasts (Evaluation period finished)
-//    Only forecasts whose 30-day evaluation window has fully elapsed.
-//    actual_sold is summed per-product within each forecast's own 30-day window.
-$completed_forecasts_query = mysqli_query($conn, "
-    SELECT f.id,
-           f.forecast_quantity,
-           f.forecast_date,
-           f.product_id,
-           p.product_name,
-           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end,
-           COALESCE((
-               SELECT SUM(sd2.quantity)
-               FROM sale_details sd2
-               JOIN sales s2 ON sd2.sale_id = s2.id
-               WHERE sd2.product_id = f.product_id
-                 AND DATE(s2.created_at) >= f.forecast_date
-                 AND DATE(s2.created_at) <  DATE_ADD(f.forecast_date, INTERVAL 30 DAY)
-           ), 0) AS actual_sold
-    FROM forecasts f
-    JOIN products p ON f.product_id = p.id
-    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) <= CURDATE()
-    ORDER BY f.forecast_date DESC
-");
-
-$total_accuracy = 0;
-$accuracy_count = 0;
-$completed_forecasts = [];
-
-while ($c = mysqli_fetch_assoc($completed_forecasts_query)) {
-    $forecast_qty = (float)$c['forecast_quantity'];
-    $actual_sold  = (float)$c['actual_sold'];
-    $error = abs($actual_sold - $forecast_qty);
-
-    if ($forecast_qty == $actual_sold) {
-        $error_percentage = 0;
-        $acc = 100;
-    } elseif ($actual_sold > 0) {
-        $error_percentage = ($error / $actual_sold) * 100;
-        $acc = max(0, 100 - $error_percentage);
-    } else {
-        $error_percentage = 100;
-        $acc = 0;
-    }
-
-    $c['error']           = $error;
-    $c['error_percentage'] = $error_percentage;
-    $c['accuracy']        = $acc;
-    $completed_forecasts[] = $c;
-
-    $total_accuracy += $acc;
-    $accuracy_count++;
-}
-
-if ($accuracy_count > 0) {
-    $accuracy = $total_accuracy / $accuracy_count;
-    $accuracy_display = number_format($accuracy, 1) . '%';
-    $accuracy_class = $accuracy >= 70 ? 'text-emerald-600' : ($accuracy >= 50 ? 'text-amber-600' : 'text-red-600');
-} else {
-    $accuracy = null;
-    $accuracy_display = 'N/A';
-    $accuracy_class = 'text-gray-400';
-}
-
-// 2. Pending Forecasts (Evaluation period ongoing)
-$pending_forecasts = [];
-$pending_query = mysqli_query($conn, "
-    SELECT f.id, f.forecast_quantity, f.forecast_date, f.product_id, p.product_name,
-           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end
-    FROM forecasts f
-    JOIN products p ON f.product_id = p.id
-    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) > CURDATE()
-    ORDER BY f.forecast_date DESC
-");
-while ($p = mysqli_fetch_assoc($pending_query)) {
-    $pending_forecasts[] = $p;
-}
+// ============ End Forecast Accuracy (Moved to evaluation.php) ============
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -398,13 +335,37 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
             <?php include "../includes/header.php"; ?>
             <main class="p-4 lg:p-6">
                 <div class="max-w-7xl mx-auto">
-                    <div class="flex justify-end mb-6">
-                        <button onclick="generateForecast()" id="generateBtn" class="btn btn-primary gap-2">
-                            <svg id="btnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span id="btnText">Generate Forecast</span>
-                        </button>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Demand Forecast</h1>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1">Predict future product demand using actual sales history.</p>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="document.getElementById('methodModal').classList.remove('hidden')" class="btn btn-secondary px-3 gap-1 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Forecast Method Info">
+                                    <span>Method</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                                <a href="evaluation.php" class="btn btn-secondary px-4 gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Forecast Evaluation</span>
+                                </a>
+                                <button onclick="generateForecast()" id="generateBtn" class="btn btn-primary gap-2">
+                                    <svg id="btnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span id="btnText">Generate Forecast</span>
+                                </button>
+                            </div>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Simple Moving Average &middot; Last 30 Days &rarr; Next 30 Days &middot; Based on Actual Sales</span>
+                            <?php if ($generated): ?>
+                                <span class="text-xs text-indigo-500 mt-1">Last updated: <?= date('Y-m-d H:i:s') ?></span>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <?php if ($generated): ?>
@@ -426,7 +387,7 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                     </svg>
                                 </div>
                                 <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">No Forecast Data</h2>
-                                <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Generate a forecast to predict future demand based on your sales history. The algorithm analyzes the last 30 days of sales data.</p>
+                                <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Generate a forecast to predict future product demand based on your latest sales history.</p>
                                 <button onclick="generateForecast()" id="generateBtnEmpty" class="btn btn-primary btn-lg gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -438,60 +399,46 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                     <?php else: ?>
 
                         <!-- Dashboard Stats -->
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div class="stat-card bg-white rounded-xl border border-gray-200 p-5 fade-in">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 mb-6">
+                            <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl shadow-md border border-indigo-100 dark:border-indigo-800/50 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-in">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Expected Demand</p>
-                                        <p class="text-xl font-bold text-indigo-600 mt-0.5"><?= number_format($total_forecast) ?></p>
-                                        <p class="text-[11px] text-gray-400">units (30 days)</p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= number_format($total_forecast) ?></p>
+                                        <p class="text-sm text-indigo-700 dark:text-indigo-300">Expected Demand</p>
+                                        <p class="text-[11px] text-indigo-600/70 dark:text-indigo-400/70 mt-0.5">units (next 30 days)</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="stat-card bg-white rounded-xl border border-gray-200 p-5 fade-in" style="animation-delay: 0.05s">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-red-50 dark:bg-red-900/30 rounded-2xl shadow-md border border-red-100 dark:border-red-800/50 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-in" style="animation-delay: 0.05s">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">High Demand</p>
-                                        <p class="text-xl font-bold text-red-600 mt-0.5"><?= $high_demand ?></p>
-                                        <p class="text-[11px] text-gray-400">products</p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= $high_demand ?></p>
+                                        <p class="text-sm text-red-700 dark:text-red-300">High Demand</p>
+                                        <p class="text-[11px] text-red-600/70 dark:text-red-400/70 mt-0.5">products</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="stat-card bg-white rounded-xl border border-gray-200 p-5 fade-in" style="animation-delay: 0.1s">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="bg-amber-50 dark:bg-amber-900/30 rounded-2xl shadow-md border border-amber-100 dark:border-amber-800/50 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-in" style="animation-delay: 0.1s">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Need Restock</p>
-                                        <p class="text-xl font-bold text-amber-600 mt-0.5"><?= $need_restock ?></p>
-                                        <p class="text-[11px] text-gray-400">products</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="stat-card bg-white rounded-xl border border-gray-200 p-5 fade-in" style="animation-delay: 0.15s">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Forecast Accuracy</p>
-                                        <p class="text-xl font-bold <?= $accuracy_class ?> mt-0.5"><?= $accuracy_display ?></p>
-                                        <p class="text-[11px] text-gray-400"><?= $accuracy !== null ? 'based on history' : 'no data yet' ?></p>
+                                        <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= $need_restock ?></p>
+                                        <p class="text-sm text-amber-700 dark:text-amber-300">Need Restock</p>
+                                        <p class="text-[11px] text-amber-600/70 dark:text-amber-400/70 mt-0.5">products</p>
                                     </div>
                                 </div>
                             </div>
@@ -505,7 +452,7 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                         </svg>
-                                        Sales Trend (30 Days)
+                                        Actual Sales — Last 30 Days
                                     </h2>
                                 </div>
                                 <div class="card-body">
@@ -518,7 +465,7 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                         <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                         </svg>
-                                        Product Demand Forecast
+                                        Top 10 Product Demand Forecast
                                     </h2>
                                 </div>
                                 <div class="card-body">
@@ -545,21 +492,19 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                     <table class="data-table w-full">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
                                                 <th>Product</th>
                                                 <th class="num">Current Stock</th>
-                                                <th class="num">Forecast Qty</th>
-                                                <th class="num">Recommended</th>
+                                                <th class="num">Forecast Demand</th>
+                                                <th class="num">Shortage</th>
                                                 <th class="center">Demand</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $hd_count = 1;
-                                            while ($h = mysqli_fetch_assoc($high_demand_products)): 
+                                            <?php
+                                            while ($h = mysqli_fetch_assoc($high_demand_products)):
                                                 $rec_purch = max(0, $h['forecast_quantity'] - $h['current_stock']);
                                             ?>
                                                 <tr>
-                                                    <td class="text-gray-400 font-mono"><?= $hd_count++ ?></td>
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($h['product_name']) ?></td>
                                                     <td class="num <?= $h['current_stock'] <= $h['reorder_level'] ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $h['current_stock'] ?></td>
                                                     <td class="num font-bold text-red-600"><?= number_format($h['forecast_quantity']) ?></td>
@@ -591,29 +536,24 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                     <table class="data-table w-full">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
                                                 <th>Product</th>
                                                 <th class="num">Current Stock</th>
-                                                <th class="num">Min Stock</th>
+                                                <th class="num">Reorder Level</th>
                                                 <th class="num">Forecast Demand</th>
-                                                <th class="num">Recommended</th>
-                                                <th class="num">Shortage</th>
+                                                <th class="num">Recommended Purchase</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $rs_count = 1;
+                                            <?php
                                             while ($l = mysqli_fetch_assoc($need_restock_products)):
                                                 $rec_purch = max(0, $l['forecast_quantity'] - $l['current_stock']);
-                                                $shortage = $rec_purch;
                                             ?>
                                                 <tr>
-                                                    <td class="text-gray-400 font-mono"><?= $rs_count++ ?></td>
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($l['product_name']) ?></td>
                                                     <td class="num <?= $l['current_stock'] <= $l['reorder_level'] ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $l['current_stock'] ?></td>
                                                     <td class="num text-gray-500 dark:text-gray-400"><?= $l['reorder_level'] ?></td>
                                                     <td class="num font-semibold text-amber-600"><?= number_format($l['forecast_quantity']) ?></td>
                                                     <td class="num font-semibold text-emerald-600"><?= number_format($rec_purch) ?></td>
-                                                    <td class="num font-bold text-red-600"><?= number_format($shortage) ?></td>
                                                 </tr>
                                             <?php endwhile; ?>
                                         </tbody>
@@ -636,41 +576,48 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                 <table class="data-table w-full">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
-                                            <th>Product Name</th>
+                                            <th>Product</th>
                                             <th class="num">Current Stock</th>
-                                            <th class="num">Forecast Quantity</th>
-                                            <th class="num">Recommended Purchase Qty</th>
+                                            <th class="num">30-Day Forecast</th>
+                                            <th class="num">Recommended Purchase</th>
+                                            <th class="center">Demand</th>
                                             <th class="center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                         $all_forecasts = mysqli_query($conn, "
-                                        SELECT p.product_name, p.current_stock, p.reorder_level, f.forecast_quantity, f.demand_level, f.recommended_stock
-                                        FROM forecasts f
-                                        JOIN products p ON f.product_id = p.id
-                                        WHERE f.forecast_date = CURDATE()
-                                        ORDER BY f.forecast_quantity DESC
-                                    ");
-                                        $af_count = 1;
-                                        if (mysqli_num_rows($all_forecasts) > 0): while ($f = mysqli_fetch_assoc($all_forecasts)):
+                                            SELECT p.product_name, p.current_stock, p.reorder_level, f.forecast_quantity, f.demand_level, f.recommended_stock
+                                            FROM forecasts f
+                                            JOIN products p ON f.product_id = p.id
+                                            WHERE f.forecast_date = CURDATE()
+                                            ORDER BY f.forecast_quantity DESC
+                                        ");
+                                        if (mysqli_num_rows($all_forecasts) > 0):
+                                            $index = 0;
+                                            while ($f = mysqli_fetch_assoc($all_forecasts)):
                                                 $current_stock = (int)$f['current_stock'];
                                                 $reorder_level = (int)$f['reorder_level'];
                                                 $forecast_qty = (int)$f['forecast_quantity'];
                                                 $recommended_purchase = max(0, $forecast_qty - $current_stock);
                                                 $insufficient = ($f['demand_level'] === 'Insufficient');
                                                 $needs_reorder = ($current_stock <= $reorder_level) && !$insufficient;
+
+                                                $hidden = $index >= 10 ? 'hidden forecast-extra-row' : '';
+                                                $row_class = $needs_reorder ? 'bg-red-50 dark:bg-red-900/10' : '';
+                                                $combined_class = trim("$row_class $hidden");
                                         ?>
-                                                <tr class="<?= $needs_reorder ? 'bg-red-50 dark:bg-red-900/10' : '' ?>">
-                                                    <td class="text-gray-400 font-mono"><?= $af_count++ ?></td>
+                                                <tr class="<?= $combined_class ?>">
                                                     <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($f['product_name']) ?></td>
                                                     <td class="num <?= $current_stock < 5 ? 'text-red-600 font-bold' : 'text-gray-700 dark:text-gray-300' ?>"><?= $current_stock ?></td>
                                                     <?php if ($insufficient): ?>
-                                                        <td colspan="2" class="text-center text-gray-500 text-sm italic py-2">Insufficient historical data</td>
+                                                        <td colspan="3" class="text-center text-gray-500 text-sm italic py-2">Insufficient historical data</td>
                                                     <?php else: ?>
                                                         <td class="num font-semibold"><?= number_format($forecast_qty) ?></td>
                                                         <td class="num font-bold <?= $needs_reorder ? 'text-red-600' : 'text-gray-500' ?>"><?= number_format($recommended_purchase) ?></td>
+                                                        <td class="center">
+                                                            <span class="badge <?= $f['demand_level'] === 'High' ? 'badge-danger' : ($f['demand_level'] === 'Medium' ? 'badge-warning' : 'badge-success') ?>"><span class="badge-dot"></span> <?= $f['demand_level'] ?></span>
+                                                        </td>
                                                     <?php endif; ?>
                                                     <td class="center">
                                                         <?php if ($insufficient): ?>
@@ -682,7 +629,9 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
-                                            <?php endwhile;
+                                            <?php
+                                                $index++;
+                                            endwhile;
                                         else: ?>
                                             <tr>
                                                 <td colspan="6" class="text-center py-8 text-gray-400">No forecast data. Click "Generate Forecast" to start.</td>
@@ -691,108 +640,69 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                                     </tbody>
                                 </table>
                             </div>
+                            <?php if (isset($all_forecasts) && mysqli_num_rows($all_forecasts) > 10): ?>
+                                <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 flex justify-center">
+                                    <button type="button" id="viewAllForecasts" onclick="toggleAllForecasts()" class="btn btn-secondary px-6 font-medium bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                                        View All
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
-                        <!-- Completed Forecasts Accuracy -->
-                        <div class="card mt-6">
-                            <div class="card-header">
-                                <h2 class="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Completed Forecasts (Accuracy Report)
-                                </h2>
-                            </div>
-                            <div class="table-wrap">
-                                <table class="data-table w-full">
-                                    <thead>
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Forecast Date</th>
-                                            <th class="num">Eval End</th>
-                                            <th class="num">Forecast Qty</th>
-                                            <th class="num">Actual Sold</th>
-                                            <th class="num">Abs Error</th>
-                                            <th class="num">Error %</th>
-                                            <th class="num">Accuracy %</th>
-                                            <th class="center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (count($completed_forecasts) > 0): ?>
-                                            <?php foreach ($completed_forecasts as $c): ?>
-                                                <tr>
-                                                    <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($c['product_name']) ?></td>
-                                                    <td class="text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($c['forecast_date'])) ?></td>
-                                                    <td class="num text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($c['evaluation_end'])) ?></td>
-                                                    <td class="num font-semibold text-indigo-600"><?= number_format($c['forecast_quantity']) ?></td>
-                                                    <td class="num font-semibold text-emerald-600"><?= number_format($c['actual_sold']) ?></td>
-                                                    <td class="num font-bold text-red-600"><?= number_format($c['error']) ?></td>
-                                                    <td class="num font-bold text-red-500"><?= $c['error_percentage'] === 100 && $c['actual_sold'] == 0 && $c['forecast_quantity'] > 0 ? 'N/A' : number_format($c['error_percentage'], 2) . '%' ?></td>
-                                                    <td class="num font-bold <?= $c['accuracy'] >= 70 ? 'text-emerald-600' : ($c['accuracy'] >= 50 ? 'text-amber-600' : 'text-red-600') ?>"><?= number_format($c['accuracy'], 2) ?>%</td>
-                                                    <td class="center">
-                                                        <span class="badge badge-success" style="background-color: #d1fae5; color: #047857;"><span class="badge-dot" style="background-color: #10b981;"></span> Completed</span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <tr>
-                                                <td colspan="8" class="text-center py-8 text-gray-400">No completed forecasts available yet.</td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Pending Forecasts -->
-                        <div class="card mt-6 mb-6">
-                            <div class="card-header">
-                                <h2 class="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Pending Forecasts
-                                </h2>
-                            </div>
-                            <div class="table-wrap">
-                                <table class="data-table w-full">
-                                    <thead>
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Forecast Date</th>
-                                            <th class="num">Forecast Qty</th>
-                                            <th class="num">Evaluation End Date</th>
-                                            <th class="center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (count($pending_forecasts) > 0): ?>
-                                            <?php foreach ($pending_forecasts as $p): ?>
-                                                <tr>
-                                                    <td class="font-semibold text-gray-900 dark:text-gray-100"><?= htmlspecialchars($p['product_name']) ?></td>
-                                                    <td class="text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($p['forecast_date'])) ?></td>
-                                                    <td class="num font-semibold text-indigo-600"><?= number_format($p['forecast_quantity']) ?></td>
-                                                    <td class="num text-gray-500 dark:text-gray-400"><?= date('Y-m-d', strtotime($p['evaluation_end'])) ?></td>
-                                                    <td class="center">
-                                                        <span class="badge badge-warning" style="background-color: #fef3c7; color: #b45309;"><span class="badge-dot" style="background-color: #f59e0b;"></span> Pending</span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <tr>
-                                                <td colspan="5" class="text-center py-8 text-gray-400">No pending forecasts.</td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    <?php endif; ?>
                 </div>
-            </main>
+
         </div>
+
+        <!-- Forecast Method Modal -->
+        <div id="methodModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 dark:bg-black/50 backdrop-blur-sm">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden fade-in">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Forecast Method
+                    </h3>
+                    <button type="button" onclick="document.getElementById('methodModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                        <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Method:</strong> 
+                            <span>Simple Moving Average</span>
+                        </li>
+                        <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Historical Period:</strong> 
+                            <span>Last 30 Days</span>
+                        </li>
+                        <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Forecast Period:</strong> 
+                            <span>Next 30 Days</span>
+                        </li>
+                        <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Data Source:</strong> 
+                            <span>Actual Sales</span>
+                        </li>
+                        <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Update:</strong> 
+                            <span>Generated using the latest available sales data</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 flex justify-end">
+                    <button type="button" onclick="document.getElementById('methodModal').classList.add('hidden')" class="btn btn-primary px-6">Close</button>
+                </div>
+            </div>
+        </div>
+
+    <?php endif; ?>
+    </div>
+    </main>
+    </div>
     </div>
 
     <?php include "../includes/toast.php"; ?>
@@ -918,58 +828,42 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                     data: {
                         labels: <?= json_encode($chart_labels) ?>,
                         datasets: [{
-                                label: 'Historical Actual Demand',
-                                data: <?= json_encode($chart_historical) ?>,
-                                backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                                borderColor: '#10b981',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                            },
-                            {
-                                label: 'Forecast Demand',
-                                data: <?= json_encode($chart_forecast) ?>,
-                                backgroundColor: 'rgba(245, 158, 11, 0.7)',
-                                borderColor: '#f59e0b',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                            },
-                            {
-                                label: 'Current Stock',
-                                data: <?= json_encode($chart_current) ?>,
-                                backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                                borderColor: '#6366f1',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                            }
-                        ]
+                            label: 'Forecast Demand',
+                            data: <?= json_encode($chart_forecast) ?>,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                        }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
                         plugins: {
                             legend: {
-                                position: 'top',
-                                labels: {
-                                    boxWidth: 12,
-                                    padding: 10
-                                }
+                                display: false
                             },
                             tooltip: {
                                 callbacks: {
-                                    label: (ctx) => ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString() + ' units'
+                                    label: (ctx) => 'Forecast Demand: ' + Number(ctx.raw).toLocaleString() + ' units'
                                 }
                             }
                         },
                         scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    autoSkip: false
+                                }
+                            },
                             y: {
                                 beginAtZero: true,
                                 grid: {
                                     color: 'rgba(0,0,0,0.05)'
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
                                 },
                                 ticks: {
                                     maxTicksLimit: 10
@@ -980,7 +874,22 @@ while ($p = mysqli_fetch_assoc($pending_query)) {
                 });
             <?php endif; ?>
         <?php endif; ?>
+
+        function toggleAllForecasts() {
+            const rows = document.querySelectorAll('.forecast-extra-row');
+            const button = document.getElementById('viewAllForecasts');
+
+            if (!rows.length || !button) return;
+
+            const isHidden = rows[0].classList.contains('hidden');
+
+            rows.forEach(row => {
+                row.classList.toggle('hidden', !isHidden);
+            });
+
+            button.textContent = isHidden ? 'Show Less' : 'View All';
+        }
     </script>
 </body>
 
-</html> 
+</html>
