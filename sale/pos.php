@@ -140,9 +140,7 @@ if (isset($_POST['complete_sale'])) {
             }
 
             if ($total_paid < $grand_total - 0.01) {
-                $error = "Payment amount is not enough.";
-            } elseif ($payment_method !== 'Cash' && $total_paid > $grand_total + 0.01) {
-                $error = "Payment amount exceeds total.";
+                $error = "Insufficient payment.";
             } else {
                 $invoice_no = generateInvoiceNo($conn);
                 $user_id = $_SESSION['user_id'] ?? null;
@@ -610,7 +608,7 @@ $page_title = "New Sale (POS)";
                             <span class="font-bold text-indigo-600" id="totalPaidDisplay">0 Ks</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="font-semibold text-gray-600">Balance</span>
+                            <span class="font-semibold text-gray-600">Change Amount</span>
                             <span class="font-bold" id="balanceDisplay">0 Ks</span>
                         </div>
                         <div id="paymentError" class="text-red-600 text-xs font-medium hidden"></div>
@@ -750,27 +748,22 @@ $page_title = "New Sale (POS)";
             const errorEl = document.getElementById('paymentError');
             const btn = document.getElementById('completeSaleBtn');
 
-            balanceEl.textContent = Math.abs(balance).toLocaleString() + ' Ks';
-
-            if (Math.abs(balance) < 0.01) {
+            if (balance < 0) {
+                balanceEl.textContent = '0 Ks';
+                balanceEl.className = 'font-bold text-red-600';
+                errorEl.textContent = 'Insufficient payment.';
+                errorEl.classList.remove('hidden');
+                btn.disabled = true;
+            } else if (Math.abs(balance) < 0.01) {
+                balanceEl.textContent = '0 Ks';
                 balanceEl.className = 'font-bold text-emerald-600';
                 errorEl.classList.add('hidden');
                 btn.disabled = false;
-            } else if (balance < 0) {
-                balanceEl.className = 'font-bold text-red-600';
-                errorEl.textContent = 'Payment amount is not enough.';
-                errorEl.classList.remove('hidden');
-                btn.disabled = true;
-            } else if (method === 'Cash') {
-                balanceEl.className = 'font-bold text-amber-600';
-                errorEl.textContent = 'Payment amount exceeds total (change: ' + balance.toLocaleString() + ' Ks)';
-                errorEl.classList.remove('hidden');
-                btn.disabled = false;
             } else {
-                balanceEl.className = 'font-bold text-red-600';
-                errorEl.textContent = 'Payment amount exceeds total.';
-                errorEl.classList.remove('hidden');
-                btn.disabled = true;
+                balanceEl.textContent = balance.toLocaleString() + ' Ks';
+                balanceEl.className = 'font-bold text-amber-600';
+                errorEl.classList.add('hidden');
+                btn.disabled = false;
             }
         }
 

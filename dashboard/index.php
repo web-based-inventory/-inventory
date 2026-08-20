@@ -16,8 +16,8 @@ $low_stock_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c 
 if ($role === 'admin') {
     $total_categories = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM categories WHERE status='Active'"))['c'];
     $total_users = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS c FROM users"))['c'];
-    $today_revenue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount),0) AS c FROM sales WHERE DATE(created_at)=CURDATE()"))['c'];
-    $monthly_revenue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount),0) AS c FROM sales WHERE MONTH(created_at)=MONTH(CURDATE()) AND YEAR(created_at)=YEAR(CURDATE())"))['c'];
+    $today_revenue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount),0) AS c FROM sales WHERE DATE(created_at)=CURDATE() AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)"))['c'];
+    $monthly_revenue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount),0) AS c FROM sales WHERE MONTH(created_at)=MONTH(CURDATE()) AND YEAR(created_at)=YEAR(CURDATE()) AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)"))['c'];
     $today_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE DATE(s.created_at)=CURDATE()"))['c'];
     $monthly_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE MONTH(s.created_at)=MONTH(CURDATE()) AND YEAR(s.created_at)=YEAR(CURDATE())"))['c'];
     $yearly_profit = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(sd.profit),0) AS c FROM sale_details sd JOIN sales s ON sd.sale_id=s.id WHERE YEAR(s.created_at)=YEAR(CURDATE())"))['c'];
@@ -29,7 +29,7 @@ if ($role === 'admin') {
 
     // Sales overview last 7 days
     $sales_chart_rows = [];
-    $sc_res = mysqli_query($conn, "SELECT DATE(created_at) AS d, COUNT(*) AS orders, COALESCE(SUM(total_amount),0) AS revenue FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY DATE(created_at) ORDER BY d");
+    $sc_res = mysqli_query($conn, "SELECT DATE(created_at) AS d, COUNT(*) AS orders, COALESCE(SUM(total_amount),0) AS revenue FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id) GROUP BY DATE(created_at) ORDER BY d");
     while ($r = mysqli_fetch_assoc($sc_res)) $sales_chart_rows[] = $r;
 
     // Top selling products today
@@ -39,7 +39,7 @@ if ($role === 'admin') {
 
     // Recent sales
     $recent_sales = [];
-    $rs_res = mysqli_query($conn, "SELECT s.invoice_no, s.subtotal, sp.payment_method, s.created_at, u.name AS user_name FROM sales s LEFT JOIN users u ON s.user_id=u.id LEFT JOIN sale_payments sp ON sp.id = (SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1) ORDER BY s.created_at DESC LIMIT 5");
+    $rs_res = mysqli_query($conn, "SELECT s.invoice_no, s.subtotal, sp.payment_method, s.created_at, u.name AS user_name FROM sales s LEFT JOIN users u ON s.user_id=u.id LEFT JOIN sale_payments sp ON sp.id = (SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1) WHERE EXISTS (SELECT 1 FROM sale_details WHERE sale_id = s.id) ORDER BY s.created_at DESC LIMIT 5");
     while ($r = mysqli_fetch_assoc($rs_res)) $recent_sales[] = $r;
 }
 
@@ -69,16 +69,16 @@ if ($role === 'staff') {
     while ($r = mysqli_fetch_assoc($si_res)) $stock_in_chart[] = $r;
 
     $stock_out_chart = [];
-    $so_res = mysqli_query($conn, "SELECT DATE(created_at) AS d, COUNT(*) AS cnt, COALESCE(SUM(total_amount),0) AS total FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) GROUP BY DATE(created_at) ORDER BY d");
+    $so_res = mysqli_query($conn, "SELECT DATE(created_at) AS d, COUNT(*) AS cnt, COALESCE(SUM(total_amount),0) AS total FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id) GROUP BY DATE(created_at) ORDER BY d");
     while ($r = mysqli_fetch_assoc($so_res)) $stock_out_chart[] = $r;
 }
 
 // ── Cashier-only Queries ──
 if ($role === 'cashier') {
-    $today_stats = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS orders, COALESCE(SUM(total_amount),0) AS revenue FROM sales WHERE DATE(created_at)=CURDATE()"));
+    $today_stats = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS orders, COALESCE(SUM(total_amount),0) AS revenue FROM sales WHERE DATE(created_at)=CURDATE() AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)"));
 
     $recent_sales = [];
-    $rs_res = mysqli_query($conn, "SELECT s.invoice_no, s.subtotal, sp.payment_method, s.created_at FROM sales s LEFT JOIN sale_payments sp ON sp.id = (SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1) ORDER BY s.created_at DESC LIMIT 5");
+    $rs_res = mysqli_query($conn, "SELECT s.invoice_no, s.subtotal, sp.payment_method, s.created_at FROM sales s LEFT JOIN sale_payments sp ON sp.id = (SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1) WHERE EXISTS (SELECT 1 FROM sale_details WHERE sale_id = s.id) ORDER BY s.created_at DESC LIMIT 5");
     while ($r = mysqli_fetch_assoc($rs_res)) $recent_sales[] = $r;
 
     $best_products = [];

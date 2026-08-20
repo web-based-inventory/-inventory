@@ -208,7 +208,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             New Purchase
                         </a>
                     </div>
-
+ 
                     <!-- Table -->
                     <div class="card overflow-hidden">
                         <div class="table-wrap overflow-x-auto">
@@ -224,7 +224,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                         <th class="center" style="width: 23%">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody> 
                                     <?php if (mysqli_num_rows($result) > 0): $count = 1;
                                         while ($row = mysqli_fetch_assoc($result)):
                                             $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
