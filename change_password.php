@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
     // Confirm password match
     if ($new_password !== $confirm_password) {
-        $errors[] = 'New password and confirmation do not match.';
+        $errors[] = 'New password and confirm password do not match.';
     }
 
     // Don't allow same password
@@ -56,16 +56,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
         if ($update->execute()) {
             $success = 'Password changed successfully.';
         } else {
-            $error = 'Failed to update password. Please try again.';
+            $error = 'Password change failed. Please try again.';
         }
         $update->close();
     } else {
-        $error = implode(' ', $errors);
+        $error = implode('<br>', $errors);
     }
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     <?php include "includes/theme-init.php"; ?>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body class="bg-gray-50 dark:bg-slate-900">
     <div class="flex min-h-screen">
         <?php include "includes/sidebar.php"; ?>
@@ -87,7 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ensure your account is using a strong password</p>
                         </div>
                         <div class="card-body">
-                            <form method="POST" class="space-y-5" data-form-guard="true">
+                            <div id="frontendError" class="hidden mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium"></div>
+                            <?php if ($success): ?>
+                                <div class="mb-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium">
+                                    <?= htmlspecialchars($success) ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($error): ?>
+                                <div class="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium">
+                                    <?= $error ?>
+                                </div>
+                            <?php endif; ?>
+                            <form method="POST" class="space-y-5" data-form-guard="true" onsubmit="return validatePasswords(event)">
                                 <!-- Current Password -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Current Password</label>
@@ -126,55 +139,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                             </form>
                         </div>
                     </div>
-
-                    <!-- Password Tips -->
-                    <div class="card mt-6">
-                        <div class="card-header">
-                            <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Password Tips</h2>
-                        </div>
-                        <div class="card-body">
-                            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                                <li class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Use at least 8 characters
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Mix uppercase, lowercase, numbers, and symbols
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Do not share your password with others
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    Use a different password for each account
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <script>
+        function validatePasswords(e) {
+            const newPass = document.querySelector('input[name="new_password"]').value;
+            const confirmPass = document.querySelector('input[name="confirm_password"]').value;
+            const errorDiv = document.getElementById('frontendError');
+
+            if (newPass !== confirmPass) {
+                e.preventDefault();
+                errorDiv.innerHTML = 'New password and confirm password do not match.';
+                errorDiv.classList.remove('hidden');
+                return false;
+            }
+            errorDiv.classList.add('hidden');
+            return true;
+        }
+    </script>
     <?php if ($success): ?>
-    <script>showToast('success', '<?= htmlspecialchars($success, ENT_QUOTES) ?>');</script>
+        <script>
+            showToast('success', '<?= htmlspecialchars($success, ENT_QUOTES) ?>');
+        </script>
     <?php endif; ?>
     <?php if ($error): ?>
-    <script>showToast('error', '<?= htmlspecialchars($error, ENT_QUOTES) ?>');</script>
+        <script>
+            showToast('error', '<?= htmlspecialchars(strip_tags($error), ENT_QUOTES) ?>');
+        </script>
     <?php endif; ?>
 
     <?php include "includes/toast.php"; ?>
     <?php include "includes/form_guard.php"; ?>
     <?php include "includes/footer.php"; ?>
 </body>
+
 </html>

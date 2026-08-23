@@ -601,7 +601,7 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                                                 $forecast_qty = (int)$f['forecast_quantity'];
                                                 $recommended_purchase = max(0, $forecast_qty - $current_stock);
                                                 $insufficient = ($f['demand_level'] === 'Insufficient');
-                                                $needs_reorder = ($current_stock <= $reorder_level) && !$insufficient;
+                                                $needs_reorder = ($current_stock < $forecast_qty) && !$insufficient;
 
                                                 $hidden = $index >= 10 ? 'hidden forecast-extra-row' : '';
                                                 $row_class = $needs_reorder ? 'bg-red-50 dark:bg-red-900/10' : '';
@@ -623,9 +623,9 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                                                         <?php if ($insufficient): ?>
                                                             <span class="badge badge-secondary" style="background-color: #f3f4f6; color: #6b7280;"><span class="badge-dot" style="background-color: #9ca3af;"></span> No Data</span>
                                                         <?php elseif ($needs_reorder): ?>
-                                                            <span class="badge badge-danger"><span class="badge-dot"></span> Reorder Required</span>
+                                                            <span class="badge badge-danger"><span class="badge-dot"></span> Need Restock</span>
                                                         <?php else: ?>
-                                                            <span class="badge badge-success"><span class="badge-dot"></span> Enough Stock</span>
+                                                            <span class="badge badge-success"><span class="badge-dot"></span> Sufficient</span>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
