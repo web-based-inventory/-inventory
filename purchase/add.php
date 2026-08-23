@@ -113,12 +113,23 @@ if (isset($_POST['save_purchase'])) {
                 $payment_status = 'Unpaid';
             }
 
+            // Cash actually applied to THIS purchase is capped at what the
+            // purchase owes. Any excess (advance_created) belongs to the
+            // supplier as advance credit — it is already recorded in full in
+            // supplier_payments, so it must NOT also be stored inside this
+            // purchase's purchase_payments row, otherwise the same money is
+            // counted twice and "Paid" exceeds the purchase amount.
+            $cash_applied = min($paid_amount, $effective_total);
+
             $user_id = (int)($_SESSION['user_id'] ?? 0);
             ensurePurchasePaymentColumns($conn);
 
             // ── Insert purchase record ──
+            // total_paid only ever counts money applied to THIS purchase
+            // (capped cash + advance credit), never the overpayment excess.
+            $purchase_total_paid = min($total, $total_paid);
             $ins_cols = "invoice_no, supplier_id, user_id, purchase_date, total_amount, total_paid, remaining_balance, payment_status";
-            $ins_vals = "'$invoice_no', '$supplier_id', $user_id, '$purchase_date', '$total', $total_paid, $remaining_balance, '$payment_status'";
+            $ins_vals = "'$invoice_no', '$supplier_id', $user_id, '$purchase_date', '$total', $purchase_total_paid, $remaining_balance, '$payment_status'";
             if (columnExists($conn, 'purchases', 'status')) {
                 $ins_cols .= ", status";
                 $ins_vals .= ", 'completed'";
@@ -136,27 +147,27 @@ if (isset($_POST['save_purchase'])) {
             $hasNotes = columnExists($conn, 'purchase_payments', 'notes');
             $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
 
-            $cash_amt = ($payment_method === 'Cash') ? $paid_amount : 0;
-            $kbz_amt = ($payment_method === 'KBZPay') ? $paid_amount : 0;
+            $cash_amt = ($payment_method === 'Cash') ? $cash_applied : 0;
+            $kbz_amt = ($payment_method === 'KBZPay') ? $cash_applied : 0;
 
             if ($paid_amount > 0.01 || $advance_applied > 0.01) {
                 if ($hasCash && $hasNotes) {
                     $cols = "purchase_id, payment_method, cash_amount, kbzpay_amount, $insAmtCol, remaining_balance, payment_status, payment_date, notes";
-                    $vals = "'$purchase_id', '$payment_method', $cash_amt, $kbz_amt, $paid_amount, $remaining_balance, '$payment_status', '$purchase_date', ''";
+                    $vals = "'$purchase_id', '$payment_method', $cash_amt, $kbz_amt, $cash_applied, $remaining_balance, '$payment_status', '$purchase_date', ''";
                     if ($hasAdvance) {
                         $cols .= ", advance_applied, advance_created";
                         $vals .= ", $advance_applied, $advance_created";
                     }
                 } elseif ($hasCash) {
                     $cols = "purchase_id, payment_method, cash_amount, kbzpay_amount, $insAmtCol, remaining_balance, payment_status, payment_date";
-                    $vals = "'$purchase_id', '$payment_method', $cash_amt, $kbz_amt, $paid_amount, $remaining_balance, '$payment_status', '$purchase_date'";
+                    $vals = "'$purchase_id', '$payment_method', $cash_amt, $kbz_amt, $cash_applied, $remaining_balance, '$payment_status', '$purchase_date'";
                     if ($hasAdvance) {
                         $cols .= ", advance_applied, advance_created";
                         $vals .= ", $advance_applied, $advance_created";
                     }
                 } else {
                     $cols = "purchase_id, payment_method, $insAmtCol, remaining_balance, payment_status, payment_date";
-                    $vals = "'$purchase_id', '$payment_method', $paid_amount, $remaining_balance, '$payment_status', '$purchase_date'";
+                    $vals = "'$purchase_id', '$payment_method', $cash_applied, $remaining_balance, '$payment_status', '$purchase_date'";
                     if ($hasAdvance) {
                         $cols .= ", advance_applied, advance_created";
                         $vals .= ", $advance_applied, $advance_created";
@@ -165,11 +176,21 @@ if (isset($_POST['save_purchase'])) {
                 mysqli_query($conn, "INSERT INTO purchase_payments($cols) VALUES($vals)");
             }
 
-            // NOTE: No supplier_ledger rows are inserted here. The supplier
-            // ledger is rebuilt on every Supplier Ledger page view by
-            // rebuildSupplierLedger() from purchases, purchase_payments, and
-            // supplier_payments, so it always reflects real-time data without
-            // double-counting advances.
+            // ── Insert supplier_payments record for the cash paid ──
+            // This ensures supplier_payments is the single source of truth for financial transactions.
+            if ($paid_amount > 0.01 && columnExists($conn, 'supplier_payments', 'supplier_id')) {
+                $hasNotesSP = columnExists($conn, 'supplier_payments', 'notes');
+                if ($hasNotesSP) {
+                    $sql_direct = "INSERT INTO supplier_payments 
+                        (supplier_id, payment_method, cash_amount, kbzpay_amount, paid_amount, ref_no, payment_date, notes)
+                        VALUES ($supplier_id, '$payment_method', $cash_amt, $kbz_amt, $paid_amount, '$invoice_no', '$purchase_date', '')";
+                } else {
+                    $sql_direct = "INSERT INTO supplier_payments 
+                        (supplier_id, payment_method, cash_amount, kbzpay_amount, paid_amount, ref_no, payment_date)
+                        VALUES ($supplier_id, '$payment_method', $cash_amt, $kbz_amt, $paid_amount, '$invoice_no', '$purchase_date')";
+                }
+                mysqli_query($conn, $sql_direct);
+            }
 
             // ── Insert product details ──
             foreach ($_SESSION['cart'] as $item) {
@@ -184,22 +205,17 @@ if (isset($_POST['save_purchase'])) {
                 $check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT selling_price FROM products WHERE id='$pid'"));
                 $sp = $check ? (float)$check['selling_price'] : 0;
 
-                if ($sp <= $price) {
-                    $recommended = calculateSellingPrice($conn, $price);
-                    mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price', selling_price = $recommended, price_update_required = 0 WHERE id='$pid'");
-                } else {
-                    mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price' WHERE id='$pid'");
-                }
+                mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price' WHERE id='$pid'");
             }
 
-            // ── Update supplier balance ──
+            // ── Update supplier balance & ledger ──
             recalcSupplierBalance($conn, $supplier_id);
+            rebuildSupplierLedger($conn, $supplier_id);
 
             $conn->commit();
             unset($_SESSION['cart']);
             header("Location: index.php?view_id=$purchase_id&success=" . urlencode("Purchase #$invoice_no created successfully."));
             exit;
-
         } catch (Exception $e) {
             $conn->rollback();
             $error_msg = 'Failed to create purchase: ' . $e->getMessage();
@@ -633,26 +649,26 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                         <span class="font-bold text-indigo-700 dark:text-indigo-400 text-lg" id="confirmTotalDue">0.00</span>
                     </div>
                     <div class="border-t border-indigo-200 dark:border-indigo-800 pt-2">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Payment Method</span>
-                        <span class="font-semibold text-gray-800 dark:text-gray-200" id="confirmMethod">Cash</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Total Paid</span>
-                        <span class="font-semibold text-emerald-600" id="confirmPaid">0.00</span>
-                    </div>
-                    <div id="confirmAdvanceRow" class="flex justify-between hidden">
-                        <span class="text-gray-600 dark:text-gray-400">Advance Applied</span>
-                        <span class="font-semibold text-blue-600" id="confirmAdvanceApplied">0.00</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">Remaining Balance</span>
-                        <span class="font-semibold" id="confirmBalance">0.00</span>
-                    </div>
-                    <div id="confirmAdvanceCreatedRow" class="flex justify-between hidden">
-                        <span class="text-gray-600 dark:text-gray-400">Advance Created</span>
-                        <span class="font-semibold text-blue-600" id="confirmAdvanceCreated">0.00</span>
-                    </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Payment Method</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-200" id="confirmMethod">Cash</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Total Paid</span>
+                            <span class="font-semibold text-emerald-600" id="confirmPaid">0.00</span>
+                        </div>
+                        <div id="confirmAdvanceRow" class="flex justify-between hidden">
+                            <span class="text-gray-600 dark:text-gray-400">Advance Applied</span>
+                            <span class="font-semibold text-blue-600" id="confirmAdvanceApplied">0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Remaining Balance</span>
+                            <span class="font-semibold" id="confirmBalance">0.00</span>
+                        </div>
+                        <div id="confirmAdvanceCreatedRow" class="flex justify-between hidden">
+                            <span class="text-gray-600 dark:text-gray-400">Advance Created</span>
+                            <span class="font-semibold text-blue-600" id="confirmAdvanceCreated">0.00</span>
+                        </div>
                     </div>
                     <div class="border-t border-indigo-200 dark:border-indigo-800 pt-2 flex justify-between">
                         <span class="font-bold text-gray-800 dark:text-gray-200">Payment Status</span>
@@ -662,7 +678,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             </div>
 
             <!-- Warning -->
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-5">
+            <!-- <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-5">
                 <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -672,7 +688,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                         <p class="text-xs text-amber-600 dark:text-amber-500 mt-1">This action will save the purchase, update product stock automatically, record the payment, and cannot be undone.</p>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Buttons -->
             <div class="flex gap-3">
@@ -842,9 +858,13 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 // Show previous balance if positive
                 if (supData.balance > 0) {
                     selectedPrevBalance = supData.balance;
-                    prevBalEl.textContent = parseFloat(selectedPrevBalance).toLocaleString('en', {minimumFractionDigits: 2});
+                    prevBalEl.textContent = parseFloat(selectedPrevBalance).toLocaleString('en', {
+                        minimumFractionDigits: 2
+                    });
                     prevNewTotalEl.textContent = '0.00';
-                    prevTotalDueEl.textContent = parseFloat(selectedPrevBalance).toLocaleString('en', {minimumFractionDigits: 2});
+                    prevTotalDueEl.textContent = parseFloat(selectedPrevBalance).toLocaleString('en', {
+                        minimumFractionDigits: 2
+                    });
                     section.classList.remove('hidden');
                 } else {
                     section.classList.add('hidden');
@@ -855,7 +875,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 // Show advance balance if positive
                 if (supData.advance > 0) {
                     selectedAdvance = supData.advance;
-                    advanceBalEl.textContent = parseFloat(selectedAdvance).toLocaleString('en', {minimumFractionDigits: 2}) + ' MMK';
+                    advanceBalEl.textContent = parseFloat(selectedAdvance).toLocaleString('en', {
+                        minimumFractionDigits: 2
+                    }) + ' MMK';
                     applyAdvanceCb.checked = true;
                     advanceSection.classList.remove('hidden');
                 } else {
@@ -907,9 +929,19 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 const sp = sellingPrices[productId] || 0;
 
                 if (sp > 0 && purchasePrice === sp) {
-                    equalWarnings.push({ id: productId, name: productName, purchase: purchasePrice, selling: sp });
+                    equalWarnings.push({
+                        id: productId,
+                        name: productName,
+                        purchase: purchasePrice,
+                        selling: sp
+                    });
                 } else if (sp > 0 && purchasePrice > sp) {
-                    lossWarnings.push({ id: productId, name: productName, purchase: purchasePrice, selling: sp });
+                    lossWarnings.push({
+                        id: productId,
+                        name: productName,
+                        purchase: purchasePrice,
+                        selling: sp
+                    });
                 }
             });
 
@@ -1002,7 +1034,12 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 const row = document.querySelector('.data-table tbody tr[data-product-id="' + id + '"]');
                 const name = row ? row.querySelector('td:nth-child(2)')?.textContent?.trim() : 'Product';
                 const purchasePrice = row ? parseFloat(row.querySelector('td:nth-child(4)')?.textContent?.replace(/,/g, '')) || 0 : 0;
-                allWarnings.push({ id: id, name: name, purchase: purchasePrice, selling: sp });
+                allWarnings.push({
+                    id: id,
+                    name: name,
+                    purchase: purchasePrice,
+                    selling: sp
+                });
             });
 
             let html = '';
@@ -1049,8 +1086,13 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 try {
                     const resp = await fetch('../ajax/update_selling_price.php', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ product_id: parseInt(productId), selling_price: newPrice })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: parseInt(productId),
+                            selling_price: newPrice
+                        })
                     });
                     const data = await resp.json();
                     if (data.success) {
@@ -1090,8 +1132,12 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             // Previous balance info
             const totalDue = selectedPrevBalance + grand;
             if (selectedPrevBalance > 0) {
-                document.getElementById('prevNewTotal').textContent = grand.toLocaleString('en', {minimumFractionDigits: 2});
-                document.getElementById('prevTotalDue').textContent = totalDue.toLocaleString('en', {minimumFractionDigits: 2});
+                document.getElementById('prevNewTotal').textContent = grand.toLocaleString('en', {
+                    minimumFractionDigits: 2
+                });
+                document.getElementById('prevTotalDue').textContent = totalDue.toLocaleString('en', {
+                    minimumFractionDigits: 2
+                });
             }
 
             // Advance calculation
@@ -1104,11 +1150,15 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             let advanceToApply = 0;
             if (applyAdvance && selectedAdvance > 0 && grand > 0) {
                 advanceToApply = Math.min(selectedAdvance, grand);
-                advanceAppliedEl.textContent = advanceToApply.toLocaleString('en', {minimumFractionDigits: 2});
+                advanceAppliedEl.textContent = advanceToApply.toLocaleString('en', {
+                    minimumFractionDigits: 2
+                });
                 advanceAppliedSection.classList.remove('hidden');
 
                 const remainingAfter = grand - advanceToApply;
-                remainingAfterAdvanceEl.textContent = remainingAfter.toLocaleString('en', {minimumFractionDigits: 2});
+                remainingAfterAdvanceEl.textContent = remainingAfter.toLocaleString('en', {
+                    minimumFractionDigits: 2
+                });
                 remainingAfterAdvanceSection.classList.remove('hidden');
             } else {
                 advanceAppliedSection.classList.add('hidden');
@@ -1300,7 +1350,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 
             // Disable modal buttons
             const modalBtns = document.querySelectorAll('#confirmModal button');
-            modalBtns.forEach(b => { b.disabled = true; });
+            modalBtns.forEach(b => {
+                b.disabled = true;
+            });
 
             document.getElementById('purchaseForm').submit();
         }

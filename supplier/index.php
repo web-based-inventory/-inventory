@@ -12,6 +12,49 @@ recalcAllSupplierBalances($conn);
 
 
 
+// REPAIR ALL SUPPLIER BALANCES & LEDGERS
+
+if (isset($_GET['repair'])) {
+    protectSuppliers('edit');
+
+    // 0. SAFETY SNAPSHOT — save current data before touching anything.
+    //    If the snapshot cannot be written, refuse to repair.
+    $backup_file = backupTablesToSql($conn, [
+        'suppliers',
+        'purchases',
+        'purchase_payments',
+        'supplier_payments',
+        'supplier_ledger'
+    ]);
+    if ($backup_file === false) {
+        header("Location:index.php?error=" . urlencode("Could not create the pre-repair backup (check backups/ folder permissions). Repair aborted - nothing was changed."));
+        exit;
+    }
+
+    // 1. Re-derive per-purchase tracking (total_paid / remaining / status)
+    //    from purchase_payments real-time data.
+    $p_res = mysqli_query($conn, "SELECT id FROM purchases");
+    while ($p = mysqli_fetch_assoc($p_res)) {
+        updatePurchasePaymentStatus($conn, (int)$p['id']);
+    }
+
+    createSupplierLedgerTable($conn);
+
+    // 2. For every supplier: recompute balance columns from purchases +
+    //    supplier_payments (single source of truth), then rebuild the
+    //    ledger from the same sources so both always match.
+    $s_res = mysqli_query($conn, "SELECT id FROM suppliers");
+    while ($s = mysqli_fetch_assoc($s_res)) {
+        $sid = (int)$s['id'];
+        recalcSupplierBalance($conn, $sid);
+        rebuildSupplierLedger($conn, $sid);
+    }
+
+    $backup_name = basename($backup_file);
+    header("Location:index.php?success=" . urlencode("All supplier balances and ledgers have been repaired. Backup saved as backups/$backup_name"));
+    exit;
+}
+
 // DELETE SUPPLIER
 
 
@@ -244,13 +287,11 @@ $result = mysqli_query($conn, $sql);
                         <table class="data-table w-full">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th class="w-[6%]">#</th>
                                     <th>Supplier</th>
                                     <th>Contact Person</th>
-                                    <th>Phone</th>
+                                    <th class="w-[8%]">Phone</th>
                                     <th class="center">Status</th>
-                                    <th class="center">Outstanding Balance</th>
-                                    <th class="center">Advance Credit</th>
                                     <th class="center">Action</th>
                                 </tr>
                             </thead>
@@ -271,7 +312,7 @@ $result = mysqli_query($conn, $sql);
                                                 <span class="badge badge-danger"><span class="badge-dot"></span> Inactive</span>
                                             <?php } ?>
                                         </td>
-                                        <td class="center">
+                                        <!-- <td class="center">
                                             <?php
                                             $outstanding = (float)($row['outstanding_balance'] ?? 0);
                                             if ($outstanding > 0) { ?>
@@ -288,7 +329,7 @@ $result = mysqli_query($conn, $sql);
                                             <?php } else { ?>
                                                 <span class="text-sm text-gray-500 dark:text-gray-400">0 MMK</span>
                                             <?php } ?>
-                                        </td>
+                                        </td> -->
                                         <td class="center">
                                             <div class="actions flex gap-1">
                                                 <a href="view.php?id=<?= $row['id'] ?>" class="btn btn-sm bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-lg">View</a>

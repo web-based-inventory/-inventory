@@ -44,15 +44,15 @@ if (isset($conn)) {
         }
     }
 
-    // Price update required notifications (admin only)
+    // Profit/Loss alerts (admin only)
     $pu_count = 0;
     if ($role === 'admin') {
-        $pu_count_result = mysqli_query($conn, "SELECT COUNT(*) AS count FROM products WHERE price_update_required = 1 AND status='Active'");
+        $pu_count_result = mysqli_query($conn, "SELECT COUNT(*) AS count FROM products WHERE selling_price <= purchase_price AND purchase_price > 0 AND status='Active'");
         if ($pu_count_result) {
             $pu_count = (int)mysqli_fetch_assoc($pu_count_result)['count'];
         }
         if ($pu_count > 0) {
-            $pu_result = mysqli_query($conn, "SELECT id, product_name, purchase_price, selling_price FROM products WHERE price_update_required = 1 AND status='Active' ORDER BY product_name ASC LIMIT 10");
+            $pu_result = mysqli_query($conn, "SELECT id, product_name, purchase_price, selling_price FROM products WHERE selling_price <= purchase_price AND purchase_price > 0 AND status='Active' ORDER BY product_name ASC LIMIT 10");
             while ($row = mysqli_fetch_assoc($pu_result)) {
                 $price_update_products[] = $row;
             }
@@ -292,7 +292,7 @@ if (isset($conn)) {
                                 <div class="px-4 py-2 bg-red-50/60 dark:bg-red-500/5">
                                     <p class="text-[11px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 flex items-center gap-1.5">
                                         <span class="w-2 h-2 rounded-full bg-red-400 flex-shrink-0"></span>
-                                        Loss Risk
+                                        🔴 Loss Risk
                                         <span class="ml-auto bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full text-[10px] font-bold"><?= count($sp_items) ?></span>
                                     </p>
                                 </div>
@@ -311,7 +311,7 @@ if (isset($conn)) {
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 truncate"><?= htmlspecialchars($item['product_name']) ?></p>
                                                 <div class="flex items-center gap-2 mt-1">
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">Loss Risk</span>
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">🔴 Loss Risk</span>
                                                 </div>
                                                 <div class="flex items-center gap-3 mt-1.5 text-[11px]">
                                                     <span class="text-gray-500 dark:text-slate-400">Purchase: <span class="font-bold text-red-600 dark:text-red-400"><?= number_format($pp) ?> Ks</span></span>
@@ -331,7 +331,7 @@ if (isset($conn)) {
                                 <div class="px-4 py-2 bg-amber-50/60 dark:bg-amber-500/5">
                                     <p class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
                                         <span class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span>
-                                        No Profit
+                                        ⚠️ No Profit
                                         <span class="ml-auto bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full text-[10px] font-bold"><?= count($pp_items) ?></span>
                                     </p>
                                 </div>
@@ -350,7 +350,7 @@ if (isset($conn)) {
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 truncate"><?= htmlspecialchars($item['product_name']) ?></p>
                                                 <div class="flex items-center gap-2 mt-1">
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">No Profit</span>
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">⚠️ No Profit</span>
                                                 </div>
                                                 <div class="flex items-center gap-3 mt-1.5 text-[11px]">
                                                     <span class="text-gray-500 dark:text-slate-400">Purchase: <span class="font-bold text-amber-600 dark:text-amber-400"><?= number_format($pp) ?> Ks</span></span>

@@ -56,7 +56,7 @@ while ($c = mysqli_fetch_assoc($completed_forecasts_query)) {
 
     $total_accuracy += $acc;
     $accuracy_count++;
-    
+
     if ($acc > $best_accuracy) {
         $best_accuracy = $acc;
     }
@@ -102,9 +102,17 @@ usort($all_evaluations, function ($a, $b) {
         .fade-in {
             animation: fadeIn 0.4s ease-out both;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -131,7 +139,7 @@ usort($all_evaluations, function ($a, $b) {
                     </div>
 
                     <!-- Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-5 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-6">
                         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 fade-in">
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -141,7 +149,7 @@ usort($all_evaluations, function ($a, $b) {
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Evaluated</p>
-                                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5"><?= $accuracy_count ?></p>
+                                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5">N/A</p>
                                     <p class="text-[11px] text-gray-400">Forecasts Completed</p>
                                 </div>
                             </div>
@@ -158,40 +166,6 @@ usort($all_evaluations, function ($a, $b) {
                                     <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Pending</p>
                                     <p class="text-xl font-bold text-gray-900 dark:text-white mt-0.5"><?= $pending_count ?></p>
                                     <p class="text-[11px] text-gray-400">Period Not Complete</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 fade-in" style="animation-delay: 0.1s">
-                            <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Avg Accuracy</p>
-                                    <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                                        <?= $accuracy_count > 0 ? number_format($average_accuracy, 1) . '%' : 'N/A' ?>
-                                    </p>
-                                    <p class="text-[11px] text-gray-400">Overall Performance</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 fade-in" style="animation-delay: 0.15s">
-                            <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Best Accuracy</p>
-                                    <p class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                                        <?= $accuracy_count > 0 ? number_format($best_accuracy, 1) . '%' : 'N/A' ?>
-                                    </p>
-                                    <p class="text-[11px] text-gray-400">Highest Score Achieved</p>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +212,7 @@ usort($all_evaluations, function ($a, $b) {
                                                     <td class="num text-gray-400">N/A</td>
                                                     <td class="num text-gray-400">Pending</td>
                                                     <td class="center">
-                                                        <span class="badge badge-warning"><span class="badge-dot"></span> Pending Data</span>
+                                                        <span class="badge badge-warning"><span class="badge-dot"></span> Pending</span>
                                                     </td>
                                                 <?php endif; ?>
                                             </tr>
@@ -259,4 +233,5 @@ usort($all_evaluations, function ($a, $b) {
     <?php include "../includes/toast.php"; ?>
     <?php include "../includes/footer.php"; ?>
 </body>
+
 </html>

@@ -198,10 +198,16 @@ function updatePurchasePaymentStatus($conn, $purchase_id) {
 
     $total_amount = (float)$purchase['total_amount'];
 
-    // total_paid = cash paid + advance credit applied
+    // total_paid = cash paid + advance credit applied,
+    // capped at the purchase total. Money beyond the purchase total belongs
+    // to the supplier as advance credit (supplier_payments) and must never
+    // be attributed to this purchase a second time.
     $sum_expr = $has_advance ? "SUM($amtCol + COALESCE(advance_applied, 0))" : "SUM($amtCol)";
     $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE($sum_expr, 0) AS total_paid FROM purchase_payments WHERE purchase_id = $purchase_id"));
     $total_paid = max(0, (float)$pay_res['total_paid']);
+    if ($total_paid > $total_amount) {
+        $total_paid = $total_amount;
+    }
 
     $remaining_balance = max(0, round($total_amount - $total_paid, 2));
 
@@ -239,19 +245,17 @@ function recalcSupplierBalance($conn, $supplier_id) {
     $purch_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount), 0) AS total FROM purchases WHERE supplier_id = $supplier_id"));
     $total_purchases = max(0, (float)$purch_res['total']);
 
-    // Total payments from purchase_payments (paid_amount only — advance_applied is NOT cash)
-    $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(pp.$amtCol), 0) AS total FROM purchase_payments pp INNER JOIN purchases p ON pp.purchase_id = p.id WHERE p.supplier_id = $supplier_id"));
-    $total_purchase_payments = max(0, (float)$pay_res['total']);
-
-    // Total direct payments from supplier_payments table (if exists)
-    $total_direct_payments = 0;
+    // Total payments from supplier_payments table acts as the SINGLE SOURCE OF TRUTH for cash paid to the supplier.
+    // We no longer sum purchase_payments to avoid double-counting.
+    $total_payments = 0;
     if (columnExists($conn, 'supplier_payments', 'supplier_id') && columnExists($conn, 'supplier_payments', 'paid_amount')) {
         $dp_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(paid_amount), 0) AS total FROM supplier_payments WHERE supplier_id = $supplier_id"));
-        $total_direct_payments = max(0, (float)$dp_res['total']);
+        $total_payments = max(0, (float)$dp_res['total']);
+    } else {
+        // Fallback for older schemas
+        $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(pp.$amtCol), 0) AS total FROM purchase_payments pp INNER JOIN purchases p ON pp.purchase_id = p.id WHERE p.supplier_id = $supplier_id"));
+        $total_payments = max(0, (float)$pay_res['total']);
     }
-
-    // Total payments = purchase payments + direct payments
-    $total_payments = $total_purchase_payments + $total_direct_payments;
 
     // Outstanding Balance vs Advance Credit (never mixed)
     if ($total_purchases > $total_payments) {
@@ -311,12 +315,61 @@ function getSupplierBalance($conn, $supplier_id) {
  * Call this on pages that list suppliers to ensure all balances are up-to-date.
  */
 function recalcAllSupplierBalances($conn) {
-    $suppliers = mysqli_query($conn, "SELECT id FROM suppliers WHERE status = 'Active'");
+    $suppliers = mysqli_query($conn, "SELECT id FROM suppliers");
     if ($suppliers) {
         while ($row = mysqli_fetch_assoc($suppliers)) {
             recalcSupplierBalance($conn, $row['id']);
         }
     }
+}
+
+/**
+ * Dump the given tables to a restorable .sql file (DROP TABLE + CREATE TABLE
+ * + INSERT rows). Used as an automatic safety snapshot BEFORE running repairs.
+ *
+ * @return string|false Absolute path of the written file, or false on failure.
+ */
+function backupTablesToSql($conn, array $tables, $destDir = null) {
+    $destDir = $destDir ?: (__DIR__ . '/../backups');
+    if (!is_dir($destDir) && !mkdir($destDir, 0755, true)) {
+        error_log("BACKUP ERROR: cannot create directory $destDir");
+        return false;
+    }
+
+    $filename = $destDir . '/repair_backup_' . date('Ymd_His') . '.sql';
+    $out = "-- Repair backup generated " . date('Y-m-d H:i:s') . "\n";
+    $out .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
+
+    foreach ($tables as $table) {
+        $table = preg_replace('/[^a-z0-9_]/i', '', $table); // only safe identifiers
+        $createRes = mysqli_query($conn, "SHOW CREATE TABLE `$table`");
+        if (!$createRes || mysqli_num_rows($createRes) === 0) {
+            continue; // table doesn't exist yet — skip
+        }
+        $createRow = mysqli_fetch_assoc($createRes);
+        $out .= "DROP TABLE IF EXISTS `$table`;\n";
+        $out .= $createRow['Create Table'] . ";\n\n";
+
+        $rowsRes = mysqli_query($conn, "SELECT * FROM `$table`");
+        if ($rowsRes && mysqli_num_rows($rowsRes) > 0) {
+            while ($row = mysqli_fetch_assoc($rowsRes)) {
+                $vals = array();
+                foreach ($row as $v) {
+                    $vals[] = $v === null ? 'NULL' : "'" . mysqli_real_escape_string($conn, $v) . "'";
+                }
+                $out .= "INSERT INTO `$table` VALUES (" . implode(',', $vals) . ");\n";
+            }
+            $out .= "\n";
+        }
+    }
+
+    $out .= "SET FOREIGN_KEY_CHECKS=1;\n";
+
+    if (@file_put_contents($filename, $out) === false) {
+        error_log("BACKUP ERROR: cannot write $filename");
+        return false;
+    }
+    return $filename;
 }
 
 /**
@@ -332,4 +385,70 @@ function compactMoney($amount) {
         return rtrim(rtrim(number_format($amount / 1000, 1), '0'), '.') . 'K';
     }
     return number_format($amount);
+}
+
+/**
+ * Validate and store a category image upload.
+ * - Optional: an empty/absent file returns ['ok' => true, 'path' => null]
+ * - Allowed: JPG, JPEG, PNG, WEBP only (extension + real MIME + content check)
+ * - Max size: 2MB
+ * - Filename is generated server-side (original name is never trusted)
+ * - Files are stored under img/categories/, DB stores the relative path
+ *   inside img/ (e.g. "categories/cat_1690000000_a1b2c3d4.png")
+ * - When $old_image is given and a new file is saved, the old file is deleted
+ *
+ * @return array ['ok' => bool, 'path' => ?string, 'error' => ?string]
+ */
+function handleCategoryImageUpload($file, $old_image = null) {
+    // No file chosen -> keep whatever exists (optional field)
+    if (!isset($file) || !is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => true, 'path' => null, 'error' => null];
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'path' => null, 'error' => 'Image upload failed. Please try again.'];
+    }
+    if (($file['size'] ?? 0) <= 0 || $file['size'] > 2 * 1024 * 1024) {
+        return ['ok' => false, 'path' => null, 'error' => 'Image must be under 2MB.'];
+    }
+
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
+    $allowed_mime = ['image/jpeg', 'image/png', 'image/webp'];
+
+    $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed_ext, true)) {
+        return ['ok' => false, 'path' => null, 'error' => 'Image must be JPG, JPEG, PNG, or WebP.'];
+    }
+
+    // Real content checks: reject executables/scripts renamed to .png etc.
+    $tmp = $file['tmp_name'];
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($tmp);
+    if (!in_array($mime, $allowed_mime, true)) {
+        return ['ok' => false, 'path' => null, 'error' => 'The uploaded file is not a valid image.'];
+    }
+    if (@getimagesize($tmp) === false) {
+        return ['ok' => false, 'path' => null, 'error' => 'The uploaded file is not a valid image.'];
+    }
+
+    $upload_dir = __DIR__ . '/../img/categories';
+    if (!is_dir($upload_dir) && !mkdir($upload_dir, 0755, true)) {
+        return ['ok' => false, 'path' => null, 'error' => 'Failed to create the image storage folder.'];
+    }
+
+    $filename = 'cat_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+    $dest = $upload_dir . '/' . $filename;
+    if (!move_uploaded_file($tmp, $dest)) {
+        return ['ok' => false, 'path' => null, 'error' => 'Failed to save the uploaded image.'];
+    }
+    @chmod($dest, 0644);
+
+    // Replace: remove the previous image file (only paths we manage)
+    if ($old_image && strpos($old_image, 'categories/') === 0) {
+        $old_abs = __DIR__ . '/../img/' . $old_image;
+        if (is_file($old_abs)) {
+            @unlink($old_abs);
+        }
+    }
+
+    return ['ok' => true, 'path' => 'categories/' . $filename, 'error' => null];
 }

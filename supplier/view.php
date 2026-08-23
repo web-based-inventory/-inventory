@@ -22,10 +22,15 @@ $total_purchases = 0;
 $r = fetchOne($conn, "SELECT COALESCE(SUM(total_amount), 0) AS total FROM purchases WHERE supplier_id = ?", [$id], "i");
 if ($r) $total_purchases = (float)$r['total'];
 
-// Total Payments (paid_amount only — advance_applied is NOT cash)
+// Total Payments (paid_amount only)
 $total_payments = 0;
-$r = fetchOne($conn, "SELECT COALESCE(SUM(pp.{$amtCol}), 0) AS total FROM purchase_payments pp INNER JOIN purchases pu ON pp.purchase_id = pu.id WHERE pu.supplier_id = ?", [$id], "i");
-if ($r) $total_payments = (float)$r['total'];
+if (columnExists($conn, 'supplier_payments', 'supplier_id')) {
+    $r = fetchOne($conn, "SELECT COALESCE(SUM(paid_amount), 0) AS total FROM supplier_payments WHERE supplier_id = ?", [$id], "i");
+    if ($r) $total_payments = (float)$r['total'];
+} else {
+    $r = fetchOne($conn, "SELECT COALESCE(SUM(pp.{$amtCol}), 0) AS total FROM purchase_payments pp INNER JOIN purchases pu ON pp.purchase_id = pu.id WHERE pu.supplier_id = ?", [$id], "i");
+    if ($r) $total_payments = (float)$r['total'];
+}
 
 // Total Advance Created (overpayments)
 $total_advance_created = 0;
@@ -49,7 +54,11 @@ $recent_purchases = fetchAll($conn, "
     ORDER BY p.purchase_date DESC LIMIT 5", [$id], "i");
 
 // Recent Payments (latest 5)
-$recent_payments = fetchAll($conn, "SELECT pp.*, pu.invoice_no FROM purchase_payments pp INNER JOIN purchases pu ON pp.purchase_id = pu.id WHERE pu.supplier_id = ? ORDER BY pp.payment_date DESC LIMIT 5", [$id], "i");
+if (columnExists($conn, 'supplier_payments', 'supplier_id')) {
+    $recent_payments = fetchAll($conn, "SELECT *, ref_no AS invoice_no, 'Paid' AS payment_status FROM supplier_payments WHERE supplier_id = ? ORDER BY payment_date DESC, id DESC LIMIT 5", [$id], "i");
+} else {
+    $recent_payments = fetchAll($conn, "SELECT pp.*, pu.invoice_no FROM purchase_payments pp INNER JOIN purchases pu ON pp.purchase_id = pu.id WHERE pu.supplier_id = ? ORDER BY pp.payment_date DESC LIMIT 5", [$id], "i");
+}
 
 // Ensure balance is up-to-date before displaying
 recalcSupplierBalance($conn, $id);

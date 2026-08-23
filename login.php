@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($email) || empty($password)) {
         $error = 'Please enter both email and password';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Invalid email format';
     } else {
         $stmt = $conn->prepare("SELECT id, name, email, password, role, status, profile_image FROM users WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
@@ -39,19 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if (!$user) {
-            $error = 'Email not found';
+            $error = 'Invalid email or password';
         } elseif ($user['status'] !== 'Active') {
             $error = 'Account is inactive. Contact administrator.';
         } elseif (!password_verify($password, $user['password'])) {
-            if ($user['password'] === $password) {
-                $hashed = password_hash($password, PASSWORD_DEFAULT);
-                $update = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                $update->bind_param("si", $hashed, $user['id']);
-                $update->execute();
-                $update->close();
-            } else {
-                $error = 'Wrong password';
-            }
+            $error = 'Invalid email or password';
         }
 
         if (empty($error)) {
@@ -277,9 +271,9 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                                 <?= $remembered_email ? 'checked' : '' ?>>
                             <span class="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">Remember me</span>
                         </label>
-                        <button type="button" onclick="document.getElementById('forgotModal').classList.remove('hidden')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors">
+                        <a href="forgot_password.php" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors">
                             Forgot Password?
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Submit -->
@@ -298,28 +292,7 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
-    <div id="forgotModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-gray-900/50 dark:bg-black/60 backdrop-blur-sm" onclick="document.getElementById('forgotModal').classList.add('hidden')"></div>
-        <!-- Modal Card -->
-        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 text-center border border-gray-100 dark:border-slate-700">
-            <!-- Icon -->
-            <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-50 dark:bg-indigo-900/50 rounded-full mb-4">
-                <svg class="w-7 h-7 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Forgot your password?</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Please contact the System Administrator to reset your password. Only administrators can perform password resets.
-            </p>
-            <button onclick="document.getElementById('forgotModal').classList.add('hidden')"
-                class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-800 dark:text-white font-semibold py-2.5 px-5 rounded-xl transition-colors text-sm">
-                Close
-            </button>
-        </div>
-    </div>
+
 
     <script>
         function togglePassword() {

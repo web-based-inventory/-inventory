@@ -12,9 +12,14 @@ $status_filter = $_GET['status'] ?? '';
 if (isset($_GET['confirm_delete'])) {
     protectCategories('delete');
     $delete_id = (int)$_GET['confirm_delete'];
-    $del_check = mysqli_query($conn, "SELECT name FROM categories WHERE id = $delete_id");
+    $del_check = mysqli_query($conn, "SELECT name, image FROM categories WHERE id = $delete_id");
     if (mysqli_num_rows($del_check) > 0) {
+        $del_row = mysqli_fetch_assoc($del_check);
         mysqli_query($conn, "DELETE FROM categories WHERE id = $delete_id");
+        // Remove the category image file (only paths managed by this module)
+        if (!empty($del_row['image']) && strpos($del_row['image'], 'categories/') === 0 && is_file("../img/" . $del_row['image'])) {
+            @unlink("../img/" . $del_row['image']);
+        }
         header("Location: index.php?success=" . urlencode("Category deleted successfully"));
         exit;
     }
@@ -95,19 +100,34 @@ if (!$result) {
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         <?php while ($row = mysqli_fetch_assoc($result)): ?>
                             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 h-full flex flex-col hover:shadow-lg transition-all duration-200 group overflow-hidden">
-                                
-                                <div class="p-6 flex-1 flex flex-col relative">
+
+                                <!-- Category Image Banner -->
+                                <div class="relative h-36 bg-indigo-50 dark:bg-indigo-500/10 overflow-hidden flex-shrink-0">
+                                    <?php $cat_image_ok = !empty($row['image']) && file_exists("../img/" . $row['image']); ?>
+                                    <?php if ($cat_image_ok): ?>
+                                        <img src="../img/<?= htmlspecialchars($row['image']) ?>"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy">
+                                    <?php else: ?>
+                                        <!-- Default placeholder when no image / missing file / broken path -->
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <svg class="w-12 h-12 text-indigo-300 dark:text-indigo-500/50 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                            </svg>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <!-- Badges -->
-                                    <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                                    <div class="absolute top-3 right-3 z-10 flex flex-col gap-2">
                                         <?php if ($row['status'] === 'Active'): ?>
                                             <span class="px-2.5 py-1 bg-emerald-100/90 text-emerald-700 text-[11px] font-bold rounded shadow-sm border border-emerald-200 uppercase tracking-wider backdrop-blur-sm">Active</span>
                                         <?php else: ?>
                                             <span class="px-2.5 py-1 bg-gray-100/90 text-gray-600 text-[11px] font-bold rounded shadow-sm border border-gray-200 uppercase tracking-wider backdrop-blur-sm">Inactive</span>
                                         <?php endif; ?>
                                     </div>
-                                    
+
                                     <!-- Quick Actions -->
-                                    <div class="absolute top-4 left-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="absolute top-3 left-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <?php if (checkPermission('categories', 'edit')): ?>
                                             <a href="edit.php?id=<?= $row['id'] ?>" class="p-1.5 bg-white/90 dark:bg-slate-800/90 text-gray-600 dark:text-gray-300 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition backdrop-blur-sm border border-gray-200 dark:border-slate-600" title="Edit">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -119,18 +139,9 @@ if (!$result) {
                                             </button>
                                         <?php endif; ?>
                                     </div>
+                                </div>
 
-                                    <!-- Icon -->
-                                    <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-4 mt-8 mx-auto group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300">
-                                        <?php if (!empty($row['image']) && file_exists("../img/" . $row['image'])): ?>
-                                            <img src="../img/<?= htmlspecialchars($row['image']) ?>" class="w-full h-full object-cover rounded-2xl" alt="<?= htmlspecialchars($row['name']) ?>">
-                                        <?php else: ?>
-                                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                            </svg>
-                                        <?php endif; ?>
-                                    </div>
-                                    
+                                <div class="p-6 flex-1 flex flex-col relative">
                                     <!-- Details -->
                                     <div class="text-center mb-4">
                                         <h3 class="text-[17px] font-bold text-gray-900 dark:text-white mb-1.5">

@@ -384,9 +384,9 @@ if ($selected_id > 0) {
                                             <table class="data-table w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th>#</th>
-                                                        <th>Date</th>
-                                                        <th>Reference</th>
+                                                        <th style="width: 5%;">#</th>
+                                                        <th style="width:3%;">Date</th>
+                                                        <th style="width:20%;">Reference</th>
                                                         <th>Description</th>
                                                         <th class="num">Debit</th>
                                                         <th class="num">Credit</th>

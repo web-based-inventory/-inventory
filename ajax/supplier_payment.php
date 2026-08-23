@@ -301,9 +301,9 @@ try {
         $advance_created = $remaining_to_pay;
     }
 
-    // Step 4: Only record the overpayment (advance_created) in supplier_payments
-    // The allocated portion is already tracked in purchase_payments — no double-counting
-    if ($advance_created > 0.01 && columnExists($conn, 'supplier_payments', 'supplier_id')) {
+    // Step 4: Record the FULL cash payment in supplier_payments
+    // (This acts as the single source of truth for the financial transaction)
+    if ($paid_amount > 0.01 && columnExists($conn, 'supplier_payments', 'supplier_id')) {
         $escaped_notes = $conn->real_escape_string($notes);
         $has_notes = columnExists($conn, 'supplier_payments', 'notes');
         
@@ -311,11 +311,11 @@ try {
             $notes_sql_val = empty($notes) ? "''" : "'$escaped_notes'";
             $sql_direct = "INSERT INTO supplier_payments 
                 (supplier_id, payment_method, cash_amount, kbzpay_amount, paid_amount, ref_no, payment_date, notes)
-                VALUES ($supplier_id, '$payment_method', 0, 0, $advance_created, '$payment_ref_no', '$payment_datetime', $notes_sql_val)";
+                VALUES ($supplier_id, '$payment_method', $cash_amount, $kbzpay_amount, $paid_amount, '$payment_ref_no', '$payment_datetime', $notes_sql_val)";
         } else {
             $sql_direct = "INSERT INTO supplier_payments 
                 (supplier_id, payment_method, cash_amount, kbzpay_amount, paid_amount, ref_no, payment_date)
-                VALUES ($supplier_id, '$payment_method', 0, 0, $advance_created, '$payment_ref_no', '$payment_datetime')";
+                VALUES ($supplier_id, '$payment_method', $cash_amount, $kbzpay_amount, $paid_amount, '$payment_ref_no', '$payment_datetime')";
         }
         
         $debug_log[] = "STEP4_DIRECT_SQL: $sql_direct";

@@ -7,6 +7,8 @@ include "../config/helpers.php";
 $is_admin = isAdmin();
 $search = $_GET['search'] ?? '';
 $status_filter = $_GET['status'] ?? '';
+$date_from = $_GET['date_from'] ?? '';
+$date_to = $_GET['date_to'] ?? '';
 
 // Ensure purchases table has payment tracking columns
 ensurePurchasePaymentColumns($conn);
@@ -67,12 +69,7 @@ if (isset($_POST['update'])) {
         $prod_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT selling_price FROM products WHERE id='$product_id'"));
         $prod_sp = $prod_check ? (float)$prod_check['selling_price'] : 0;
 
-        if ($prod_sp <= $price) {
-            $recommended = calculateSellingPrice($conn, $price);
-            mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $diff, purchase_price='$price', selling_price=$recommended, price_update_required=0 WHERE id='$product_id'");
-        } else {
-            mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $diff, purchase_price='$price' WHERE id='$product_id'");
-        }
+        mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $diff, purchase_price='$price' WHERE id='$product_id'");
         mysqli_query($conn, "UPDATE purchase_details SET quantity='$qty', purchase_price='$price', subtotal='$subtotal' WHERE id='$detail_id'");
         $new_total += $subtotal;
     }
@@ -108,8 +105,44 @@ if ($search) {
 if ($status_filter && columnExists($conn, 'purchases', 'status')) {
     $sql .= " AND p.status = '$status_filter'";
 }
-$sql .= " ORDER BY p.id DESC";
+// Safe date-range filter on the real purchase_date column.
+// purchase_date >= start  AND  purchase_date < (end + 1 day)
+// -> includes every purchase made on the end date (00:00:00 through 23:59:59).
+if ($date_from !== '') {
+    $safe_from = mysqli_real_escape_string($conn, $date_from);
+    $sql .= " AND p.purchase_date >= '$safe_from'";
+}
+if ($date_to !== '') {
+    $safe_to = mysqli_real_escape_string($conn, $date_to);
+    $sql .= " AND p.purchase_date < '$safe_to' + INTERVAL 1 DAY";
+}
+
+// Display limit: latest 10 purchases by default, "View More" shows everything
+// that matches the active filters. Database records are never limited/deleted.
+$DISPLAY_LIMIT = 10;
+$show_all = (($_GET['view'] ?? '') === 'all');
+$sql .= " ORDER BY p.purchase_date DESC, p.id DESC";
+if (!$show_all) {
+    // Fetch one extra row purely to detect whether more than 10 records exist
+    $sql .= " LIMIT " . ($DISPLAY_LIMIT + 1);
+}
 $result = mysqli_query($conn, $sql);
+
+$purchases = [];
+while ($row = mysqli_fetch_assoc($result)) $purchases[] = $row;
+
+$has_more = !$show_all && count($purchases) > $DISPLAY_LIMIT;
+$display_purchases = $show_all ? $purchases : array_slice($purchases, 0, $DISPLAY_LIMIT);
+
+// View More / Show Less links keep every active filter (search, status, dates)
+$view_more_params = $_GET;
+$view_less_params = $_GET;
+unset($view_less_params['view']);
+if (!$show_all) {
+    $view_more_params['view'] = 'all';
+}
+$view_more_url = 'index.php' . (!empty($view_more_params) ? '?' . http_build_query($view_more_params) : '');
+$view_less_url = 'index.php' . (!empty($view_less_params) ? '?' . http_build_query($view_less_params) : '');
 
 $all_products = mysqli_query($conn, "SELECT * FROM products WHERE status='Active'");
 $all_suppliers = mysqli_query($conn, "SELECT * FROM suppliers WHERE status='Active'");
@@ -156,7 +189,7 @@ if ($show_view_id) {
 }
 
 $success_msg = $_GET['success'] ?? '';
-$page_title = "Purchase Management";
+$page_title = "Purchase History";
 $pur_settings = getShopSettings($conn);
 $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 ?>
@@ -166,13 +199,72 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Management - <?= $pur_shop_name ?></title>
+    <title>Purchase History - <?= $pur_shop_name ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* ============ Purchase Invoice — Print ============ */
+        @media print {
+            @page { margin: 0.5in; }
+
+            .no-print { display: none !important; }
+
+            /* When the invoice modal is open, print only the invoice */
+            body.print-invoice-mode > .flex.min-h-screen { display: none !important; }
+            body.print-invoice-mode #viewModal {
+                position: static !important;
+                inset: auto !important;
+                background: #fff !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                display: block !important;
+            }
+            body.print-invoice-mode #viewModal > div {
+                max-width: 100% !important;
+                max-height: none !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                overflow: visible !important;
+            }
+
+            /* Themed header tint that prints reliably and stays readable */
+            #viewModal .data-table th {
+                background-color: #e0e7ff !important;
+                color: #1e293b !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Clean borders, subtle alternating rows */
+            #viewModal .data-table td,
+            #viewModal .data-table th {
+                border-bottom: 1px solid #cbd5e1 !important;
+            }
+            #viewModal .data-table td {
+                color: #111827 !important;
+            }
+            #viewModal .data-table tbody tr:nth-child(even) td {
+                background-color: #f8fafc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Hover effects must never appear on paper */
+            #viewModal .data-table tbody tr:hover td {
+                background-color: transparent !important;
+            }
+            /* Strong total row */
+            #viewModal .data-table tfoot td {
+                background-color: #eef2ff !important;
+                border-top: 2px solid #6366f1 !important;
+                border-bottom: none !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900">
+<body class="bg-gray-50 dark:bg-slate-900 <?= (isset($_GET['view_id']) && $view_purchase) ? 'print-invoice-mode' : '' ?>">
     <div class="flex min-h-screen">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">
@@ -189,17 +281,33 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <?php endif; ?>
 
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <form method="GET" class="flex flex-wrap items-center gap-3 flex-1">
-                            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>"
-                                placeholder="Search supplier or invoice..." class="form-input flex-1 min-w-[200px]">
-                            <select name="status" class="form-input w-auto">
-                                <option value="">All Status</option>
-                                <option value="Paid" <?= $status_filter === 'Paid' ? 'selected' : '' ?>>Paid</option>
-                                <option value="Partial" <?= $status_filter === 'Partial' ? 'selected' : '' ?>>Partial</option>
-                                <option value="Unpaid" <?= $status_filter === 'Unpaid' ? 'selected' : '' ?>>Unpaid</option>
-                            </select>
-                            <button class="btn btn-primary">Search</button>
-                            <a href="index.php" class="btn btn-outline">Reset</a>
+                        <form method="GET" class="flex flex-wrap items-end gap-3 flex-1">
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Search</label>
+                                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>"
+                                    placeholder="Supplier or invoice..." class="form-input text-sm w-full">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Payment</label>
+                                <select name="status" class="form-input text-sm">
+                                    <option value="">All Status</option>
+                                    <option value="Paid" <?= $status_filter === 'Paid' ? 'selected' : '' ?>>Paid</option>
+                                    <option value="Partial" <?= $status_filter === 'Partial' ? 'selected' : '' ?>>Partial</option>
+                                    <option value="Unpaid" <?= $status_filter === 'Unpaid' ? 'selected' : '' ?>>Unpaid</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">From Date</label>
+                                <input type="date" name="date_from" value="<?= htmlspecialchars($date_from) ?>" class="form-input text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">To Date</label>
+                                <input type="date" name="date_to" value="<?= htmlspecialchars($date_to) ?>" class="form-input text-sm">
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary text-sm">Filter</button>
+                                <a href="index.php" class="btn btn-outline text-sm">Reset</a>
+                            </div>
                         </form>
                         <a href="add.php" class="btn btn-primary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +316,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             New Purchase
                         </a>
                     </div>
- 
+
                     <!-- Table -->
                     <div class="card overflow-hidden">
                         <div class="table-wrap overflow-x-auto">
@@ -218,15 +326,15 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                         <th style="width: 5%">#</th>
                                         <th style="width: 15%">Invoice</th>
                                         <th style="width: 12%">Date</th>
-                                        <th style="width: 1%">Supplier</th>
-                                        <th class="num" style="width: 15%">Amount</th>
+                                        <th style="width: 12%">Supplier</th>
+                                        <th class="num" style="width: 18%">Amount</th>
                                         <th class="center" style="width: 10%">Payment</th>
-                                        <th class="center" style="width: 23%">Action</th>
+                                        <th class="center" style="width: 20%">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody> 
-                                    <?php if (mysqli_num_rows($result) > 0): $count = 1;
-                                        while ($row = mysqli_fetch_assoc($result)):
+                                <tbody>
+                                    <?php if (count($display_purchases) > 0): $count = 1;
+                                        foreach ($display_purchases as $row):
                                             $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
                                             $adv_expr = columnExists($conn, 'purchase_payments', 'advance_applied') ? " + COALESCE(advance_applied, 0)" : "";
                                             $total_paid_q = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM($amtCol$adv_expr), 0) AS tp FROM purchase_payments WHERE purchase_id='{$row['id']}'"));
@@ -273,7 +381,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                                     </div>
                                                 </td>
                                             </tr>
-                                        <?php endwhile;
+                                        <?php endforeach;
                                     else: ?>
                                         <tr>
                                             <td colspan="7" class="text-center py-12">
@@ -282,7 +390,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                                     </svg>
                                                     <h3>No purchases found</h3>
-                                                    <p>Create your first purchase to get started.</p>
+                                                    <p>No purchases match your filters. Try adjusting the search criteria.</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -291,6 +399,30 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             </table>
                         </div>
                     </div>
+
+                    <!-- Showing / View More -->
+                    <?php if (count($display_purchases) > 0): ?>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-5">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">
+                                <?php if ($show_all): ?>
+                                    Showing all <?= count($purchases) ?> purchase<?= count($purchases) === 1 ? '' : 's' ?><?= ($date_from !== '' || $date_to !== '') ? ' within selected date range' : '' ?>
+                                <?php else: ?>
+                                    Showing latest <?= count($display_purchases) ?> purchase<?= count($display_purchases) === 1 ? '' : 's' ?><?= ($date_from !== '' || $date_to !== '') ? ' within selected date range' : '' ?>
+                                <?php endif; ?>
+                            </p>
+                            <?php if ($has_more): ?>
+                                <a href="<?= $view_more_url ?>" class="btn btn-outline gap-2 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    View More
+                                </a>
+                            <?php elseif ($show_all && $has_more === false && count($purchases) > $DISPLAY_LIMIT): ?>
+                                <a href="<?= $view_less_url ?>" class="btn btn-outline gap-2 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    Show Less
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </main>
         </div>
@@ -335,7 +467,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                         </div>
                     </div>
                     <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-2 mt-4">
+                    <div class="flex flex-wrap gap-2 mt-4 no-print">
                         <button onclick="window.print()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -432,17 +564,17 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             <table class="data-table w-full">
                                 <thead>
                                     <tr>
-                                        <th class="bg-gray-100 dark:bg-slate-700">#</th>
-                                        <th class="bg-gray-100 dark:bg-slate-700">Product</th>
-                                        <th class="bg-gray-100 dark:bg-slate-700 num">Qty</th>
-                                        <th class="bg-gray-100 dark:bg-slate-700 num">Price</th>
-                                        <th class="bg-gray-100 dark:bg-slate-700 num">Subtotal</th>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th class="num">Qty</th>
+                                        <th class="num">Price</th>
+                                        <th class="num">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php $vi = 1;
                                     while ($row = mysqli_fetch_assoc($view_details)): ?>
-                                        <tr class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                                        <tr class="transition-colors">
                                             <td class="text-gray-500"><?= $vi++ ?></td>
                                             <td class="font-medium text-gray-900 dark:text-gray-100"><?= htmlspecialchars($row['product_name']) ?></td>
                                             <td class="num text-gray-700 dark:text-gray-300"><?= $row['quantity'] ?></td>
@@ -452,9 +584,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                     <?php endwhile; ?>
                                 </tbody>
                                 <tfoot>
-                                    <tr class="bg-gray-50 dark:bg-slate-700/50">
-                                        <td colspan="4" class="text-right font-bold text-gray-700 dark:text-gray-300">Total:</td>
-                                        <td class="num font-bold text-indigo-600 dark:text-indigo-400"><?= number_format($view_purchase['total_amount'], 2) ?></td>
+                                    <tr class="bg-indigo-50/80 dark:bg-indigo-500/10">
+                                        <td colspan="4" class="text-right font-bold text-indigo-700 dark:text-indigo-300 uppercase text-xs tracking-wider border-t-2 border-indigo-300 dark:border-slate-600">Total:</td>
+                                        <td class="num font-extrabold text-indigo-600 dark:text-indigo-400 text-base border-t-2 border-indigo-300 dark:border-slate-600"><?= number_format($view_purchase['total_amount'], 2) ?> Ks</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -474,14 +606,14 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                 <table class="data-table w-full">
                                     <thead>
                                         <tr>
-                                            <th class="bg-gray-100 dark:bg-slate-700">#</th>
-                                            <th class="bg-gray-100 dark:bg-slate-700">Date</th>
-                                            <th class="bg-gray-100 dark:bg-slate-700">Method</th>
-                                            <th class="bg-gray-100 dark:bg-slate-700 num">Amount</th>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Method</th>
+                                            <th class="num">Amount</th>
                                             <?php if (columnExists($conn, 'purchase_payments', 'advance_applied')): ?>
-                                                <th class="bg-gray-100 dark:bg-slate-700 num">Advance</th>
+                                                <th class="num">Advance</th>
                                             <?php endif; ?>
-                                            <th class="bg-gray-100 dark:bg-slate-700">Notes</th>
+                                            <th>Notes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -556,7 +688,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
     <?php if ($edit_purchase && $edit_details): ?>
         <div id="editModal" class="modal-overlay">
             <div class="bg-white rounded-2xl p-6 lg:p-8 w-full max-w-4xl relative mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <a href="index.php" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:text-gray-300 text-2xl leading-none">&times;</a>
+                <button onclick="window.location.href='index.php'" class="no-print absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:text-gray-300 text-2xl leading-none">&times;</button>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Edit Purchase #<?= htmlspecialchars($edit_purchase['invoice_no'] ?? $edit_purchase['id']) ?></h2>
 
                 <form method="POST">

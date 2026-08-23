@@ -23,28 +23,42 @@ $week_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
+// ============ SHARED DATE-RANGE RULE (used by EVERY query below) ============
+// created_at >= start_of_first_day AND created_at < (end_day + 1 day)
+// -> includes every sale made on the selected end date, at any time of day.
 // ============ MONTHLY SALES (selected report range) ============
 $month_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS count, COALESCE(SUM(total_amount), 0) AS revenue
-    FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    FROM sales
+    WHERE created_at >= '$safe_from' AND created_at < '$safe_to' + INTERVAL 1 DAY
     AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
-// ============ OVERALL REVENUE (filtered range) ============
+// ============ OVERALL REVENUE (filtered range) — same rule as Monthly Sales ============
 $revenue_stats = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COUNT(*) AS total_sales, COALESCE(SUM(total_amount), 0) AS total_revenue
-    FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    FROM sales
+    WHERE created_at >= '$safe_from' AND created_at < '$safe_to' + INTERVAL 1 DAY
     AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
 "));
 
-// ============ PROFIT ============
+// ============ PROFIT OVERVIEW ============
+// Revenue: SUM(sales.total_amount) — exactly the same real revenue the Monthly
+// Sales card uses (post-discount header total, one row per sale so multiple
+// sale_details lines or a Mixed Cash+KBZPay payment can never double-count it).
+// COGS:    quantity sold x purchase price stored on each sale_details line.
+// Profit:  Revenue - COGS (computed from real data, never selling price alone).
 $profit_stats = mysqli_fetch_assoc(mysqli_query($conn, "
-    SELECT COALESCE(SUM(sd.subtotal), 0) AS revenue,
-           COALESCE(SUM(sd.purchase_price * sd.quantity), 0) AS cost,
-           COALESCE(SUM(sd.profit), 0) AS profit
-    FROM sale_details sd
-    JOIN sales s ON sd.sale_id = s.id
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    SELECT COUNT(DISTINCT s.id) AS total_sales,
+           COALESCE(SUM(s.total_amount), 0) AS revenue,
+           COALESCE(SUM(cogs.cogs), 0) AS cost,
+           COALESCE(SUM(s.total_amount), 0) - COALESCE(SUM(cogs.cogs), 0) AS profit
+    FROM sales s
+    JOIN (
+        SELECT sale_id, SUM(purchase_price * quantity) AS cogs
+        FROM sale_details GROUP BY sale_id
+    ) cogs ON cogs.sale_id = s.id
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
 "));
 
 // ============ BEST SELLING PRODUCTS ============
@@ -55,7 +69,7 @@ $top_products = mysqli_query($conn, "
     FROM sale_details sd
     JOIN products p ON sd.product_id = p.id
     JOIN sales s ON sd.sale_id = s.id
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
     GROUP BY sd.product_id
     ORDER BY total_qty DESC LIMIT 10
 ");
@@ -69,7 +83,7 @@ $category_sales = mysqli_query($conn, "
     JOIN products p ON sd.product_id = p.id
     JOIN categories c ON p.category_id = c.id
     JOIN sales s ON sd.sale_id = s.id
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
     GROUP BY c.id
     ORDER BY total_revenue DESC
 ");
@@ -90,7 +104,7 @@ $payment_summary = mysqli_fetch_assoc(mysqli_query($conn, "
     LEFT JOIN sale_payments sp ON sp.id = (
         SELECT id FROM sale_payments WHERE sale_id = s.id ORDER BY id ASC LIMIT 1
     )
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
     AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = s.id)
 "));
 
@@ -115,7 +129,8 @@ $has_payments = ($cash_received + $kbzpay_received) > 0;
 // ============ DAILY SALES ============
 $daily_sales = mysqli_query($conn, "
     SELECT DATE(created_at) AS day, COUNT(*) AS count, SUM(total_amount) AS total
-    FROM sales WHERE DATE(created_at) BETWEEN '$safe_from' AND '$safe_to'
+    FROM sales
+    WHERE created_at >= '$safe_from' AND created_at < '$safe_to' + INTERVAL 1 DAY
     AND EXISTS (SELECT 1 FROM sale_details WHERE sale_id = sales.id)
     GROUP BY DATE(created_at) ORDER BY day DESC
 ");
@@ -126,7 +141,7 @@ $best_selling = mysqli_fetch_assoc(mysqli_query($conn, "
     FROM sale_details sd
     JOIN products p ON sd.product_id = p.id
     JOIN sales s ON sd.sale_id = s.id
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
     GROUP BY p.id, p.product_name
     ORDER BY total_qty DESC
     LIMIT 1
@@ -141,10 +156,39 @@ $product_sales_analysis = mysqli_query($conn, "
     FROM sales s
     JOIN sale_details sd ON sd.sale_id = s.id
     JOIN products p ON p.id = sd.product_id
-    WHERE DATE(s.created_at) BETWEEN '$safe_from' AND '$safe_to'
+    WHERE s.created_at >= '$safe_from' AND s.created_at < '$safe_to' + INTERVAL 1 DAY
     GROUP BY DATE(s.created_at), p.id, p.product_name
-    ORDER BY sale_date DESC, total_quantity DESC
+    ORDER BY total_quantity DESC, total_amount DESC
 ");
+
+// Top 10 by quantity sold by default; "View More" reveals all matching rows
+// from the SAME result set and date range. Display-only limit — no data is
+// removed, and the CSV export still uses every row.
+// Each expandable section has its own ?param so they toggle independently.
+$PSA_DISPLAY_LIMIT = 10;
+$psa_show_all = (($_GET['psa'] ?? '') === 'all');
+
+$psa_view_more_params = $_GET;
+$psa_show_less_params = $_GET;
+unset($psa_show_less_params['psa']);
+if (!$psa_show_all) {
+    $psa_view_more_params['psa'] = 'all';
+}
+$psa_view_more_url = 'salereport.php?' . http_build_query($psa_view_more_params);
+$psa_show_less_url = 'salereport.php' . (!empty($psa_show_less_params) ? '?' . http_build_query($psa_show_less_params) : '');
+
+// Sales by Category: top 10 by revenue by default; "More View" reveals all.
+$CATEGORY_DISPLAY_LIMIT = 10;
+$cat_show_all = (($_GET['cat'] ?? '') === 'all');
+
+$cat_more_params = $_GET;
+$cat_less_params = $_GET;
+unset($cat_less_params['cat']);
+if (!$cat_show_all) {
+    $cat_more_params['cat'] = 'all';
+}
+$cat_more_url = 'salereport.php?' . http_build_query($cat_more_params);
+$cat_less_url = 'salereport.php' . (!empty($cat_less_params) ? '?' . http_build_query($cat_less_params) : '');
 
 $page_title = "Sales Reports";
 $report_settings = getShopSettings($conn);
@@ -334,7 +378,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                     <form method="GET" id="reportForm"></form>
 
                     <!-- Quick Stats Row -->
-                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6" id="exportArea">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="exportArea">
                         <!-- Today's Sales -->
                         <div class="stat-card bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
@@ -375,7 +419,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                             </div>
                         </div>
                         <!-- Period Revenue -->
-                        <div class="stat-card bg-amber-50 dark:bg-amber-900/30 rounded-xl p-5">
+                        <!-- <div class="stat-card bg-amber-50 dark:bg-amber-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
                                 <svg class="w-12 h-12 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -386,7 +430,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1"><?= $revenue_stats['total_sales'] ?> sales</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Best Selling Product -->
                         <div class="stat-card bg-rose-50 dark:bg-rose-900/30 rounded-xl p-5">
                             <div class="flex items-center gap-3">
@@ -599,7 +643,8 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     <?php
                                     $psa_rows = [];
                                     while ($psa = mysqli_fetch_assoc($product_sales_analysis)) $psa_rows[] = $psa;
-                                    foreach ($psa_rows as $psa):
+                                    $psa_display = $psa_show_all ? $psa_rows : array_slice($psa_rows, 0, $PSA_DISPLAY_LIMIT);
+                                    foreach ($psa_display as $psa):
                                     ?>
                                         <tr>
                                             <td><?= date('d-M', strtotime($psa['sale_date'])) ?></td>
@@ -626,6 +671,30 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Top 10 summary + View More -->
+                        <?php if (!empty($psa_rows)): ?>
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-700">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">
+                                    <?php if ($psa_show_all): ?>
+                                        Showing all <?= count($psa_rows) ?> record<?= count($psa_rows) === 1 ? '' : 's' ?> for the selected period
+                                    <?php else: ?>
+                                        Showing top <?= count($psa_display) ?> by quantity sold
+                                    <?php endif; ?>
+                                </p>
+                                <?php if (!$psa_show_all && count($psa_rows) > $PSA_DISPLAY_LIMIT): ?>
+                                    <a href="<?= $psa_view_more_url ?>" class="btn btn-outline gap-2 text-sm whitespace-nowrap">
+                                        View More
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </a>
+                                <?php elseif ($psa_show_all && count($psa_rows) > $PSA_DISPLAY_LIMIT): ?>
+                                    <a href="<?= $psa_show_less_url ?>" class="btn btn-outline gap-2 text-sm whitespace-nowrap">
+                                        Show Less
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Sales by Category -->
@@ -656,10 +725,12 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                     <?php
                                     $cat_rows = [];
                                     while ($cs = mysqli_fetch_assoc($category_sales)) $cat_rows[] = $cs;
+                                    // Shares are always computed from the FULL result set
                                     $cat_total = array_sum(array_column($cat_rows, 'total_revenue'));
+                                    $cat_display = $cat_show_all ? $cat_rows : array_slice($cat_rows, 0, $CATEGORY_DISPLAY_LIMIT);
                                     $cat_colors = ['bg-indigo-500', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500', 'bg-purple-500', 'bg-red-500', 'bg-cyan-500'];
                                     $ci = 0;
-                                    foreach ($cat_rows as $cs):
+                                    foreach ($cat_display as $cs):
                                         $share = $cat_total > 0 ? ($cs['total_revenue'] / $cat_total) * 100 : 0;
                                         $color = $cat_colors[$ci % count($cat_colors)];
                                         $ci++;
@@ -693,6 +764,30 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Top 10 summary + More View -->
+                        <?php if (!empty($cat_rows)): ?>
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-700">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">
+                                    <?php if ($cat_show_all): ?>
+                                        Showing all <?= count($cat_rows) ?> categor<?= count($cat_rows) === 1 ? 'y' : 'ies' ?> for the selected period
+                                    <?php else: ?>
+                                        Showing top <?= count($cat_display) ?> of <?= count($cat_rows) ?> categories
+                                    <?php endif; ?>
+                                </p>
+                                <?php if (!$cat_show_all && count($cat_rows) > $CATEGORY_DISPLAY_LIMIT): ?>
+                                    <a href="<?= $cat_more_url ?>" class="btn btn-outline gap-2 text-sm whitespace-nowrap">
+                                        More View
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </a>
+                                <?php elseif ($cat_show_all && count($cat_rows) > $CATEGORY_DISPLAY_LIMIT): ?>
+                                    <a href="<?= $cat_less_url ?>" class="btn btn-outline gap-2 text-sm whitespace-nowrap">
+                                        Show Less
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Daily Sales Breakdown -->
@@ -831,12 +926,9 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
             rows.push(['Best Selling Product', '<?= $best_selling ? addslashes($best_selling['product_name']) : 'No sales data' ?>', '<?= $best_selling ? number_format($best_selling['total_qty']) . ' units sold' : '' ?>']);
             rows.push([]);
             rows.push(['Product Sales Analysis', 'Date', 'Product', 'Quantity Sold', 'Sales Amount']);
-            <?php
-            mysqli_data_seek($product_sales_analysis, 0);
-            while ($psa = mysqli_fetch_assoc($product_sales_analysis)):
-            ?>
+            <?php foreach ($psa_rows as $psa): ?>
                 rows.push(['', '<?= date('d-M', strtotime($psa['sale_date'])) ?>', '<?= addslashes($psa['product_name']) ?>', <?= $psa['total_quantity'] ?>, <?= $psa['total_amount'] ?>]);
-            <?php endwhile; ?>
+            <?php endforeach; ?>
 
             const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
             const blob = new Blob([csv], {
