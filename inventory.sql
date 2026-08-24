@@ -61,7 +61,6 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `profile_image` varchar(255) DEFAULT NULL,
-  `profile_picture` varchar(255) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','staff','cashier') DEFAULT 'staff',
   `status` enum('Active','Inactive')  DEFAULT 'Active',
@@ -141,28 +140,6 @@ CREATE TABLE `purchase_details` (
   CONSTRAINT `purchase_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================================
--- Table: purchase_payments
--- ============================================================
-DROP TABLE IF EXISTS `purchase_payments`;
-CREATE TABLE `purchase_payments` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `purchase_id` int NOT NULL,
-  `payment_method` enum('Cash','KBZPay','Mixed') NOT NULL,
-  `cash_amount` decimal(10,2) DEFAULT '0.00',
-  `kbzpay_amount` decimal(10,2) DEFAULT '0.00',
-  `paid_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `advance_applied` decimal(10,2) DEFAULT '0.00',
-  `advance_created` decimal(10,2) DEFAULT '0.00',
-  `remaining_balance` decimal(10,2) DEFAULT '0.00',
-  `payment_status` enum('Paid','Partial','Unpaid') DEFAULT 'Paid',
-  `payment_date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `notes` text COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `purchase_id` (`purchase_id`),
-  CONSTRAINT `purchase_payments_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchases` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
 
 -- ============================================================
 -- Table: sales
