@@ -38,11 +38,11 @@ $total_paid_amount = 0;
 while ($ps = mysqli_fetch_assoc($paid_summary)) {
     $ta = (float)$ps['total_amount'];
     $tp = (float)$ps['total_paid'];
-    $cp = (float)$ps['cash_paid'];
     $remaining = max(0, round($ta - $tp, 2));
 
-    // Paid Amount = total cash actually paid to suppliers
-    $total_paid_amount += $cp;
+    // Paid Amount = total amount allocated to purchases (cash + advance credit)
+    // Capped at purchase total to handle any floating-point edge cases.
+    $total_paid_amount += min($ta, $tp);
 
     if ($remaining <= 0.01) {
         $paid_stats['Paid']['count']++;

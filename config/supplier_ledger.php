@@ -275,67 +275,37 @@ function rebuildSupplierLedger($conn, $supplier_id) {
         );
     }
 
-    // 2. Supplier payments (credit) - single source of truth for financial transactions
-    $has_supplier_payments = columnExists($conn, 'supplier_payments', 'supplier_id');
-    
-    if ($has_supplier_payments) {
-        $direct = mysqli_query($conn, "
-            SELECT * FROM supplier_payments
-            WHERE supplier_id = $supplier_id AND paid_amount > 0
-            ORDER BY payment_date ASC, id ASC
+    // 2. Purchase payments (credit) - ties payments to specific purchases (matches recalcSupplierBalance)
+    $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
+    if ($amtCol !== '') {
+        $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
+        $advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
+        $payments = mysqli_query($conn, "
+            SELECT pp.id, pp.purchase_id, pu.invoice_no, pp.$amtCol AS paid_amount,
+                   pp.payment_method, pp.payment_date
+            FROM purchase_payments pp
+            INNER JOIN purchases pu ON pp.purchase_id = pu.id
+            WHERE pu.supplier_id = $supplier_id AND (pp.$amtCol$advanceExpr) > 0
+            ORDER BY pp.payment_date ASC, pp.id ASC
         ");
-        if ($direct) {
-            while ($dp = mysqli_fetch_assoc($direct)) {
-                $date = date('Y-m-d', strtotime($dp['payment_date']));
-                $method = isset($dp['payment_method']) && $dp['payment_method'] !== '' && $dp['payment_method'] !== null
-                    ? $dp['payment_method']
+        if ($payments) {
+            while ($pm = mysqli_fetch_assoc($payments)) {
+                $date = date('Y-m-d', strtotime($pm['payment_date']));
+                $method = $pm['payment_method'] !== '' && $pm['payment_method'] !== null
+                    ? $pm['payment_method']
                     : 'Cash';
-                $ref_no = isset($dp['ref_no']) && $dp['ref_no'] !== '' ? $dp['ref_no'] : 'DP-' . $dp['id'];
                 $entries[] = array(
                     'transaction_type' => 'Payment',
-                    'reference_type'   => 'supplier_payment',
-                    'reference_id'     => (int)$dp['id'],
-                    'reference_no'     => $ref_no,
+                    'reference_type'   => 'purchase_payment',
+                    'reference_id'     => (int)$pm['id'],
+                    'reference_no'     => $pm['invoice_no'],
                     'debit'            => 0,
-                    'credit'           => (float)$dp['paid_amount'],
-                    'description'      => "Payment via " . $method,
+                    'credit'           => (float)$pm['paid_amount'],
+                    'description'      => "Payment for Purchase #" . $pm['invoice_no'] . " via " . $method,
                     'transaction_date' => $date,
                     'seq'              => 2,
-                    'sort_id'          => (int)$dp['id'],
+                    'sort_id'          => (int)$pm['id'],
                 );
-            }
-        }
-    } else {
-        // Fallback: older schema without supplier_payments table
-        $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
-        if ($amtCol !== '') {
-            $payments = mysqli_query($conn, "
-                SELECT pp.id, pp.purchase_id, pu.invoice_no, pp.$amtCol AS paid_amount,
-                       pp.payment_method, pp.payment_date
-                FROM purchase_payments pp
-                INNER JOIN purchases pu ON pp.purchase_id = pu.id
-                WHERE pu.supplier_id = $supplier_id AND pp.$amtCol > 0
-                ORDER BY pp.payment_date ASC, pp.id ASC
-            ");
-            if ($payments) {
-                while ($pm = mysqli_fetch_assoc($payments)) {
-                    $date = date('Y-m-d', strtotime($pm['payment_date']));
-                    $method = $pm['payment_method'] !== '' && $pm['payment_method'] !== null
-                        ? $pm['payment_method']
-                        : 'Cash';
-                    $entries[] = array(
-                        'transaction_type' => 'Payment',
-                        'reference_type'   => 'purchase_payment',
-                        'reference_id'     => (int)$pm['id'],
-                        'reference_no'     => $pm['invoice_no'],
-                        'debit'            => 0,
-                        'credit'           => (float)$pm['paid_amount'],
-                        'description'      => "Payment for Purchase #" . $pm['invoice_no'] . " via " . $method,
-                        'transaction_date' => $date,
-                        'seq'              => 2,
-                        'sort_id'          => (int)$pm['id'],
-                    );
-                }
             }
         }
     }
