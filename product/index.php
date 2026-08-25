@@ -170,7 +170,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                     <!-- Image -->
                                     <div class="flex-shrink-0">
                                         <?php if ($view_product['image']): ?>
-                                            <img src="../img/<?= htmlspecialchars($view_product['image']) ?>" class="w-40 h-40 object-cover rounded-2xl shadow-lg">
+                                            <img src="../img/<?= htmlspecialchars($view_product['image'] ?? '') ?>" class="w-40 h-40 object-cover rounded-2xl shadow-lg">
                                         <?php else: ?>
                                             <div class="w-40 h-40 rounded-2xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-gray-400">
                                                 <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,10 +192,10 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                             <span class="<?= $vstockClass ?> px-3 py-1 rounded-full text-xs font-semibold"><?= $vstockLabel ?></span>
                                         </div>
                                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1"><?= htmlspecialchars($view_product['product_name']) ?></h1>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><?= htmlspecialchars($view_product['sku']) ?> <?= $view_product['barcode'] ? ' &middot; ' . htmlspecialchars($view_product['barcode']) : '' ?></p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><?= htmlspecialchars($view_product['sku'] ?? '') ?> <?= $view_product['barcode'] ? ' &middot; ' . htmlspecialchars($view_product['barcode'] ?? '') : '' ?></p>
 
                                         <?php if (!empty($view_product['description'])): ?>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed"><?= nl2br(htmlspecialchars($view_product['description'])) ?></p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed"><?= nl2br(htmlspecialchars($view_product['description'] ?? '')) ?></p>
                                         <?php endif; ?>
                                     </div>
 
@@ -242,7 +242,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                     <div class="p-6 space-y-3">
                                         <div class="flex justify-between py-2 border-b border-gray-100 dark:border-slate-700">
                                             <span class="text-sm text-gray-500">SKU</span>
-                                            <span class="text-sm font-semibold text-gray-900 dark:text-white font-mono"><?= htmlspecialchars($view_product['sku']) ?></span>
+                                            <span class="text-sm font-semibold text-gray-900 dark:text-white font-mono"><?= htmlspecialchars($view_product['sku'] ?? '') ?></span>
                                         </div>
                                         <div class="flex justify-between py-2 border-b border-gray-100 dark:border-slate-700">
                                             <span class="text-sm text-gray-500">Barcode</span>
@@ -400,7 +400,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                                             <input type="file" name="image" id="imageInput" accept="image/*" class="hidden" onchange="previewImage(this)">
                                                             <label for="imageInput" class="cursor-pointer block w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-indigo-400 transition-colors overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-slate-700">
                                                                 <?php if ($is_edit && $product['image']): ?>
-                                                                    <img id="imagePreview" src="../img/<?= htmlspecialchars($product['image']) ?>" class="w-full h-full object-cover">
+                                                                    <img id="imagePreview" src="../img/<?= htmlspecialchars($product['image'] ?? '') ?>" class="w-full h-full object-cover">
                                                                 <?php else: ?>
                                                                     <img id="imagePreview" class="hidden w-full h-full object-cover">
                                                                     <div id="imagePlaceholder" class="text-center">
@@ -424,13 +424,13 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                                 <!-- Product Name -->
                                                 <div class="md:col-span-2">
                                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Product Name <span class="text-red-500">*</span></label>
-                                                    <input type="text" name="product_name" value="<?= $is_edit ? htmlspecialchars($product['product_name']) : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition" placeholder="Enter product name" required>
+                                                    <input type="text" name="product_name" value="<?= $is_edit ? htmlspecialchars($product['product_name'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition" placeholder="Enter product name" required>
                                                 </div>
 
                                                 <!-- SKU -->
                                                 <div>
                                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SKU <span class="text-red-500">*</span></label>
-                                                    <input type="text" name="sku" value="<?= $is_edit ? htmlspecialchars($product['sku']) : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required>
+                                                    <input type="text" name="sku" value="<?= $is_edit ? htmlspecialchars($product['sku'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required>
                                                 </div>
 
                                                 <!-- Barcode -->
@@ -706,7 +706,7 @@ WHERE 1=1
                                         </div>
 
                                         <?php if ($row['image']): ?>
-                                            <img src="../img/<?= htmlspecialchars($row['image']) ?>" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" alt="<?= htmlspecialchars($row['product_name']) ?>">
+                                            <img src="../img/<?= htmlspecialchars($row['image'] ?? '') ?>" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" alt="<?= htmlspecialchars($row['product_name']) ?>">
                                         <?php else: ?>
                                             <div class="w-16 h-16 rounded-xl bg-gray-200 dark:bg-slate-600 flex items-center justify-center text-gray-400">
                                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -724,7 +724,7 @@ WHERE 1=1
                                         
                                         <div class="space-y-1 mb-4">
                                             <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                <span class="font-mono text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">SKU: <?= htmlspecialchars($row['sku']) ?></span>
+                                                <span class="font-mono text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">SKU: <?= htmlspecialchars($row['sku'] ?? '') ?></span>
                                             </div>
                                             <div class="text-[13px] text-gray-600 dark:text-gray-300 font-medium pt-1">
                                                 <?= htmlspecialchars($row['name']) ?> &middot; <?= htmlspecialchars($row['unit_symbol'] ?? '') ?>

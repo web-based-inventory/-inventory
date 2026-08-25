@@ -105,7 +105,7 @@ if (!$result) {
                                 <div class="relative h-36 bg-indigo-50 dark:bg-indigo-500/10 overflow-hidden flex-shrink-0">
                                     <?php $cat_image_ok = !empty($row['image']) && file_exists("../img/" . $row['image']); ?>
                                     <?php if ($cat_image_ok): ?>
-                                        <img src="../img/<?= htmlspecialchars($row['image']) ?>"
+                                        <img src="../img/<?= htmlspecialchars($row['image'] ?? '') ?>"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy">
                                     <?php else: ?>

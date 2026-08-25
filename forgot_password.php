@@ -49,7 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insert_stmt = $conn->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))");
             $insert_stmt->bind_param("is", $user['id'], $token_hash);
             if ($insert_stmt->execute()) {
-                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=" . $token;
+                $base_dir = str_replace('\\', '/', dirname($_SERVER['PHP_SELF']));
+                $base_dir = rtrim($base_dir, '/');
+                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . $base_dir . "/reset_password.php?token=" . $token;
                 
                 if (!sendResetEmail($email, $reset_link, $login_shop_name)) {
                     $message = 'Failed to send the reset email due to a server error. Please try again later.';

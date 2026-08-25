@@ -822,13 +822,13 @@ $page_title = "New Sale (POS)";
                 const form = e.target.closest('.add-cart-form');
                 const formData = new FormData(form);
                 formData.append('add_cart', '1');
-                
+
                 fetch('pos.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.text())
-                .then(html => refreshCartSidebar(html));
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.text())
+                    .then(html => refreshCartSidebar(html));
             }
         });
 
@@ -837,8 +837,8 @@ $page_title = "New Sale (POS)";
             if (removeBtn) {
                 e.preventDefault();
                 fetch(removeBtn.href)
-                .then(res => res.text())
-                .then(html => refreshCartSidebar(html));
+                    .then(res => res.text())
+                    .then(html => refreshCartSidebar(html));
             }
 
             const clearBtn = e.target.closest('.clear-cart-btn');
@@ -848,8 +848,8 @@ $page_title = "New Sale (POS)";
                     return;
                 }
                 fetch(clearBtn.href)
-                .then(res => res.text())
-                .then(html => refreshCartSidebar(html));
+                    .then(res => res.text())
+                    .then(html => refreshCartSidebar(html));
             }
         });
 
