@@ -45,10 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Generate token
             $token = bin2hex(random_bytes(32));
             $token_hash = hash('sha256', $token);
-            $expires_at = date('Y-m-d H:i:s', strtotime('+30 minutes'));
             
-            $insert_stmt = $conn->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)");
-            $insert_stmt->bind_param("iss", $user['id'], $token_hash, $expires_at);
+            $insert_stmt = $conn->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))");
+            $insert_stmt->bind_param("is", $user['id'], $token_hash);
             if ($insert_stmt->execute()) {
                 $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=" . $token;
                 

@@ -16,8 +16,8 @@ require_once __DIR__ . '/../lib/phpmailer/SMTP.php';
 // To generate an App Password, go to Google Account -> Security -> 2-Step Verification -> App passwords
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
-define('SMTP_USER', 'your-gmail@gmail.com'); // Replace with your Gmail address
-define('SMTP_PASS', 'your-16-digit-app-password'); // Replace with your Gmail App Password
+define('SMTP_USER', 'sumyatmin09@gmail.com');
+define('SMTP_PASS', 'unfo yqca tbph jevp');
 
 /**
  * Sends a password reset email using PHPMailer and Gmail SMTP.
@@ -65,8 +65,10 @@ function sendResetEmail($toEmail, $resetLink, $shopName) {
         $mail->send();
         return true;
     } catch (Exception $e) {
-        // Log the server-side error
-        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        // Log the server-side error to a file for diagnostics
+        $log_path = __DIR__ . '/../smtp_debug.log';
+        $entry = date('Y-m-d H:i:s') . ' | sendResetEmail FAILED | To: ' . $toEmail . ' | Error: ' . $mail->ErrorInfo . PHP_EOL;
+        file_put_contents($log_path, $entry, FILE_APPEND);
         return false;
     }
 }
