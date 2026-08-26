@@ -277,6 +277,26 @@ $page_title = "New Sale (POS)";
     <?php include "../includes/theme-init.php"; ?>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
+        /* Preloader to hide FOUC and give feedback while Tailwind CDN loads */
+        #pos-preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-color: #f3f4f6; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.3s ease-out;
+        }
+        .pos-spinner {
+            width: 44px; height: 44px;
+            border: 4px solid #e5e7eb; border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: pos-spin 1s linear infinite;
+        }
+        @keyframes pos-spin { to { transform: rotate(360deg); } }
+        /* Dark mode support for preloader */
+        @media (prefers-color-scheme: dark) {
+            #pos-preloader { background-color: #0f172a; }
+            .pos-spinner { border-color: #334155; border-top-color: #818cf8; }
+        }
+        
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -327,8 +347,38 @@ $page_title = "New Sale (POS)";
         .slide-up { animation: slideUp 0.2s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+    <script>
+        // Preloader script: wait for Tailwind CDN, then hide preloader
+        document.addEventListener('DOMContentLoaded', function() {
+            const preloader = document.getElementById('pos-preloader');
+            const hidePreloader = () => {
+                if(preloader) {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => preloader.remove(), 300);
+                }
+            };
+            if (document.getElementById('tailwind-play-cdn')) {
+                hidePreloader();
+            } else {
+                const observer = new MutationObserver(function(mutations, obs) {
+                    if (document.getElementById('tailwind-play-cdn')) {
+                        hidePreloader();
+                        obs.disconnect();
+                    }
+                });
+                observer.observe(document.head, { childList: true });
+                setTimeout(hidePreloader, 3000); // 3s fallback timeout
+            }
+        });
+    </script>
 </head>
 <body class="bg-gray-100 dark:bg-slate-900 overflow-hidden">
+    <!-- Preloader Overlay -->
+    <div id="pos-preloader">
+        <div class="pos-spinner"></div>
+        <div style="margin-top: 16px; font-family: sans-serif; font-size: 14px; color: #6b7280; font-weight: 600;">Loading POS...</div>
+    </div>
+
     <div class="flex h-screen overflow-hidden">
         <?php include "../includes/sidebar.php"; ?>
 
