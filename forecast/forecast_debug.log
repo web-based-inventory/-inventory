@@ -1,0 +1,3192 @@
+=== Forecast Debug Log (Generated: 2026-08-26 07:25:42) ===
+
+{
+    "product_id": "17",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "18",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "19",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "20",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "21",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "22",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "23",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "24",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "25",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "26",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "27",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "28",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "29",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "30",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "33",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "35",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "36",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "37",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "38",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "39",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "40",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "41",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "42",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "43",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "44",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "45",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "46",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "47",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "48",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "49",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "50",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "51",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "52",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "53",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "54",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "55",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "56",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "57",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "58",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "59",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "60",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "61",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "62",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "63",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "64",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "65",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "66",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "67",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "68",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "69",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "70",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "71",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "72",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "73",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "74",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "75",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "76",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "77",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "78",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "79",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "80",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "81",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "82",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "83",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "84",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "85",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "86",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "87",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "88",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "89",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "90",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "91",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "92",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "93",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "94",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "95",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "96",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "97",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "98",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "99",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "100",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "101",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "102",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "103",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "104",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "105",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "106",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "107",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "108",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "109",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "110",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "111",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "112",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "113",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "114",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "115",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "116",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "117",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "119",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "120",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "121",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "122",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "123",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "124",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "125",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "126",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "127",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "129",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "130",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "131",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "133",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "134",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "135",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "136",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "137",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "138",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "139",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "140",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "141",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "142",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "143",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "144",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "145",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "146",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "147",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "148",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "149",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "150",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "151",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "152",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "153",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "154",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "155",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "156",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "157",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "158",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "164",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "165",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "166",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "167",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "168",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "169",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "170",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "171",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "172",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "173",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "175",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "176",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "177",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "179",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "180",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "181",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "182",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "183",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "184",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "185",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "186",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "187",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "188",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "189",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "190",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "191",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "192",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "194",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "196",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "197",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "198",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "199",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "200",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "201",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "202",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "203",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "204",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "205",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "206",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "207",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "208",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "209",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "210",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "211",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "212",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "213",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "214",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "215",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "216",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "217",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "218",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "219",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "220",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "222",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "223",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "224",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "225",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "226",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "227",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "228",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "229",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "230",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "231",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "232",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "233",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "234",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "235",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "236",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "237",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "238",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "239",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "240",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "241",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "242",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "243",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "244",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "245",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "246",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "247",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "248",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "249",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "250",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "251",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "252",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "253",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "254",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "255",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "256",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "257",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "258",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "259",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "260",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "261",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "262",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "263",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "265",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "266",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "267",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "268",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "269",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "270",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "271",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "272",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "273",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "274",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "275",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "277",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "278",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "279",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "280",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "281",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "282",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "283",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "284",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "287",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "288",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "289",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "292",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "293",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "294",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "295",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "296",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "297",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "298",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "299",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "300",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "301",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "302",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "303",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "304",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "305",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "306",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "307",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "308",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "309",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "310",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "311",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "312",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "313",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "314",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "316",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "317",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "318",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "319",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "325",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "326",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "327",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "328",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "329",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "330",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "333",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "334",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "335",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "336",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "337",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "338",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "339",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "340",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "341",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "342",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "343",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "344",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "345",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "346",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "347",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "348",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "349",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "350",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "351",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "352",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "353",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "354",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "355",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "356",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "357",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "360",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "362",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "363",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "364",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "365",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "366",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "367",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
+{
+    "product_id": "368",
+    "days_with_sales": 0,
+    "total_quantity_sold": 0,
+    "daily_average": 0,
+    "forecast_7_days": 0,
+    "forecast_30_days": 0,
+    "demand_level": "Insufficient"
+}
+
