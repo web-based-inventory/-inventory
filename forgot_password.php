@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Invalid email format.';
         $message_type = 'error';
     } else {
-        // Find user
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND status = 'Active' LIMIT 1");
+        // Find user - Restrict to Admins only
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND status = 'Active' AND role = 'Admin' LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
