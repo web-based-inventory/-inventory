@@ -117,17 +117,15 @@ if (isset($_POST['save_purchase'])) {
             // purchase owes. Any excess (advance_created) belongs to the
             // supplier as advance credit — it is already recorded in full in
             // supplier_payments, so it must NOT also be stored inside this
-            // purchase's purchase_payments row, otherwise the same money is
-            // counted twice and "Paid" exceeds the purchase amount.
-            $cash_applied = min($paid_amount, $effective_total);
+            // Overpayments are now allowed to be recorded against the purchase.
+            $cash_applied = $paid_amount;
 
             $user_id = (int)($_SESSION['user_id'] ?? 0);
             ensurePurchasePaymentColumns($conn);
 
             // ── Insert purchase record ──
-            // total_paid only ever counts money applied to THIS purchase
-            // (capped cash + advance credit), never the overpayment excess.
-            $purchase_total_paid = min($total, $total_paid);
+            // total_paid now includes the full payment, even if it exceeds the total_amount.
+            $purchase_total_paid = $total_paid;
             $ins_cols = "invoice_no, supplier_id, user_id, purchase_date, total_amount, total_paid, remaining_balance, payment_status";
             $ins_vals = "'$invoice_no', '$supplier_id', $user_id, '$purchase_date', '$total', $purchase_total_paid, $remaining_balance, '$payment_status'";
             if (columnExists($conn, 'purchases', 'status')) {

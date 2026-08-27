@@ -209,9 +209,10 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                         </div>
                         <div class="min-w-[150px]">
                             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Payment</label>
-                            <select name="payment_status" class="form-input text-sm">
+                                <select name="payment_status" class="form-input text-sm">
                                 <option value="">All Status</option>
                                 <option value="Paid" <?= $payment_status === 'Paid' ? 'selected' : '' ?>>Paid</option>
+                                <option value="Partial" <?= $payment_status === 'Partial' ? 'selected' : '' ?>>Partial</option>
                                 <option value="Unpaid" <?= $payment_status === 'Unpaid' ? 'selected' : '' ?>>Unpaid</option>
                             </select>
                         </div>

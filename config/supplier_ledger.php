@@ -275,18 +275,13 @@ function rebuildSupplierLedger($conn, $supplier_id) {
         );
     }
 
-    // 2. Purchase payments (credit) - ties payments to specific purchases (matches recalcSupplierBalance)
-    $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
-    if ($amtCol !== '') {
-        $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
-        $advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
+    // 2. Supplier payments (credit) - actual cash payments
+    if (columnExists($conn, 'supplier_payments', 'supplier_id')) {
         $payments = mysqli_query($conn, "
-            SELECT pp.id, pp.purchase_id, pu.invoice_no, pp.$amtCol AS paid_amount,
-                   pp.payment_method, pp.payment_date
-            FROM purchase_payments pp
-            INNER JOIN purchases pu ON pp.purchase_id = pu.id
-            WHERE pu.supplier_id = $supplier_id AND (pp.$amtCol$advanceExpr) > 0
-            ORDER BY pp.payment_date ASC, pp.id ASC
+            SELECT id, ref_no, paid_amount, payment_method, payment_date, notes
+            FROM supplier_payments
+            WHERE supplier_id = $supplier_id AND paid_amount > 0
+            ORDER BY payment_date ASC, id ASC
         ");
         if ($payments) {
             while ($pm = mysqli_fetch_assoc($payments)) {
@@ -294,18 +289,76 @@ function rebuildSupplierLedger($conn, $supplier_id) {
                 $method = $pm['payment_method'] !== '' && $pm['payment_method'] !== null
                     ? $pm['payment_method']
                     : 'Cash';
+                $credit_total = (float)$pm['paid_amount'];
+
+                $desc = "Payment via " . $method;
+                if (!empty($pm['ref_no'])) {
+                    $desc .= " (Ref: " . $pm['ref_no'] . ")";
+                }
+
                 $entries[] = array(
                     'transaction_type' => 'Payment',
-                    'reference_type'   => 'purchase_payment',
+                    'reference_type'   => 'supplier_payment',
                     'reference_id'     => (int)$pm['id'],
-                    'reference_no'     => $pm['invoice_no'],
+                    'reference_no'     => $pm['ref_no'],
                     'debit'            => 0,
-                    'credit'           => (float)$pm['paid_amount'],
-                    'description'      => "Payment for Purchase #" . $pm['invoice_no'] . " via " . $method,
+                    'credit'           => $credit_total,
+                    'description'      => $desc,
                     'transaction_date' => $date,
                     'seq'              => 2,
                     'sort_id'          => (int)$pm['id'],
                 );
+            }
+        }
+    } else {
+        // Fallback to purchase_payments if supplier_payments doesn't exist
+        $amtCol = getPaymentAmountCol($conn, 'purchase_payments');
+        if ($amtCol !== '') {
+            $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
+            $advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
+            $advanceSelect = $hasAdvance ? "COALESCE(pp.advance_applied, 0)" : "0";
+            $payments = mysqli_query($conn, "
+                SELECT pp.id, pp.purchase_id, pu.invoice_no, pp.$amtCol AS paid_amount,
+                       $advanceSelect AS advance_applied,
+                       pp.payment_method, pp.payment_date
+                FROM purchase_payments pp
+                INNER JOIN purchases pu ON pp.purchase_id = pu.id
+                WHERE pu.supplier_id = $supplier_id AND (pp.$amtCol$advanceExpr) > 0
+                ORDER BY pp.payment_date ASC, pp.id ASC
+            ");
+            if ($payments) {
+                while ($pm = mysqli_fetch_assoc($payments)) {
+                    $date = date('Y-m-d', strtotime($pm['payment_date']));
+                    $method = $pm['payment_method'] !== '' && $pm['payment_method'] !== null
+                        ? $pm['payment_method']
+                        : 'Cash';
+                    $cash_paid = (float)$pm['paid_amount'];
+                    $adv_applied = (float)$pm['advance_applied'];
+                    $credit_total = $cash_paid + $adv_applied;
+
+                    if ($adv_applied > 0 && $cash_paid > 0) {
+                        $desc = "Payment for Purchase #" . $pm['invoice_no'] . " — " .
+                                number_format($adv_applied, 2) . " advance + " .
+                                number_format($cash_paid, 2) . " cash via " . $method;
+                    } elseif ($adv_applied > 0) {
+                        $desc = "Advance applied to Purchase #" . $pm['invoice_no'];
+                    } else {
+                        $desc = "Payment for Purchase #" . $pm['invoice_no'] . " via " . $method;
+                    }
+
+                    $entries[] = array(
+                        'transaction_type' => 'Payment',
+                        'reference_type'   => 'purchase_payment',
+                        'reference_id'     => (int)$pm['id'],
+                        'reference_no'     => $pm['invoice_no'],
+                        'debit'            => 0,
+                        'credit'           => $credit_total,
+                        'description'      => $desc,
+                        'transaction_date' => $date,
+                        'seq'              => 2,
+                        'sort_id'          => (int)$pm['id'],
+                    );
+                }
             }
         }
     }

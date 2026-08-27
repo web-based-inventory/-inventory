@@ -27,6 +27,8 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/helpers.php';
 
+exit("This repair script is disabled. Overpayments on purchases are now supported and tracked accurately in the database.\n");
+
 if (!columnExists($conn, 'purchase_payments', 'paid_amount')) {
     exit("purchase_payments.paid_amount missing - nothing to repair.\n");
 }

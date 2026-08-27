@@ -130,11 +130,11 @@ if (isset($_GET['edit_id'])) {
                         <table class="data-table w-full">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Username</th>
+                                    <th class="w-[3%]">#</th>
+                                    <th class="w-[12%]">Username</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th class="center">Role</th>
+                                    <th class="w-[5%]">Role</th>
                                     <th class="center">Status</th>
                                     <th>Created</th>
                                     <th class="center">Actions</th>

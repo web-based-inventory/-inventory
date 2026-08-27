@@ -205,16 +205,13 @@ function updatePurchasePaymentStatus($conn, $purchase_id) {
     $sum_expr = $has_advance ? "SUM($amtCol + COALESCE(advance_applied, 0))" : "SUM($amtCol)";
     $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE($sum_expr, 0) AS total_paid FROM purchase_payments WHERE purchase_id = $purchase_id"));
     $total_paid = max(0, (float)$pay_res['total_paid']);
-    if ($total_paid > $total_amount) {
-        $total_paid = $total_amount;
-    }
+    $total_paid = (float)$pay_res['total_paid'];
 
-    $remaining_balance = max(0, round($total_amount - $total_paid, 2));
+    $remaining_balance = round($total_amount - $total_paid, 2);
 
-    if ($total_amount > 0 && $total_paid >= $total_amount - 0.01) {
+    if ($total_amount > 0 && $total_paid >= $total_amount) {
         $payment_status = 'Paid';
-        $remaining_balance = 0;
-    } elseif ($total_paid > 0.01) {
+    } elseif ($total_paid > 0) {
         $payment_status = 'Partial';
     } else {
         $payment_status = 'Unpaid';
@@ -245,13 +242,16 @@ function recalcSupplierBalance($conn, $supplier_id) {
     $purch_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total_amount), 0) AS total FROM purchases WHERE supplier_id = $supplier_id"));
     $total_purchases = max(0, (float)$purch_res['total']);
 
-    // Primary source: purchase_payments (ties payments to specific purchases)
-    // This matches how the purchase report calculates outstanding balance.
-    $total_payments = 0;
-    $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
-    $advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
-    $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(pp.$amtCol$advanceExpr), 0) AS total FROM purchase_payments pp INNER JOIN purchases p ON pp.purchase_id = p.id WHERE p.supplier_id = $supplier_id"));
-    $total_payments = max(0, (float)$pay_res['total']);
+    // Primary source: supplier_payments (tracks ALL cash payments)
+    if (columnExists($conn, 'supplier_payments', 'supplier_id')) {
+        $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(paid_amount), 0) AS total FROM supplier_payments WHERE supplier_id = $supplier_id"));
+        $total_payments = max(0, (float)$pay_res['total']);
+    } else {
+        $hasAdvance = columnExists($conn, 'purchase_payments', 'advance_applied');
+        $advanceExpr = $hasAdvance ? " + COALESCE(pp.advance_applied, 0)" : "";
+        $pay_res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(pp.$amtCol$advanceExpr), 0) AS total FROM purchase_payments pp INNER JOIN purchases p ON pp.purchase_id = p.id WHERE p.supplier_id = $supplier_id"));
+        $total_payments = max(0, (float)$pay_res['total']);
+    }
 
     // Outstanding Balance vs Advance Credit (never mixed)
     if ($total_purchases > $total_payments) {
