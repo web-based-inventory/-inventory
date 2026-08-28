@@ -104,8 +104,10 @@ if ($role === 'cashier') {
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900">
-    <div class="flex min-h-screen">
+<body class="bg-gray-50 dark:bg-slate-900 bg-cover bg-center bg-fixed" style="background-image: url('../img/bg_inventory.jpg');">
+    <!-- Overlay for better readability -->
+    <div class="fixed inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-[2px] z-0 pointer-events-none"></div>
+    <div class="flex min-h-screen relative z-10">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">
             <?php include "../includes/header.php"; ?>

@@ -135,7 +135,8 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
     </style>
 </head>
 <body class="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 font-sans antialiased text-gray-100">
-    <!-- Animated background -->
+    <!-- Animated background with Image -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-cover bg-center bg-no-repeat opacity-40" style="background-image: url('img/bg_inventory.jpg'); mix-blend-mode: overlay;"></div>
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/20 blur-[100px] mix-blend-screen animate-blob"></div>
         <div class="absolute top-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[100px] mix-blend-screen animate-blob animation-delay-2000"></div>
