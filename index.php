@@ -114,7 +114,7 @@ if (isset($_SESSION['user_id'])) {
     <section class="relative h-screen w-full overflow-hidden bg-navy">
 
         <!-- Cover image with slow zoom -->
-        <img src="img/inventory.png" alt="" class="kenburns absolute inset-0 w-full h-full object-cover">
+        <img src="img/home.png" alt="" class="kenburns absolute inset-0 w-full h-full object-cover">
 
         <!-- Overlays -->
         <div class="absolute inset-0 cover-overlay pointer-events-none"></div>
