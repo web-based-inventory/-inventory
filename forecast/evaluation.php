@@ -8,19 +8,21 @@ $page_title = "Forecast Evaluation";
 
 // 1. Completed Forecasts (Evaluation period ended)
 $completed_forecasts_query = mysqli_query($conn, "
-    SELECT f.id, f.forecast_quantity, f.forecast_date, f.product_id, p.product_name,
-           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end,
+    SELECT f.id, 
+           CASE WHEN f.forecast_date < '2026-08-28' THEN ROUND(f.forecast_quantity / 30 * 7) ELSE f.forecast_quantity END AS forecast_quantity,
+           f.forecast_date, f.product_id, p.product_name,
+           DATE_ADD(f.forecast_date, INTERVAL 7 DAY) AS evaluation_end,
            COALESCE((
                SELECT SUM(sd2.quantity)
                FROM sale_details sd2
                JOIN sales s2 ON sd2.sale_id = s2.id
                WHERE sd2.product_id = f.product_id
                  AND DATE(s2.created_at) >= f.forecast_date
-                 AND DATE(s2.created_at) <  DATE_ADD(f.forecast_date, INTERVAL 30 DAY)
+                 AND DATE(s2.created_at) <  DATE_ADD(f.forecast_date, INTERVAL 7 DAY)
            ), 0) AS actual_sold
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
-    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) <= CURDATE()
+    WHERE DATE_ADD(f.forecast_date, INTERVAL 7 DAY) <= CURDATE()
       AND f.forecast_date >= '2026-07-20'
     ORDER BY f.forecast_date DESC
 ");
@@ -67,11 +69,13 @@ $average_accuracy = $accuracy_count > 0 ? ($total_accuracy / $accuracy_count) : 
 // 2. Pending Forecasts (Evaluation period ongoing)
 $pending_forecasts = [];
 $pending_query = mysqli_query($conn, "
-    SELECT f.id, f.forecast_quantity, f.forecast_date, f.product_id, p.product_name,
-           DATE_ADD(f.forecast_date, INTERVAL 30 DAY) AS evaluation_end
+    SELECT f.id, 
+           CASE WHEN f.forecast_date < '2026-08-28' THEN ROUND(f.forecast_quantity / 30 * 7) ELSE f.forecast_quantity END AS forecast_quantity,
+           f.forecast_date, f.product_id, p.product_name,
+           DATE_ADD(f.forecast_date, INTERVAL 7 DAY) AS evaluation_end
     FROM forecasts f
     JOIN products p ON f.product_id = p.id
-    WHERE DATE_ADD(f.forecast_date, INTERVAL 30 DAY) > CURDATE()
+    WHERE DATE_ADD(f.forecast_date, INTERVAL 7 DAY) > CURDATE()
       AND f.forecast_date >= '2026-07-20'
     ORDER BY f.forecast_date DESC
 ");
@@ -139,7 +143,7 @@ usort($all_evaluations, function ($a, $b) {
                     </div>
 
                     <!-- Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-6">
+                    <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-6">
                         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 fade-in">
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -169,7 +173,7 @@ usort($all_evaluations, function ($a, $b) {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Evaluation Table -->
                     <div class="card fade-in" style="animation-delay: 0.2s">

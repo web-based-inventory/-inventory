@@ -229,7 +229,7 @@ if ($role === 'cashier') {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= number_format($forecast_summary['total'] ?? 0) ?></p>
+
                                     <p class="text-sm text-cyan-700 dark:text-cyan-300">Forecast Demand (Units)</p>
                                     <p class="text-[11px] text-cyan-600/70 dark:text-cyan-400/70 mt-0.5">
                                         High: <?= $forecast_summary['high_d'] ?? 0 ?> · Med: <?= $forecast_summary['med_d'] ?? 0 ?> · Low: <?= $forecast_summary['low_d'] ?? 0 ?>

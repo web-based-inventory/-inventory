@@ -11,27 +11,26 @@ $action = $_GET['action'] ?? 'dashboard';
  * Calculate demand forecast for a product using Moving Average on actual daily sales.
  *
  * Algorithm:
- * 1. Query actual sales from sale_details joined with sales for the last 30 days.
+ * 1. Query actual sales from sale_details joined with sales for the last 7 days.
  * 2. Group sales by calendar date, summing quantity sold per day.
- * 3. Create a complete 30-day date range in PHP; assign 0 to dates with no sales.
- * 4. Daily Average = Total quantity sold / 30 (always divides by 30).
+ * 3. Create a complete 7-day date range in PHP; assign 0 to dates with no sales.
+ * 4. Daily Average = Total quantity sold / 7.
  * 5. 7-Day Forecast = Daily Average × 7
- * 6. 30-Day Forecast = Daily Average × 30
  *
  * Uses prepared statements for the product_id parameter (no SQL injection).
  *
  * @param mysqli $conn      Database connection
  * @param int    $product_id Product to forecast
- * @param int    $days       Look-back window (default 30)
- * @return array Forecast metrics including total_sold, daily_avg, forecast_7, forecast_30
+ * @param int    $days       Look-back window (default 7)
+ * @return array Forecast metrics including total_sold, daily_avg, forecast_7
  */
-function calculateForecast($conn, $product_id, $days = 30)
+function calculateForecast($conn, $product_id, $days = 7)
 {
     // The cutoff date is 2026-07-20 to avoid using deleted sales data
     $cutoff_date = '2026-07-20';
     $target_start_date = date('Y-m-d', strtotime("-{$days} days"));
 
-    // We start from whichever is later: 30 days ago or the cutoff date
+    // We start from whichever is later: 7 days ago or the cutoff date
     $start_date = max($cutoff_date, $target_start_date);
 
     // Step 1: Retrieve actual sales aggregated by day using prepared statement
@@ -85,7 +84,6 @@ function calculateForecast($conn, $product_id, $days = 30)
 
     // Step 6: Future demand forecasts (rounded to whole units)
     $forecast_7  = (int)round($daily_avg * 7);
-    $forecast_30 = (int)round($daily_avg * 30);
 
     // Step 7: Determine demand level from real daily average
     //   High: daily average >= 5 units/day
@@ -109,7 +107,6 @@ function calculateForecast($conn, $product_id, $days = 30)
         'total_quantity_sold'    => $total,
         'daily_average'          => round($daily_avg, 4),
         'forecast_7_days'        => $forecast_7,
-        'forecast_30_days'       => $forecast_30,
         'demand_level'           => $demand_level,
     ];
 
@@ -123,7 +120,6 @@ function calculateForecast($conn, $product_id, $days = 30)
         'total_sold'  => $total,
         'daily_avg'   => round($daily_avg, 2),
         'forecast_7'  => $forecast_7,
-        'forecast_30' => $forecast_30,
         'insufficient' => ($demand_level === 'Insufficient'),
         'demand_level' => $demand_level,
         'debug'       => $debug_info
@@ -145,7 +141,7 @@ if ($action === 'generate') {
     file_put_contents($debug_log_path, "=== Forecast Debug Log (Generated: " . date('Y-m-d H:i:s') . ") ===\n\n");
 
     while ($p = mysqli_fetch_assoc($products)) {
-        $forecast = calculateForecast($conn, $p['id'], 30);
+        $forecast = calculateForecast($conn, $p['id'], 7);
 
         if ($forecast['insufficient']) {
             $demand = 'Insufficient';
@@ -160,7 +156,7 @@ if ($action === 'generate') {
             elseif ($daily_avg >= 1) $demand = 'Medium';
             else $demand = 'Low';
 
-            $forecast_qty = $forecast['forecast_30'];
+            $forecast_qty = $forecast['forecast_7'];
 
             // Recommended purchase quantity based on forecast - current stock
             $recommended = max(0, $forecast_qty - $p['current_stock']);
@@ -199,7 +195,7 @@ $has_forecast = mysqli_fetch_assoc(mysqli_query(
     "SELECT COUNT(*) AS count FROM forecasts WHERE forecast_date = CURDATE()"
 ))['count'] > 0;
 
-// Total expected demand (30-day forecast sum)
+// Total expected demand (7-day forecast sum)
 $total_forecast = mysqli_fetch_assoc(mysqli_query(
     $conn,
     "SELECT COALESCE(SUM(forecast_quantity), 0) AS total FROM forecasts WHERE forecast_date = CURDATE()"
@@ -263,11 +259,11 @@ while ($p = mysqli_fetch_assoc($products_forecast)) {
     $chart_forecast[] = (int)$p['forecast_quantity'];
 }
 
-// ============ Sales Trend (30 days) ============
+// ============ Sales Trend (7 days) ============
 $sales_trend = mysqli_query($conn, "
     SELECT DATE(created_at) AS day, COALESCE(SUM(total_amount), 0) AS total
     FROM sales
-    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
     GROUP BY DATE(created_at) ORDER BY day ASC
 ");
 $trend_labels = [];
@@ -361,7 +357,7 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                                     <span id="btnText">Generate Forecast</span>
                                 </button>
                             </div>
-                            <span class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Simple Moving Average &middot; Last 30 Days &rarr; Next 30 Days &middot; Based on Actual Sales</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Simple Moving Average &middot; Last 7 Days &rarr; Next 7 Days &middot; Based on Actual Sales</span>
                             <?php if ($generated): ?>
                                 <span class="text-xs text-indigo-500 mt-1">Last updated: <?= date('Y-m-d H:i:s') ?></span>
                             <?php endif; ?>
@@ -399,21 +395,8 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                     <?php else: ?>
 
                         <!-- Dashboard Stats -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 mb-6">
-                            <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl shadow-md border border-indigo-100 dark:border-indigo-800/50 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-in">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-2xl font-bold text-gray-900 dark:text-white"><?= number_format($total_forecast) ?></p>
-                                        <p class="text-sm text-indigo-700 dark:text-indigo-300">Expected Demand</p>
-                                        <p class="text-[11px] text-indigo-600/70 dark:text-indigo-400/70 mt-0.5">units (next 30 days)</p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-6">
+
                             <div class="bg-red-50 dark:bg-red-900/30 rounded-2xl shadow-md border border-red-100 dark:border-red-800/50 p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 fade-in" style="animation-delay: 0.05s">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 rounded-xl flex items-center justify-center">
@@ -452,7 +435,7 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                                         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                         </svg>
-                                        Actual Sales — Last 30 Days
+                                        Actual Sales — Last 7 Days
                                     </h2>
                                 </div>
                                 <div class="card-body">
@@ -578,7 +561,7 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                                         <tr>
                                             <th>Product</th>
                                             <th class="num">Current Stock</th>
-                                            <th class="num">30-Day Forecast</th>
+                                            <th class="num">7-Day Forecast</th>
                                             <th class="num">Recommended Purchase</th>
                                             <th class="center">Demand</th>
                                             <th class="center">Status</th>
@@ -672,23 +655,23 @@ while ($t = mysqli_fetch_assoc($sales_trend)) {
                 <div class="p-6">
                     <ul class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
                         <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
-                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Method:</strong> 
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Method:</strong>
                             <span>Simple Moving Average</span>
                         </li>
                         <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
-                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Historical Period:</strong> 
-                            <span>Last 30 Days</span>
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Historical Period:</strong>
+                            <span>Last 7 Days</span>
                         </li>
                         <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
-                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Forecast Period:</strong> 
-                            <span>Next 30 Days</span>
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Forecast Period:</strong>
+                            <span>Next 7 Days</span>
                         </li>
                         <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
-                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Data Source:</strong> 
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Data Source:</strong>
                             <span>Actual Sales</span>
                         </li>
                         <li class="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4">
-                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Update:</strong> 
+                            <strong class="font-semibold text-gray-900 dark:text-white w-32 shrink-0">Update:</strong>
                             <span>Generated using the latest available sales data</span>
                         </li>
                     </ul>

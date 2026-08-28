@@ -17,7 +17,7 @@ $low_stock = mysqli_query($conn, "
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN units u ON p.unit_id = u.unit_id
-    WHERE p.status = 'Active' AND p.current_stock <= 10
+    WHERE p.status = 'Active' AND p.current_stock <= p.reorder_level AND p.current_stock > 0
     ORDER BY p.current_stock ASC
 ");
 $low_stock_count = mysqli_num_rows($low_stock);
@@ -280,7 +280,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                 <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                Low Stock Products (10 or fewer units)
+                                Low Stock Products (At or below Reorder Level)
                             </h2>
                         </div>
                         <div class="table-wrap">
@@ -325,7 +325,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                                         </svg>
                                                     </div>
                                                     <h3 class="text-base font-semibold text-gray-500">All products are well stocked</h3>
-                                                    <p class="text-sm text-gray-400 mt-1">No products with 10 or fewer units.</p>
+                                                    <p class="text-sm text-gray-400 mt-1">No products are below their reorder level.</p>
                                                 </div>
                                             </td>
                                         </tr>
