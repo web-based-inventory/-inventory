@@ -299,7 +299,6 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                 <div>
                                     <p class="text-sm text-purple-600">Net Profit</p>
                                     <p class="text-2xl font-bold <?= $profit_summary['profit'] < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white' ?> leading-none truncate" title="Full amount: <?= number_format($profit_summary['profit']) ?> Ks"><?= compactMoney($profit_summary['profit']) ?> <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Ks</span></p>
-                                    <p class="text-xs <?= $margin >= 20 ? 'text-emerald-600 dark:text-emerald-400' : ($margin >= 10 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400') ?> mt-1"><?= number_format($margin, 1) ?>% margin</p>
                                 </div>
                             </div>
                         </div>
@@ -343,7 +342,6 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                         <th class="num w-[14%]">Revenue</th>
                                         <th class="num w-[14%]">Cost</th>
                                         <th class="num w-[14%]">Profit</th>
-                                        <th class="num w-[12%]">Margin</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -362,12 +360,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                             <td class="num"><?= number_format($pr['revenue']) ?> Ks</td>
                                             <td class="num"><?= number_format($pr['cost']) ?> Ks</td>
                                             <td class="num font-semibold <?= $pr['profit'] < 0 ? 'text-red-600' : 'text-emerald-600' ?>"><?= number_format($pr['profit']) ?> Ks</td>
-                                            <td class="num <?= $pm < 0 ? 'text-red-600' : ($pm < 10 ? 'text-amber-600' : '') ?>"><?= number_format($pm, 1) ?>%</td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($prod_rows)): ?>
                                         <tr>
-                                            <td colspan="8" class="text-center py-16">
+                                            <td colspan="7" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
                                                         <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +402,6 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                         <th class="num w-[16%]">Revenue</th>
                                         <th class="num w-[14%]">Cost</th>
                                         <th class="num w-[14%]">Profit</th>
-                                        <th class="num w-[14%]">Margin</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -426,14 +422,11 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
                                             <td class="num"><?= number_format($cr['revenue']) ?> Ks</td>
                                             <td class="num"><?= number_format($cr['cost']) ?> Ks</td>
                                             <td class="num font-semibold <?= $cr['profit'] < 0 ? 'text-red-600' : 'text-emerald-600' ?>"><?= number_format($cr['profit']) ?> Ks</td>
-                                            <td class="num">
-                                                <?= number_format($cm, 1) ?>%
-                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($cat_rows)): ?>
                                         <tr>
-                                            <td colspan="7" class="text-center py-16">
+                                            <td colspan="6" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-4">
                                                         <svg class="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,19 +547,17 @@ $gross_profit = $profit_summary['revenue'] - $profit_summary['cost'];
             rows.push(['Total Revenue', <?= $profit_summary['revenue'] ?>]);
             rows.push(['Total Cost', <?= $profit_summary['cost'] ?>]);
             rows.push(['Net Profit', <?= $profit_summary['profit'] ?>]);
-            rows.push(['Profit Margin', '<?= number_format($margin, 1) ?>%']);
             rows.push([]);
             rows.push(['Profit by Product']);
-            rows.push(['Product', 'SKU', 'Qty Sold', 'Revenue', 'Cost', 'Profit', 'Margin']);
+            rows.push(['Product', 'SKU', 'Qty Sold', 'Revenue', 'Cost', 'Profit']);
             <?php foreach ($prod_rows as $pr): ?>
-                $pm = <?= $pr['revenue'] ?> > 0 ? (<?= $pr['profit'] ?> / <?= $pr['revenue'] ?>) * 100 : 0;
-                rows.push(['<?= addslashes($pr['product_name']) ?>', '<?= addslashes($pr['sku'] ?? '') ?>', <?= $pr['total_qty'] ?>, <?= $pr['revenue'] ?>, <?= $pr['cost'] ?>, <?= $pr['profit'] ?>, $pm.toFixed(1) + '%']);
+                rows.push(['<?= addslashes($pr['product_name']) ?>', '<?= addslashes($pr['sku'] ?? '') ?>', <?= $pr['total_qty'] ?>, <?= $pr['revenue'] ?>, <?= $pr['cost'] ?>, <?= $pr['profit'] ?>]);
             <?php endforeach; ?>
             rows.push([]);
             rows.push(['Profit by Category']);
-            rows.push(['Category', 'Qty Sold', 'Revenue', 'Cost', 'Profit', 'Margin']);
+            rows.push(['Category', 'Qty Sold', 'Revenue', 'Cost', 'Profit']);
             <?php foreach ($cat_rows as $cr): ?>
-                rows.push(['<?= addslashes($cr['category_name']) ?>', <?= $cr['total_qty'] ?>, <?= $cr['revenue'] ?>, <?= $cr['cost'] ?>, <?= $cr['profit'] ?>, '<?= $cr['revenue'] > 0 ? number_format(($cr['profit'] / $cr['revenue']) * 100, 1) : '0.0' ?>%']);
+                rows.push(['<?= addslashes($cr['category_name']) ?>', <?= $cr['total_qty'] ?>, <?= $cr['revenue'] ?>, <?= $cr['cost'] ?>, <?= $cr['profit'] ?>]);
             <?php endforeach; ?>
 
             const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');

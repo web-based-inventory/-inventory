@@ -93,9 +93,12 @@ $category_sales = mysqli_query($conn, "
 // Mixed payment is counted once as its cash part + once as its KPay part,
 // never as a separate "Mixed" category. Legacy sales without a payment
 // record fall back to their full total as Cash.
+$has_change = columnExists($conn, 'sale_payments', 'change_amount');
+$change_sql = $has_change ? "COALESCE(sp.change_amount, 0)" : "0";
+
 $payment_summary = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT COALESCE(SUM(CASE WHEN sp.id IS NULL THEN s.total_amount ELSE 0 END), 0) AS legacy_cash,
-           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL THEN COALESCE(sp.cash_amount, 0) ELSE 0 END), 0) AS cash_from_payments,
+           COALESCE(SUM(CASE WHEN sp.id IS NOT NULL THEN COALESCE(sp.cash_amount, 0) - $change_sql ELSE 0 END), 0) AS cash_from_payments,
            COALESCE(SUM(CASE WHEN sp.id IS NOT NULL THEN COALESCE(sp.kbzpay_amount, 0) ELSE 0 END), 0) AS kbzpay_total,
            COALESCE(SUM(CASE WHEN sp.id IS NULL THEN 1 ELSE 0 END), 0) AS legacy_count,
            COALESCE(SUM(CASE WHEN sp.id IS NOT NULL AND COALESCE(sp.cash_amount, 0) > 0 THEN 1 ELSE 0 END), 0) AS cash_sales_count,
@@ -532,7 +535,7 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                                 <div class="progress-bar">
                                                     <div class="progress-fill <?= $c['fill'] ?>" style="width: <?= $pct ?>%"></div>
                                                 </div>
-                                                <p class="text-xs text-gray-500 mt-1.5 font-medium"><?= $payment_counts[$method] ?> transactions &middot; <?= number_format($pct, 1) ?>% share</p>
+                                                <p class="text-xs text-gray-500 mt-1.5 font-medium"><?= $payment_counts[$method] ?> transactions</p>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -571,7 +574,6 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                         <th class="num w-[10%]">Qty Sold</th>
                                         <th class="num w-[16%]">Revenue</th>
                                         <th class="num w-[16%]">Profit</th>
-                                        <th class="num w-[14%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -582,10 +584,8 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                         $tp_rows[] = $tp;
                                         if ($tp['total_revenue'] > $max_revenue) $max_revenue = $tp['total_revenue'];
                                     }
-                                    $total_revenue_all = array_sum(array_column($tp_rows, 'total_revenue'));
                                     $rank = 1;
                                     foreach ($tp_rows as $tp):
-                                        $share = $total_revenue_all > 0 ? ($tp['total_revenue'] / $total_revenue_all) * 100 : 0;
                                     ?>
                                         <tr>
                                             <td><?= $rank++ ?></td>
@@ -594,12 +594,11 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                             <td class="num"><?= number_format($tp['total_qty']) ?></td>
                                             <td class="num"><?= number_format($tp['total_revenue']) ?> Ks</td>
                                             <td class="num <?= $tp['total_profit'] < 0 ? 'text-red-600' : '' ?>"><?= ($tp['total_profit'] < 0 ? 'Loss ' : '') . number_format($tp['total_profit']) ?> Ks</td>
-                                            <td class="num"><?= number_format($share, 1) ?>%</td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($tp_rows)): ?>
                                         <tr>
-                                            <td colspan="7" class="text-center py-16">
+                                            <td colspan="6" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
                                                         <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -718,20 +717,16 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                         <th class="num w-[14%]">Count</th>
                                         <th class="num w-[14%]">Qty Sold</th>
                                         <th class="num w-[18%]">Revenue</th>
-                                        <th class="num w-[20%]">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $cat_rows = [];
                                     while ($cs = mysqli_fetch_assoc($category_sales)) $cat_rows[] = $cs;
-                                    // Shares are always computed from the FULL result set
-                                    $cat_total = array_sum(array_column($cat_rows, 'total_revenue'));
                                     $cat_display = $cat_show_all ? $cat_rows : array_slice($cat_rows, 0, $CATEGORY_DISPLAY_LIMIT);
                                     $cat_colors = ['bg-indigo-500', 'bg-emerald-500', 'bg-blue-500', 'bg-amber-500', 'bg-purple-500', 'bg-red-500', 'bg-cyan-500'];
                                     $ci = 0;
                                     foreach ($cat_display as $cs):
-                                        $share = $cat_total > 0 ? ($cs['total_revenue'] / $cat_total) * 100 : 0;
                                         $color = $cat_colors[$ci % count($cat_colors)];
                                         $ci++;
                                     ?>
@@ -741,14 +736,11 @@ $report_shop_name = htmlspecialchars($report_settings['shop_name']);
                                             <td class="num"><?= number_format($cs['sale_count']) ?></td>
                                             <td class="num"><?= number_format($cs['total_qty']) ?></td>
                                             <td class="num"><?= number_format($cs['total_revenue']) ?> Ks</td>
-                                            <td class="num">
-                                                <?= number_format($share, 1) ?>%
-                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (empty($cat_rows)): ?>
                                         <tr>
-                                            <td colspan="6" class="text-center py-16">
+                                            <td colspan="5" class="text-center py-16">
                                                 <div class="flex flex-col items-center">
                                                     <div class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-4">
                                                         <svg class="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
