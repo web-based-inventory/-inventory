@@ -22,7 +22,6 @@ if (isset($_POST['save'])) {
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $currency = mysqli_real_escape_string($conn, $_POST['currency']);
     if (empty($currency)) $currency = 'Ks';
-    $tax_rate = (float)$_POST['tax_rate'];
     $minimum_profit_margin = (float)$_POST['minimum_profit_margin'];
     $logo = $setting['logo'] ?? '';
 
@@ -38,9 +37,9 @@ if (isset($_POST['save'])) {
 
     if (empty($error)) {
         if ($setting) {
-            mysqli_query($conn, "UPDATE settings SET shop_name='$shop_name', logo='$logo', phone='$phone', email='$email', address='$address', currency='$currency', tax_rate=$tax_rate, minimum_profit_margin=$minimum_profit_margin WHERE id=1");
+            mysqli_query($conn, "UPDATE settings SET shop_name='$shop_name', logo='$logo', phone='$phone', email='$email', address='$address', currency='$currency', minimum_profit_margin=$minimum_profit_margin WHERE id=1");
         } else {
-            mysqli_query($conn, "INSERT INTO settings (shop_name, logo, phone, email, address, currency, tax_rate, minimum_profit_margin) VALUES ('$shop_name', '$logo', '$phone', '$email', '$address', '$currency', $tax_rate, $minimum_profit_margin)");
+            mysqli_query($conn, "INSERT INTO settings (shop_name, logo, phone, email, address, currency, minimum_profit_margin) VALUES ('$shop_name', '$logo', '$phone', '$email', '$address', '$currency', $minimum_profit_margin)");
         }
 
         // Clear the getShopSettings cache so the sidebar picks up changes immediately
@@ -121,14 +120,10 @@ if (isset($_POST['save'])) {
                         </div>
 
                         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 mt-8 border-b pb-2">Regional</h2>
-                        <div class="grid grid-cols-3 gap-5">
+                        <div class="grid grid-cols-2 gap-5">
                             <div>
                                 <label class="font-semibold">Currency</label>
                                 <input type="text" name="currency" value="<?= $setting['currency'] ?? 'Ks' ?>" class="w-full border rounded-lg p-3 mt-2" placeholder="Currency symbol">
-                            </div>
-                            <div>
-                                <label class="font-semibold">Tax Rate (%)</label>
-                                <input type="number" step="0.01" name="tax_rate" value="<?= $setting['tax_rate'] ?? 0 ?>" class="w-full border rounded-lg p-3 mt-2" placeholder="0.00">
                             </div>
                             <div>
                                 <label class="font-semibold">Min Profit Margin (%)</label>

@@ -23,42 +23,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Invalid email format.';
         $message_type = 'error';
     } else {
-        // Find user - Restrict to Admins only
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND status = 'Active' AND role = 'Admin' LIMIT 1");
+        // Find user by email
+        $stmt = $conn->prepare("SELECT id, role FROM users WHERE email = ? AND status = 'Active' LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         $stmt->close();
         
-        // Always show the same success message to prevent user enumeration
-        $message = 'If that email address is in our database, we have sent you a link to reset your password.';
-        $message_type = 'success';
-        
-        if ($user) {
-            // Delete existing active tokens for this user
-            $delete_stmt = $conn->prepare("DELETE FROM password_resets WHERE user_id = ?");
-            $delete_stmt->bind_param("i", $user['id']);
-            $delete_stmt->execute();
-            $delete_stmt->close();
+        if ($user && $user['role'] !== 'Admin') {
+            // Specifically tell non-admins to contact the administrator
+            $message = "You are logged in as a {$user['role']}. Please contact your Administrator to reset your password.";
+            $message_type = 'error';
+        } else {
+            // Always show the same success message for Admins or non-existent emails to prevent user enumeration
+            $message = 'If that email address is in our database, we have sent you a link to reset your password.';
+            $message_type = 'success';
             
-            // Generate token
-            $token = bin2hex(random_bytes(32));
-            $token_hash = hash('sha256', $token);
-            
-            $insert_stmt = $conn->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))");
-            $insert_stmt->bind_param("is", $user['id'], $token_hash);
-            if ($insert_stmt->execute()) {
-                $base_dir = str_replace('\\', '/', dirname($_SERVER['PHP_SELF']));
-                $base_dir = rtrim($base_dir, '/');
-                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . $base_dir . "/reset_password.php?token=" . $token;
+            if ($user && $user['role'] === 'Admin') {
+                // Delete existing active tokens for this user
+                $delete_stmt = $conn->prepare("DELETE FROM password_resets WHERE user_id = ?");
+                $delete_stmt->bind_param("i", $user['id']);
+                $delete_stmt->execute();
+                $delete_stmt->close();
                 
-                if (!sendResetEmail($email, $reset_link, $login_shop_name)) {
-                    $message = 'Failed to send the reset email due to a server error. Please try again later.';
-                    $message_type = 'error';
+                // Generate token
+                $token = bin2hex(random_bytes(32));
+                $token_hash = hash('sha256', $token);
+                
+                $insert_stmt = $conn->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))");
+                $insert_stmt->bind_param("is", $user['id'], $token_hash);
+                if ($insert_stmt->execute()) {
+                    $base_dir = str_replace('\\', '/', dirname($_SERVER['PHP_SELF']));
+                    $base_dir = rtrim($base_dir, '/');
+                    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . $base_dir . "/reset_password.php?token=" . $token;
+                    
+                    if (!sendResetEmail($email, $reset_link, $login_shop_name)) {
+                        $message = 'Failed to send the reset email due to a server error. Please try again later.';
+                        $message_type = 'error';
+                    }
                 }
+                $insert_stmt->close();
             }
-            $insert_stmt->close();
         }
     }
 }
