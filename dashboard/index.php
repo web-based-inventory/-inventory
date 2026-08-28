@@ -243,7 +243,7 @@ if ($role === 'cashier') {
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
 
                         <!-- Section 1: Revenue Chart -->
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden fade-in stagger-1">
+                        <!-- <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden fade-in stagger-1">
                             <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
@@ -273,7 +273,7 @@ if ($role === 'cashier') {
                                     <canvas id="revenueChart"></canvas>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Section 2: Top Selling Products -->
                         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden fade-in stagger-2">
@@ -607,7 +607,7 @@ if ($role === 'cashier') {
                     <!-- ═══════════════ STAFF DASHBOARD ═══════════════ -->
 
                     <!-- Stat Cards -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-6">
                         <a href="../product/index.php" class="stat-card stat-card-link fade-in stagger-1 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 border-blue-200 dark:border-blue-700/40 hover:scale-[1.02] shadow-md hover:shadow-lg">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-xl flex items-center justify-center">
@@ -634,23 +634,6 @@ if ($role === 'cashier') {
                                 </div>
                             </div>
                         </div>
-                        <div class="stat-card fade-in stagger-3 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/20 border-orange-200 dark:border-orange-700/40 hover:scale-[1.02] shadow-md hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-slate-100"><?= $low_stock_count ?></p>
-                                    <p class="text-sm text-gray-500 dark:text-slate-400">Low Stock Products</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Second Row -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 mb-6">
                         <div class="stat-card fade-in stagger-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700/40 hover:scale-[1.02] shadow-md hover:shadow-lg">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center">
@@ -665,22 +648,7 @@ if ($role === 'cashier') {
                                 </div>
                             </div>
                         </div>
-                        <a href="../forecast/index.php" class="stat-card stat-card-link fade-in stagger-5 bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-cyan-900/30 dark:to-cyan-800/20 border-cyan-200 dark:border-cyan-700/40 hover:scale-[1.02] shadow-md hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-slate-100"><?= $forecast_summary['total'] ?? 0 ?></p>
-                                    <p class="text-sm text-gray-500 dark:text-slate-400">Forecast Summary</p>
-                                    <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">
-                                        High: <?= $forecast_summary['high_d'] ?? 0 ?> · Med: <?= $forecast_summary['med_d'] ?? 0 ?> · Low: <?= $forecast_summary['low_d'] ?? 0 ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </a>
+
                         <?php if ($low_stock_count > 0): ?>
                             <div class="stat-card fade-in stagger-6 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-red-200 dark:border-red-700/40 hover:scale-[1.02] shadow-md hover:shadow-lg">
                                 <div class="flex items-center gap-4">
@@ -698,7 +666,6 @@ if ($role === 'cashier') {
                             </div>
                         <?php endif; ?>
                     </div>
-
                     <!-- Charts + Recent Purchases -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
                         <!-- Stock Movement Chart -->

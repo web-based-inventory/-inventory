@@ -206,12 +206,19 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
     <style>
         /* ============ Purchase Invoice — Print ============ */
         @media print {
-            @page { margin: 0.5in; }
+            @page {
+                margin: 0.5in;
+            }
 
-            .no-print { display: none !important; }
+            .no-print {
+                display: none !important;
+            }
 
             /* When the invoice modal is open, print only the invoice */
-            body.print-invoice-mode > .flex.min-h-screen { display: none !important; }
+            body.print-invoice-mode>.flex.min-h-screen {
+                display: none !important;
+            }
+
             body.print-invoice-mode #viewModal {
                 position: static !important;
                 inset: auto !important;
@@ -220,7 +227,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 overflow: visible !important;
                 display: block !important;
             }
-            body.print-invoice-mode #viewModal > div {
+
+            body.print-invoice-mode #viewModal>div {
                 max-width: 100% !important;
                 max-height: none !important;
                 margin: 0 !important;
@@ -235,23 +243,28 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             /* Clean borders, subtle alternating rows */
             #viewModal .data-table td,
             #viewModal .data-table th {
                 border-bottom: 1px solid #cbd5e1 !important;
             }
+
             #viewModal .data-table td {
                 color: #111827 !important;
             }
+
             #viewModal .data-table tbody tr:nth-child(even) td {
                 background-color: #f8fafc !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             /* Hover effects must never appear on paper */
             #viewModal .data-table tbody tr:hover td {
                 background-color: transparent !important;
             }
+
             /* Strong total row */
             #viewModal .data-table tfoot td {
                 background-color: #eef2ff !important;
@@ -412,12 +425,16 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             </p>
                             <?php if ($has_more): ?>
                                 <a href="<?= $view_more_url ?>" class="btn btn-outline gap-2 text-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
                                     View More
                                 </a>
                             <?php elseif ($show_all && $has_more === false && count($purchases) > $DISPLAY_LIMIT): ?>
                                 <a href="<?= $view_less_url ?>" class="btn btn-outline gap-2 text-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                    </svg>
                                     Show Less
                                 </a>
                             <?php endif; ?>

@@ -103,7 +103,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900">
+<body class="bg-slate-50">
     <div class="flex min-h-screen">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">
@@ -113,7 +113,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                         <div class="flex gap-2">
                             <button onclick="exportExcel()" class="btn btn-outline gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                                 Export Excel
                             </button>
                             <a href="add.php" class="btn btn-primary gap-2">
@@ -199,30 +201,32 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
 
                     <!-- Search & Filter -->
                     <form method="GET" class="filter-bar mb-6">
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Invoice No</label>
-                            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search invoice..." class="form-input text-sm">
-                        </div>
-                        <div class="min-w-[160px]">
-                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Supplier</label>
-                            <input type="text" name="supplier" value="<?= htmlspecialchars($supplier) ?>" placeholder="Supplier name..." class="form-input text-sm">
-                        </div>
-                        <div class="min-w-[150px]">
-                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Payment</label>
+                        <div class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                            <div class=" min-w-[200px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Invoice No</label>
+                                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search invoice..." class="form-input text-sm">
+                            </div>
+                            <div class="min-w-[160px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Supplier</label>
+                                <input type="text" name="supplier" value="<?= htmlspecialchars($supplier) ?>" placeholder="Supplier name..." class="form-input text-sm">
+                            </div>
+                            <div class="min-w-[150px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Payment</label>
                                 <select name="payment_status" class="form-input text-sm">
-                                <option value="">All Status</option>
-                                <option value="Paid" <?= $payment_status === 'Paid' ? 'selected' : '' ?>>Paid</option>
-                                <option value="Partial" <?= $payment_status === 'Partial' ? 'selected' : '' ?>>Partial</option>
-                                <option value="Unpaid" <?= $payment_status === 'Unpaid' ? 'selected' : '' ?>>Unpaid</option>
-                            </select>
-                        </div>
-                        <div class="min-w-[150px]">
-                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">From Date</label>
-                            <input type="date" name="date_from" value="<?= $date_from ?>" class="form-input text-sm">
-                        </div>
-                        <div class="min-w-[150px]">
-                            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">To Date</label>
-                            <input type="date" name="date_to" value="<?= $date_to ?>" class="form-input text-sm">
+                                    <option value="">All Status</option>
+                                    <option value="Paid" <?= $payment_status === 'Paid' ? 'selected' : '' ?>>Paid</option>
+                                    <option value="Partial" <?= $payment_status === 'Partial' ? 'selected' : '' ?>>Partial</option>
+                                    <option value="Unpaid" <?= $payment_status === 'Unpaid' ? 'selected' : '' ?>>Unpaid</option>
+                                </select>
+                            </div>
+                            <div class="min-w-[150px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">From Date</label>
+                                <input type="date" name="date_from" value="<?= $date_from ?>" class="form-input text-sm">
+                            </div>
+                            <div class="min-w-[150px]">
+                                <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">To Date</label>
+                                <input type="date" name="date_to" value="<?= $date_to ?>" class="form-input text-sm">
+                            </div>
                         </div>
                         <div class="flex gap-2 items-end">
                             <button class="btn btn-primary text-sm">Search</button>
@@ -369,7 +373,8 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $vi = 1; while ($row = mysqli_fetch_assoc($view_details)): ?>
+                            <?php $vi = 1;
+                            while ($row = mysqli_fetch_assoc($view_details)): ?>
                                 <tr>
                                     <td><?= $vi++ ?></td>
                                     <td class="font-medium"><?= htmlspecialchars($row['product_name']) ?></td>
@@ -417,11 +422,13 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                 elseif ($exp_paid > 0) $exp_status = 'Partial';
                 else $exp_status = 'Unpaid';
             ?>
-            rows.push([<?= $row_num++ ?>, '<?= addslashes($row['invoice_no'] ?? '#' . $row['id']) ?>', '<?= date('d M Y', strtotime($row['purchase_date'])) ?>', '<?= addslashes($row['supplier_name'] ?? '-') ?>', <?= $row['total_amount'] ?>, '<?= $exp_status ?>']);
+                rows.push([<?= $row_num++ ?>, '<?= addslashes($row['invoice_no'] ?? '#' . $row['id']) ?>', '<?= date('d M Y', strtotime($row['purchase_date'])) ?>', '<?= addslashes($row['supplier_name'] ?? '-') ?>', <?= $row['total_amount'] ?>, '<?= $exp_status ?>']);
             <?php endwhile; ?>
 
             const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['\uFEFF' + csv], {
+                type: 'text/csv;charset=utf-8;'
+            });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'purchase_history_<?= date('Y-m-d') ?>.csv';

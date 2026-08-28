@@ -139,7 +139,7 @@ HTML;
                 <div class="sidebar-group-items <?= $purch_active ? '' : 'collapsed' ?>">
                     <div class="ml-4 mt-1 space-y-0.5 border-l border-white/[0.08] pl-3">
                         <?= menuItem('../purchase/add.php', 'New Purchase', 'purchase', 'add.php') ?>
-                        <?= menuItem('../purchase/index.php', 'Purchase History', 'purchase', 'index.php') ?>
+                        <?= menuItem('../purchase/history.php', 'Purchase History', 'purchase', 'history.php') ?>
                         <?= menuItem('../supplier/ledger.php', 'Supplier Ledger', 'supplier', 'ledger.php') ?>
                     </div>
                 </div>
@@ -147,26 +147,26 @@ HTML;
 
             <!-- Sales Group -->
             <?php if (checkPermission('sales', 'view')): ?>
-            <?php $sale_active = isGroupActive('sale'); ?>
-            <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
-                    <span class="flex items-center gap-3">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                <?php $sale_active = isGroupActive('sale'); ?>
+                <div class="sidebar-group">
+                    <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                        <span class="flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                            </svg>
+                            Sale
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200 <?= $sale_active ? 'rotate-90' : '' ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
-                        Sale
-                    </span>
-                    <svg class="w-4 h-4 transition-transform duration-200 <?= $sale_active ? 'rotate-90' : '' ?>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-                <div class="sidebar-group-items <?= $sale_active ? '' : 'collapsed' ?>">
-                    <div class="ml-4 mt-1 space-y-0.5 border-l border-white/[0.08] pl-3">
-                        <?= menuItem('../sale/pos.php', 'New Sale', 'sale', 'pos.php') ?>
-                        <?= menuItem('../sale/history.php', 'Sale History', 'sale', 'history.php') ?>
+                    </button>
+                    <div class="sidebar-group-items <?= $sale_active ? '' : 'collapsed' ?>">
+                        <div class="ml-4 mt-1 space-y-0.5 border-l border-white/[0.08] pl-3">
+                            <?= menuItem('../sale/pos.php', 'New Sale', 'sale', 'pos.php') ?>
+                            <?= menuItem('../sale/history.php', 'Sale History', 'sale', 'history.php') ?>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
 
             <!-- Analytics Section -->
@@ -274,7 +274,7 @@ HTML;
                     <div class="sidebar-group-items <?= $purch_active ? '' : 'collapsed' ?>">
                         <div class="ml-4 mt-1 space-y-0.5 border-l border-white/[0.08] pl-3">
                             <?= menuItem('../purchase/add.php', 'New Purchase', 'purchase', 'add.php') ?>
-                            <?= menuItem('../purchase/index.php', 'Purchase History', 'purchase', 'index.php') ?>
+                            <?= menuItem('../purchase/history.php', 'Purchase History', 'purchase', 'history.php') ?>
                             <?= menuItem('../supplier/ledger.php', 'Supplier Ledger', 'supplier', 'ledger.php') ?>
                         </div>
                     </div>

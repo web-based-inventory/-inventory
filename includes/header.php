@@ -118,35 +118,7 @@ if (isset($conn)) {
 
         <!-- Right: Actions -->
         <div class="flex items-center gap-3">
-            <!-- Theme Toggle -->
-            <button onclick="toggleTheme()" id="themeToggleBtn" class="header-btn relative flex items-center justify-center w-10 h-10 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl border border-gray-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-500 bg-white dark:bg-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 shadow-sm hover:shadow" title="Toggle Theme">
-                <!-- Sun (light mode) -->
-                <svg id="iconLight" class="w-[18px] h-[18px] absolute inset-0 m-auto" style="opacity:0;transition:opacity .3s" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="5"/>
-                    <line x1="12" y1="1" x2="12" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/>
-                    <line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <!-- Moon (dark mode) -->
-                <svg id="iconDark" class="w-[18px] h-[18px] absolute inset-0 m-auto" style="opacity:0;transition:opacity .3s" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
-            <script>
-            (function(){
-                var t=localStorage.getItem('theme')||'dark';
-                var s=document.getElementById('iconLight');
-                var m=document.getElementById('iconDark');
-                if(!s||!m)return;
-                if(t==='light'){s.style.opacity='1';m.style.opacity='0';}
-                else{m.style.opacity='1';s.style.opacity='0';}
-            })();
-            </script>
+
 
             <!-- Notifications -->
             <div class="relative">
@@ -188,12 +160,16 @@ if (isset($conn)) {
                                             <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 truncate"><?= htmlspecialchars($item['product_name']) ?></p>
                                             <div class="flex items-center gap-3 mt-1">
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 dark:text-red-400">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                                    </svg>
                                                     Out of Stock
                                                 </span>
                                             </div>
                                             <a href="../purchase/add.php" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-red-500 hover:bg-red-600 text-white transition-all duration-150 shadow-sm hover:shadow">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
                                                 Restock Now
                                             </a>
                                         </div>
@@ -224,14 +200,18 @@ if (isset($conn)) {
                                             </div>
                                             <div class="flex items-center gap-3 mt-1">
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-medium text-orange-600 dark:text-orange-400">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                                    </svg>
                                                     Stock: <?= $item['current_stock'] ?>
                                                 </span>
                                                 <span class="text-gray-300 dark:text-slate-600">|</span>
                                                 <span class="text-[11px] font-medium text-gray-500 dark:text-slate-400">Min: <?= $item['reorder_level'] ?></span>
                                             </div>
                                             <a href="../purchase/add.php" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-all duration-150 shadow-sm hover:shadow">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
                                                 Restock
                                             </a>
                                         </div>
@@ -260,12 +240,16 @@ if (isset($conn)) {
                                             <p class="text-sm font-semibold text-gray-800 dark:text-slate-200 truncate"><?= htmlspecialchars($item['supplier_name']) ?></p>
                                             <div class="flex items-center gap-3 mt-1">
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-medium text-purple-600 dark:text-purple-400">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
                                                     <?= number_format($item['outstanding_balance'], 0) ?> MMK due
                                                 </span>
                                             </div>
                                             <a href="../supplier/ledger.php?id=<?= $item['id'] ?>" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-all duration-150 shadow-sm hover:shadow">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                </svg>
                                                 View Ledger
                                             </a>
                                         </div>
@@ -276,17 +260,17 @@ if (isset($conn)) {
 
                         <?php if (count($price_update_products) > 0): ?>
                             <?php
-                                $pp_items = [];
-                                $sp_items = [];
-                                foreach ($price_update_products as $item) {
-                                    $pp = (float)$item['purchase_price'];
-                                    $sp = (float)$item['selling_price'];
-                                    if ($pp == $sp) {
-                                        $pp_items[] = $item;
-                                    } else {
-                                        $sp_items[] = $item;
-                                    }
+                            $pp_items = [];
+                            $sp_items = [];
+                            foreach ($price_update_products as $item) {
+                                $pp = (float)$item['purchase_price'];
+                                $sp = (float)$item['selling_price'];
+                                if ($pp == $sp) {
+                                    $pp_items[] = $item;
+                                } else {
+                                    $sp_items[] = $item;
                                 }
+                            }
                             ?>
                             <?php if (count($sp_items) > 0): ?>
                                 <div class="px-4 py-2 bg-red-50/60 dark:bg-red-500/5">
@@ -298,8 +282,8 @@ if (isset($conn)) {
                                 </div>
                                 <?php foreach ($sp_items as $item): ?>
                                     <?php
-                                        $pp = (float)$item['purchase_price'];
-                                        $sp = (float)$item['selling_price'];
+                                    $pp = (float)$item['purchase_price'];
+                                    $sp = (float)$item['selling_price'];
                                     ?>
                                     <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
                                         <div class="flex items-start gap-3">
@@ -318,7 +302,9 @@ if (isset($conn)) {
                                                     <span class="text-gray-500 dark:text-slate-400">Selling: <span class="font-bold text-gray-700 dark:text-slate-300"><?= number_format($sp) ?> Ks</span></span>
                                                 </div>
                                                 <a href="../product/index.php?action=edit&id=<?= $item['id'] ?>" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-red-500 hover:bg-red-600 text-white transition-all duration-150 shadow-sm hover:shadow">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
                                                     Update Price
                                                 </a>
                                             </div>
@@ -337,8 +323,8 @@ if (isset($conn)) {
                                 </div>
                                 <?php foreach ($pp_items as $item): ?>
                                     <?php
-                                        $pp = (float)$item['purchase_price'];
-                                        $sp = (float)$item['selling_price'];
+                                    $pp = (float)$item['purchase_price'];
+                                    $sp = (float)$item['selling_price'];
                                     ?>
                                     <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-150">
                                         <div class="flex items-start gap-3">
@@ -357,7 +343,9 @@ if (isset($conn)) {
                                                     <span class="text-gray-500 dark:text-slate-400">Selling: <span class="font-bold text-gray-700 dark:text-slate-300"><?= number_format($sp) ?> Ks</span></span>
                                                 </div>
                                                 <a href="../product/index.php?action=edit&id=<?= $item['id'] ?>" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-500 hover:bg-amber-600 text-white transition-all duration-150 shadow-sm hover:shadow">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
                                                     Update Price
                                                 </a>
                                             </div>
@@ -443,13 +431,13 @@ if (isset($conn)) {
                         Change Password
                     </a>
                     <?php if (function_exists('checkPermission') && checkPermission('settings', 'view')): ?>
-                    <a href="<?= $_prefix ?>settings/index.php" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-150 cursor-pointer block">
-                        <svg class="w-4 h-4 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Settings
-                    </a>
+                        <a href="<?= $_prefix ?>settings/index.php" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-150 cursor-pointer block">
+                            <svg class="w-4 h-4 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Settings
+                        </a>
                     <?php endif; ?>
                     <div class="my-1.5 border-t border-gray-100 dark:border-slate-700"></div>
                     <a href="<?= $_prefix ?>logout.php" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-150 cursor-pointer block">
