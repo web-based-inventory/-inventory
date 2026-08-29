@@ -277,7 +277,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 <?= (isset($_GET['view_id']) && $view_purchase) ? 'print-invoice-mode' : '' ?>">
+<body class="bg-[#eaf4fc] dark:bg-slate-900 <?= (isset($_GET['view_id']) && $view_purchase) ? 'print-invoice-mode' : '' ?>">
     <div class="flex min-h-screen">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">

@@ -1,21 +1,21 @@
-=== Forecast Debug Log (Generated: 2026-08-28 09:47:22) ===
+=== Forecast Debug Log (Generated: 2026-08-29 09:58:01) ===
 
 {
     "product_id": "17",
-    "days_with_sales": 1,
-    "total_quantity_sold": 39,
-    "daily_average": 5.5714,
-    "forecast_7_days": 39,
+    "days_with_sales": 2,
+    "total_quantity_sold": 44,
+    "daily_average": 6.2857,
+    "forecast_7_days": 44,
     "demand_level": "High"
 }
 
 {
     "product_id": "18",
-    "days_with_sales": 1,
-    "total_quantity_sold": 34,
-    "daily_average": 4.8571,
-    "forecast_7_days": 34,
-    "demand_level": "Medium"
+    "days_with_sales": 2,
+    "total_quantity_sold": 40,
+    "daily_average": 5.7143,
+    "forecast_7_days": 40,
+    "demand_level": "High"
 }
 
 {
@@ -29,19 +29,19 @@
 
 {
     "product_id": "20",
-    "days_with_sales": 1,
-    "total_quantity_sold": 28,
-    "daily_average": 4,
-    "forecast_7_days": 28,
+    "days_with_sales": 2,
+    "total_quantity_sold": 31,
+    "daily_average": 4.4286,
+    "forecast_7_days": 31,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "21",
-    "days_with_sales": 1,
-    "total_quantity_sold": 19,
-    "daily_average": 2.7143,
-    "forecast_7_days": 19,
+    "days_with_sales": 2,
+    "total_quantity_sold": 26,
+    "daily_average": 3.7143,
+    "forecast_7_days": 26,
     "demand_level": "Medium"
 }
 
@@ -92,11 +92,11 @@
 
 {
     "product_id": "27",
-    "days_with_sales": 1,
-    "total_quantity_sold": 5,
-    "daily_average": 0.7143,
-    "forecast_7_days": 5,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 8,
+    "daily_average": 1.1429,
+    "forecast_7_days": 8,
+    "demand_level": "Medium"
 }
 
 {
@@ -128,11 +128,11 @@
 
 {
     "product_id": "33",
-    "days_with_sales": 2,
-    "total_quantity_sold": 30,
-    "daily_average": 4.2857,
-    "forecast_7_days": 30,
-    "demand_level": "Medium"
+    "days_with_sales": 3,
+    "total_quantity_sold": 43,
+    "daily_average": 6.1429,
+    "forecast_7_days": 43,
+    "demand_level": "High"
 }
 
 {
@@ -146,7 +146,43 @@
 
 {
     "product_id": "36",
+    "days_with_sales": 3,
+    "total_quantity_sold": 44,
+    "daily_average": 6.2857,
+    "forecast_7_days": 44,
+    "demand_level": "High"
+}
+
+{
+    "product_id": "37",
     "days_with_sales": 2,
+    "total_quantity_sold": 19,
+    "daily_average": 2.7143,
+    "forecast_7_days": 19,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "38",
+    "days_with_sales": 3,
+    "total_quantity_sold": 46,
+    "daily_average": 6.5714,
+    "forecast_7_days": 46,
+    "demand_level": "High"
+}
+
+{
+    "product_id": "41",
+    "days_with_sales": 3,
+    "total_quantity_sold": 20,
+    "daily_average": 2.8571,
+    "forecast_7_days": 20,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "43",
+    "days_with_sales": 3,
     "total_quantity_sold": 28,
     "daily_average": 4,
     "forecast_7_days": 28,
@@ -154,65 +190,29 @@
 }
 
 {
-    "product_id": "37",
-    "days_with_sales": 1,
-    "total_quantity_sold": 8,
-    "daily_average": 1.1429,
-    "forecast_7_days": 8,
-    "demand_level": "Medium"
-}
-
-{
-    "product_id": "38",
-    "days_with_sales": 2,
-    "total_quantity_sold": 31,
-    "daily_average": 4.4286,
-    "forecast_7_days": 31,
-    "demand_level": "Medium"
-}
-
-{
-    "product_id": "41",
-    "days_with_sales": 2,
-    "total_quantity_sold": 15,
-    "daily_average": 2.1429,
-    "forecast_7_days": 15,
-    "demand_level": "Medium"
-}
-
-{
-    "product_id": "43",
-    "days_with_sales": 2,
-    "total_quantity_sold": 23,
-    "daily_average": 3.2857,
-    "forecast_7_days": 23,
-    "demand_level": "Medium"
-}
-
-{
     "product_id": "45",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "46",
-    "days_with_sales": 2,
-    "total_quantity_sold": 23,
-    "daily_average": 3.2857,
-    "forecast_7_days": 23,
+    "days_with_sales": 3,
+    "total_quantity_sold": 27,
+    "daily_average": 3.8571,
+    "forecast_7_days": 27,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "47",
-    "days_with_sales": 1,
-    "total_quantity_sold": 18,
-    "daily_average": 2.5714,
-    "forecast_7_days": 18,
+    "days_with_sales": 2,
+    "total_quantity_sold": 21,
+    "daily_average": 3,
+    "forecast_7_days": 21,
     "demand_level": "Medium"
 }
 
@@ -227,16 +227,25 @@
 
 {
     "product_id": "51",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 1,
+    "daily_average": 0.1429,
+    "forecast_7_days": 1,
+    "demand_level": "Low"
 }
 
 {
     "product_id": "52",
-    "days_with_sales": 1,
+    "days_with_sales": 2,
+    "total_quantity_sold": 7,
+    "daily_average": 1,
+    "forecast_7_days": 7,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "53",
+    "days_with_sales": 2,
     "total_quantity_sold": 6,
     "daily_average": 0.8571,
     "forecast_7_days": 6,
@@ -244,21 +253,12 @@
 }
 
 {
-    "product_id": "53",
-    "days_with_sales": 1,
-    "total_quantity_sold": 5,
-    "daily_average": 0.7143,
-    "forecast_7_days": 5,
-    "demand_level": "Low"
-}
-
-{
     "product_id": "57",
-    "days_with_sales": 1,
-    "total_quantity_sold": 30,
-    "daily_average": 4.2857,
-    "forecast_7_days": 30,
-    "demand_level": "Medium"
+    "days_with_sales": 2,
+    "total_quantity_sold": 39,
+    "daily_average": 5.5714,
+    "forecast_7_days": 39,
+    "demand_level": "High"
 }
 
 {
@@ -272,11 +272,11 @@
 
 {
     "product_id": "59",
-    "days_with_sales": 1,
-    "total_quantity_sold": 34,
-    "daily_average": 4.8571,
-    "forecast_7_days": 34,
-    "demand_level": "Medium"
+    "days_with_sales": 2,
+    "total_quantity_sold": 41,
+    "daily_average": 5.8571,
+    "forecast_7_days": 41,
+    "demand_level": "High"
 }
 
 {
@@ -317,28 +317,28 @@
 
 {
     "product_id": "64",
-    "days_with_sales": 2,
-    "total_quantity_sold": 27,
-    "daily_average": 3.8571,
-    "forecast_7_days": 27,
+    "days_with_sales": 3,
+    "total_quantity_sold": 30,
+    "daily_average": 4.2857,
+    "forecast_7_days": 30,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "65",
-    "days_with_sales": 1,
-    "total_quantity_sold": 19,
-    "daily_average": 2.7143,
-    "forecast_7_days": 19,
+    "days_with_sales": 2,
+    "total_quantity_sold": 22,
+    "daily_average": 3.1429,
+    "forecast_7_days": 22,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "66",
-    "days_with_sales": 1,
-    "total_quantity_sold": 12,
-    "daily_average": 1.7143,
-    "forecast_7_days": 12,
+    "days_with_sales": 2,
+    "total_quantity_sold": 15,
+    "daily_average": 2.1429,
+    "forecast_7_days": 15,
     "demand_level": "Medium"
 }
 
@@ -425,11 +425,11 @@
 
 {
     "product_id": "77",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 15,
+    "daily_average": 2.1429,
+    "forecast_7_days": 15,
+    "demand_level": "Medium"
 }
 
 {
@@ -452,11 +452,11 @@
 
 {
     "product_id": "81",
-    "days_with_sales": 1,
-    "total_quantity_sold": 5,
-    "daily_average": 0.7143,
-    "forecast_7_days": 5,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 7,
+    "daily_average": 1,
+    "forecast_7_days": 7,
+    "demand_level": "Medium"
 }
 
 {
@@ -479,10 +479,10 @@
 
 {
     "product_id": "86",
-    "days_with_sales": 1,
-    "total_quantity_sold": 18,
-    "daily_average": 2.5714,
-    "forecast_7_days": 18,
+    "days_with_sales": 2,
+    "total_quantity_sold": 19,
+    "daily_average": 2.7143,
+    "forecast_7_days": 19,
     "demand_level": "Medium"
 }
 
@@ -542,11 +542,11 @@
 
 {
     "product_id": "93",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 5,
+    "daily_average": 0.7143,
+    "forecast_7_days": 5,
+    "demand_level": "Low"
 }
 
 {
@@ -596,10 +596,10 @@
 
 {
     "product_id": "99",
-    "days_with_sales": 1,
-    "total_quantity_sold": 10,
-    "daily_average": 1.4286,
-    "forecast_7_days": 10,
+    "days_with_sales": 2,
+    "total_quantity_sold": 12,
+    "daily_average": 1.7143,
+    "forecast_7_days": 12,
     "demand_level": "Medium"
 }
 
@@ -731,28 +731,28 @@
 
 {
     "product_id": "116",
-    "days_with_sales": 1,
-    "total_quantity_sold": 21,
-    "daily_average": 3,
-    "forecast_7_days": 21,
-    "demand_level": "Medium"
+    "days_with_sales": 2,
+    "total_quantity_sold": 44,
+    "daily_average": 6.2857,
+    "forecast_7_days": 44,
+    "demand_level": "High"
 }
 
 {
     "product_id": "117",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "119",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
@@ -767,16 +767,25 @@
 
 {
     "product_id": "121",
-    "days_with_sales": 1,
-    "total_quantity_sold": 10,
-    "daily_average": 1.4286,
-    "forecast_7_days": 10,
+    "days_with_sales": 2,
+    "total_quantity_sold": 13,
+    "daily_average": 1.8571,
+    "forecast_7_days": 13,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "122",
-    "days_with_sales": 1,
+    "days_with_sales": 2,
+    "total_quantity_sold": 20,
+    "daily_average": 2.8571,
+    "forecast_7_days": 20,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "123",
+    "days_with_sales": 2,
     "total_quantity_sold": 18,
     "daily_average": 2.5714,
     "forecast_7_days": 18,
@@ -784,20 +793,11 @@
 }
 
 {
-    "product_id": "123",
-    "days_with_sales": 1,
-    "total_quantity_sold": 10,
-    "daily_average": 1.4286,
-    "forecast_7_days": 10,
-    "demand_level": "Medium"
-}
-
-{
     "product_id": "124",
-    "days_with_sales": 1,
-    "total_quantity_sold": 4,
-    "daily_average": 0.5714,
-    "forecast_7_days": 4,
+    "days_with_sales": 2,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
     "demand_level": "Low"
 }
 
@@ -812,10 +812,10 @@
 
 {
     "product_id": "127",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
@@ -839,20 +839,20 @@
 
 {
     "product_id": "133",
-    "days_with_sales": 1,
-    "total_quantity_sold": 8,
-    "daily_average": 1.1429,
-    "forecast_7_days": 8,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "134",
-    "days_with_sales": 1,
-    "total_quantity_sold": 29,
-    "daily_average": 4.1429,
-    "forecast_7_days": 29,
-    "demand_level": "Medium"
+    "days_with_sales": 2,
+    "total_quantity_sold": 35,
+    "daily_average": 5,
+    "forecast_7_days": 35,
+    "demand_level": "High"
 }
 
 {
@@ -902,20 +902,20 @@
 
 {
     "product_id": "141",
-    "days_with_sales": 1,
-    "total_quantity_sold": 3,
-    "daily_average": 0.4286,
-    "forecast_7_days": 3,
+    "days_with_sales": 2,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
     "demand_level": "Low"
 }
 
 {
     "product_id": "142",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 3,
+    "daily_average": 0.4286,
+    "forecast_7_days": 3,
+    "demand_level": "Low"
 }
 
 {
@@ -929,10 +929,10 @@
 
 {
     "product_id": "144",
-    "days_with_sales": 1,
-    "total_quantity_sold": 15,
-    "daily_average": 2.1429,
-    "forecast_7_days": 15,
+    "days_with_sales": 2,
+    "total_quantity_sold": 18,
+    "daily_average": 2.5714,
+    "forecast_7_days": 18,
     "demand_level": "Medium"
 }
 
@@ -983,11 +983,11 @@
 
 {
     "product_id": "151",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 2,
+    "daily_average": 0.2857,
+    "forecast_7_days": 2,
+    "demand_level": "Low"
 }
 
 {
@@ -1055,15 +1055,51 @@
 
 {
     "product_id": "164",
-    "days_with_sales": 1,
-    "total_quantity_sold": 14,
-    "daily_average": 2,
-    "forecast_7_days": 14,
+    "days_with_sales": 2,
+    "total_quantity_sold": 33,
+    "daily_average": 4.7143,
+    "forecast_7_days": 33,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "165",
+    "days_with_sales": 2,
+    "total_quantity_sold": 26,
+    "daily_average": 3.7143,
+    "forecast_7_days": 26,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "166",
+    "days_with_sales": 2,
+    "total_quantity_sold": 31,
+    "daily_average": 4.4286,
+    "forecast_7_days": 31,
+    "demand_level": "Medium"
+}
+
+{
+    "product_id": "167",
+    "days_with_sales": 2,
+    "total_quantity_sold": 35,
+    "daily_average": 5,
+    "forecast_7_days": 35,
+    "demand_level": "High"
+}
+
+{
+    "product_id": "168",
+    "days_with_sales": 2,
+    "total_quantity_sold": 37,
+    "daily_average": 5.2857,
+    "forecast_7_days": 37,
+    "demand_level": "High"
+}
+
+{
+    "product_id": "169",
     "days_with_sales": 1,
     "total_quantity_sold": 10,
     "daily_average": 1.4286,
@@ -1072,66 +1108,30 @@
 }
 
 {
-    "product_id": "166",
-    "days_with_sales": 1,
-    "total_quantity_sold": 12,
-    "daily_average": 1.7143,
-    "forecast_7_days": 12,
-    "demand_level": "Medium"
-}
-
-{
-    "product_id": "167",
-    "days_with_sales": 1,
-    "total_quantity_sold": 14,
-    "daily_average": 2,
-    "forecast_7_days": 14,
-    "demand_level": "Medium"
-}
-
-{
-    "product_id": "168",
-    "days_with_sales": 1,
-    "total_quantity_sold": 6,
-    "daily_average": 0.8571,
-    "forecast_7_days": 6,
-    "demand_level": "Low"
-}
-
-{
-    "product_id": "169",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
     "product_id": "171",
-    "days_with_sales": 1,
-    "total_quantity_sold": 11,
-    "daily_average": 1.5714,
-    "forecast_7_days": 11,
+    "days_with_sales": 2,
+    "total_quantity_sold": 17,
+    "daily_average": 2.4286,
+    "forecast_7_days": 17,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "172",
-    "days_with_sales": 1,
-    "total_quantity_sold": 5,
-    "daily_average": 0.7143,
-    "forecast_7_days": 5,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 20,
+    "daily_average": 2.8571,
+    "forecast_7_days": 20,
+    "demand_level": "Medium"
 }
 
 {
     "product_id": "173",
-    "days_with_sales": 1,
-    "total_quantity_sold": 6,
-    "daily_average": 0.8571,
-    "forecast_7_days": 6,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 14,
+    "daily_average": 2,
+    "forecast_7_days": 14,
+    "demand_level": "Medium"
 }
 
 {
@@ -1163,19 +1163,19 @@
 
 {
     "product_id": "179",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 33,
+    "daily_average": 4.7143,
+    "forecast_7_days": 33,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "180",
-    "days_with_sales": 1,
-    "total_quantity_sold": 9,
-    "daily_average": 1.2857,
-    "forecast_7_days": 9,
+    "days_with_sales": 2,
+    "total_quantity_sold": 19,
+    "daily_average": 2.7143,
+    "forecast_7_days": 19,
     "demand_level": "Medium"
 }
 
@@ -1244,10 +1244,10 @@
 
 {
     "product_id": "188",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
@@ -1271,10 +1271,10 @@
 
 {
     "product_id": "191",
-    "days_with_sales": 1,
-    "total_quantity_sold": 7,
-    "daily_average": 1,
-    "forecast_7_days": 7,
+    "days_with_sales": 2,
+    "total_quantity_sold": 9,
+    "daily_average": 1.2857,
+    "forecast_7_days": 9,
     "demand_level": "Medium"
 }
 
@@ -1316,69 +1316,6 @@
 
 {
     "product_id": "198",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "199",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "200",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "201",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "202",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "203",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "204",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
-}
-
-{
-    "product_id": "205",
     "days_with_sales": 1,
     "total_quantity_sold": 3,
     "daily_average": 0.4286,
@@ -1387,30 +1324,93 @@
 }
 
 {
+    "product_id": "199",
+    "days_with_sales": 1,
+    "total_quantity_sold": 5,
+    "daily_average": 0.7143,
+    "forecast_7_days": 5,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "200",
+    "days_with_sales": 1,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "201",
+    "days_with_sales": 1,
+    "total_quantity_sold": 4,
+    "daily_average": 0.5714,
+    "forecast_7_days": 4,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "202",
+    "days_with_sales": 1,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "203",
+    "days_with_sales": 1,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "204",
+    "days_with_sales": 1,
+    "total_quantity_sold": 4,
+    "daily_average": 0.5714,
+    "forecast_7_days": 4,
+    "demand_level": "Low"
+}
+
+{
+    "product_id": "205",
+    "days_with_sales": 2,
+    "total_quantity_sold": 9,
+    "daily_average": 1.2857,
+    "forecast_7_days": 9,
+    "demand_level": "Medium"
+}
+
+{
     "product_id": "206",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 3,
+    "daily_average": 0.4286,
+    "forecast_7_days": 3,
+    "demand_level": "Low"
 }
 
 {
     "product_id": "207",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 4,
+    "daily_average": 0.5714,
+    "forecast_7_days": 4,
+    "demand_level": "Low"
 }
 
 {
     "product_id": "208",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 3,
+    "daily_average": 0.4286,
+    "forecast_7_days": 3,
+    "demand_level": "Low"
 }
 
 {
@@ -1424,11 +1424,11 @@
 
 {
     "product_id": "210",
-    "days_with_sales": 1,
-    "total_quantity_sold": 4,
-    "daily_average": 0.5714,
-    "forecast_7_days": 4,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 14,
+    "daily_average": 2,
+    "forecast_7_days": 14,
+    "demand_level": "Medium"
 }
 
 {
@@ -1649,11 +1649,11 @@
 
 {
     "product_id": "244",
-    "days_with_sales": 1,
-    "total_quantity_sold": 4,
-    "daily_average": 0.5714,
-    "forecast_7_days": 4,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 7,
+    "daily_average": 1,
+    "forecast_7_days": 7,
+    "demand_level": "Medium"
 }
 
 {
@@ -1964,10 +1964,10 @@
 
 {
     "product_id": "292",
-    "days_with_sales": 1,
-    "total_quantity_sold": 3,
-    "daily_average": 0.4286,
-    "forecast_7_days": 3,
+    "days_with_sales": 2,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
     "demand_level": "Low"
 }
 
@@ -2000,11 +2000,11 @@
 
 {
     "product_id": "299",
-    "days_with_sales": 1,
-    "total_quantity_sold": 4,
-    "daily_average": 0.5714,
-    "forecast_7_days": 4,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 8,
+    "daily_average": 1.1429,
+    "forecast_7_days": 8,
+    "demand_level": "Medium"
 }
 
 {
@@ -2045,19 +2045,19 @@
 
 {
     "product_id": "304",
-    "days_with_sales": 0,
-    "total_quantity_sold": 0,
-    "daily_average": 0,
-    "forecast_7_days": 0,
-    "demand_level": "Insufficient"
+    "days_with_sales": 1,
+    "total_quantity_sold": 5,
+    "daily_average": 0.7143,
+    "forecast_7_days": 5,
+    "demand_level": "Low"
 }
 
 {
     "product_id": "305",
-    "days_with_sales": 1,
-    "total_quantity_sold": 4,
-    "daily_average": 0.5714,
-    "forecast_7_days": 4,
+    "days_with_sales": 2,
+    "total_quantity_sold": 6,
+    "daily_average": 0.8571,
+    "forecast_7_days": 6,
     "demand_level": "Low"
 }
 
@@ -2396,20 +2396,20 @@
 
 {
     "product_id": "365",
-    "days_with_sales": 1,
-    "total_quantity_sold": 9,
-    "daily_average": 1.2857,
-    "forecast_7_days": 9,
+    "days_with_sales": 2,
+    "total_quantity_sold": 10,
+    "daily_average": 1.4286,
+    "forecast_7_days": 10,
     "demand_level": "Medium"
 }
 
 {
     "product_id": "366",
-    "days_with_sales": 1,
-    "total_quantity_sold": 6,
-    "daily_average": 0.8571,
-    "forecast_7_days": 6,
-    "demand_level": "Low"
+    "days_with_sales": 2,
+    "total_quantity_sold": 11,
+    "daily_average": 1.5714,
+    "forecast_7_days": 11,
+    "demand_level": "Medium"
 }
 
 {

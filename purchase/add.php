@@ -265,7 +265,7 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900">
+<body class="bg-[#eaf4fc] dark:bg-slate-900">
     <div class="flex min-h-screen">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">

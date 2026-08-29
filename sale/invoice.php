@@ -103,7 +103,7 @@ $invoice_has_logo = !empty($invoice_logo) && file_exists($invoice_logo_path);
     </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex items-start justify-center p-4 sm:p-6 md:p-8">
+<body class="bg-[#eaf4fc] dark:bg-slate-900 min-h-screen flex items-start justify-center p-4 sm:p-6 md:p-8">
 
     <div class="w-full max-w-[580px] flex flex-col items-center">
 

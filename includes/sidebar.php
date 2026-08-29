@@ -36,10 +36,10 @@ function menuItem($href, $label, $dirs, $file_check = null, $icon = '')
     $href = preg_replace('/^\.\.\//', $_sidebar_prefix, $href);
     $active = isActive($dirs, $file_check);
     $activeClass = $active
-        ? 'bg-blue-600/20 text-blue-400 font-semibold shadow-sm shadow-blue-500/10'
+        ? 'bg-indigo-600/20 text-indigo-400 font-semibold shadow-sm shadow-indigo-500/10'
         : 'text-slate-400 hover:bg-white/5 hover:text-slate-200';
     $dot = $active
-        ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0 shadow-sm shadow-blue-400/50"></span>'
+        ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0 shadow-sm shadow-indigo-400/50"></span>'
         : '<span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>';
     return <<<HTML
 <a href="{$href}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 {$activeClass}">
@@ -50,7 +50,7 @@ HTML;
 }
 
 ?>
-<aside id="sidebar" class="w-60 bg-[#0a0f1e] border-r border-white/[0.06] flex flex-col h-screen fixed lg:sticky top-0 z-40 -translate-x-full lg:translate-x-0" style="background: linear-gradient(180deg, #0a0f1e 0%, #0d1326 100%);">
+<aside id="sidebar" class="w-60 bg-indigo-950 border-r border-white/[0.06] flex flex-col h-screen fixed lg:sticky top-0 z-40 -translate-x-full lg:translate-x-0" style="background: linear-gradient(180deg, #172554 0%, #1e1b4b 100%);">
 
     <!-- Logo -->
     <div class="h-[4.2rem] flex items-center gap-3.5 px-5 border-b border-white/[0.06] flex-shrink-0">
@@ -67,9 +67,9 @@ HTML;
         ?>
         <?php if ($sidebar_has_logo): ?>
             <img src="<?= htmlspecialchars($_sidebar_prefix . 'img/' . $sidebar_logo) ?>" alt="<?= htmlspecialchars($sidebar_settings['shop_name']) ?>"
-                class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-lg shadow-blue-500/25">
+                class="w-10 h-10 rounded-xl object-cover flex-shrink-0 shadow-lg shadow-indigo-500/25">
         <?php else: ?>
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/25">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
@@ -87,7 +87,7 @@ HTML;
         <!-- ─── Dashboard ─── -->
         <?php if (checkPermission('dashboard', 'view')): ?>
             <a href="<?= $_sidebar_prefix ?>dashboard/index.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive('dashboard') ? 'bg-blue-600/20 text-blue-400 shadow-sm shadow-blue-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive('dashboard') ? 'bg-indigo-600/20 text-indigo-400 shadow-sm shadow-indigo-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
@@ -101,7 +101,7 @@ HTML;
             <!-- Inventory Group -->
             <?php $inv_active = isGroupActive(['product', 'category', 'categories', 'supplier', 'suppliers', 'units']); ?>
             <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-inventory" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $inv_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                <button onclick="toggleGroup(this)" data-group="grp-inventory" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $inv_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                     <span class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -125,7 +125,7 @@ HTML;
             <!-- Purchases Group -->
             <?php $purch_active = isGroupActive(['purchase', 'stock-in', 'supplier']); ?>
             <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-purchase" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $purch_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                <button onclick="toggleGroup(this)" data-group="grp-purchase" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $purch_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                     <span class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -149,7 +149,7 @@ HTML;
             <?php if (checkPermission('sales', 'view')): ?>
                 <?php $sale_active = isGroupActive('sale'); ?>
                 <div class="sidebar-group">
-                    <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                    <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                         <span class="flex items-center gap-3">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -177,7 +177,7 @@ HTML;
             <!-- Reports Group -->
             <?php $rpt_active = isGroupActive(['report', 'reports']); ?>
             <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-reports" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $rpt_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                <button onclick="toggleGroup(this)" data-group="grp-reports" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $rpt_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                     <span class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -199,7 +199,7 @@ HTML;
             </div>
 
             <a href="<?= $_sidebar_prefix ?>forecast/index.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive('forecast') ? 'bg-blue-600/20 text-blue-400 shadow-sm shadow-blue-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive('forecast') ? 'bg-indigo-600/20 text-indigo-400 shadow-sm shadow-indigo-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
@@ -212,7 +212,7 @@ HTML;
             </div>
 
             <a href="<?= $_sidebar_prefix ?>users/index.php"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive(['user', 'users']) ? 'bg-blue-600/20 text-blue-400 shadow-sm shadow-blue-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= isActive(['user', 'users']) ? 'bg-indigo-600/20 text-indigo-400 shadow-sm shadow-indigo-500/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
@@ -227,7 +227,7 @@ HTML;
             <!-- Inventory Group (Staff) -->
             <?php $inv_active = isGroupActive(['product', 'category', 'categories', 'supplier', 'suppliers', 'units']); ?>
             <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-inventory" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $inv_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                <button onclick="toggleGroup(this)" data-group="grp-inventory" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $inv_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                     <span class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -260,7 +260,7 @@ HTML;
             <?php if (checkPermission('purchases', 'view')): ?>
                 <?php $purch_active = isGroupActive(['purchase', 'stock-in', 'supplier']); ?>
                 <div class="sidebar-group">
-                    <button onclick="toggleGroup(this)" data-group="grp-purchase" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $purch_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                    <button onclick="toggleGroup(this)" data-group="grp-purchase" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $purch_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                         <span class="flex items-center gap-3">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -295,7 +295,7 @@ HTML;
             <!-- Sales Group (Cashier) -->
             <?php $sale_active = isGroupActive('sale'); ?>
             <div class="sidebar-group">
-                <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
+                <button onclick="toggleGroup(this)" data-group="grp-sale" class="sidebar-group-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?= $sale_active ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' ?>">
                     <span class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />

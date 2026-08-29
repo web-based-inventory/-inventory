@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $result->fetch_assoc();
         $stmt->close();
         
-        if ($user && $user['role'] !== 'Admin') {
+        if ($user && strtolower($user['role']) !== 'admin') {
             // Specifically tell non-admins to contact the administrator
             $message = "You are logged in as a {$user['role']}. Please contact your Administrator to reset your password.";
             $message_type = 'error';
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'If that email address is in our database, we have sent you a link to reset your password.';
             $message_type = 'success';
             
-            if ($user && $user['role'] === 'Admin') {
+            if ($user && strtolower($user['role']) === 'admin') {
                 // Delete existing active tokens for this user
                 $delete_stmt = $conn->prepare("DELETE FROM password_resets WHERE user_id = ?");
                 $delete_stmt->bind_param("i", $user['id']);
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#eaf4fc] dark:bg-slate-900 text-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
         <div class="p-8 sm:p-10">
             <div class="text-center mb-8">

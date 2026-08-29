@@ -372,7 +372,7 @@ $page_title = "New Sale (POS)";
         });
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-slate-900 overflow-hidden">
+<body class="bg-[#eaf4fc] dark:bg-slate-900 overflow-hidden">
     <!-- Preloader Overlay -->
     <div id="pos-preloader">
         <div class="pos-spinner"></div>

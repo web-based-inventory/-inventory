@@ -63,7 +63,7 @@ if (isset($_POST['save'])) {
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900">
+<body class="bg-[#eaf4fc] dark:bg-slate-900">
     <div class="flex min-h-screen">
         <?php include "../includes/sidebar.php"; ?>
         <div class="flex-1 flex flex-col">
