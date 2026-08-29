@@ -116,31 +116,28 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
             animation-delay: 4s;
         }
         .glass-panel {
-            background: rgba(17, 24, 39, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
         .input-field {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #0f172a;
             transition: all 0.3s ease;
         }
         .input-field:focus {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.9);
             border-color: rgba(99, 102, 241, 0.5);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
     </style>
 </head>
 <body class="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 font-sans antialiased text-gray-100">
-    <!-- Animated background with Image -->
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-cover bg-center bg-no-repeat opacity-40" style="background-image: url('img/home.png'); mix-blend-mode: overlay;"></div>
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-cover bg-center bg-no-repeat" style="background-image: url('img/home.png');"></div>
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/20 blur-[100px] mix-blend-screen animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[100px] mix-blend-screen animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-purple-600/20 blur-[100px] mix-blend-screen animate-blob animation-delay-4000"></div>
         <!-- Grid pattern overlay -->
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDQwIEwgNDAgNDAgNDAgMCBMIDAgMCBaIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTSA0MCA0MCBMMCA0MCBMMCAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wMikiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50"></div>
     </div>
@@ -169,8 +166,8 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                         </div>
                     </div>
                 <?php endif; ?>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Welcome Back</h1>
-                <p class="text-slate-400 mt-2 text-sm">Sign in to <?= $login_shop_name ?></p>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Welcome Back</h1>
+                <p class="text-slate-600 mt-2 text-sm">Sign in to <?= $login_shop_name ?></p>
             </div>
 
             <!-- Error Message -->
@@ -186,7 +183,7 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
             <form method="POST" class="space-y-6 relative z-20" autocomplete="off" onsubmit="showLoading()">
                 <!-- Email -->
                 <div class="space-y-2">
-                    <label class="block text-[0.8rem] font-semibold tracking-wider text-slate-400 uppercase ml-1">Email Address</label>
+                    <label class="block text-[0.8rem] font-semibold tracking-wider text-slate-700 uppercase ml-1">Email Address</label>
                     <div class="relative group/input">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -195,14 +192,14 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                         </div>
                         <input type="email" name="email" required
                             value="<?= htmlspecialchars($email ?: $remembered_email) ?>"
-                            class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-600 focus:outline-none"
+                            class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl placeholder-slate-400 focus:outline-none"
                             placeholder="you@example.com">
                     </div>
                 </div>
 
                 <!-- Password -->
                 <div class="space-y-2">
-                    <label class="block text-[0.8rem] font-semibold tracking-wider text-slate-400 uppercase ml-1">Password</label>
+                    <label class="block text-[0.8rem] font-semibold tracking-wider text-slate-700 uppercase ml-1">Password</label>
                     <div class="relative group/input">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -210,7 +207,7 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                             </svg>
                         </div>
                         <input type="password" name="password" required id="password"
-                            class="input-field w-full pl-12 pr-12 py-3.5 rounded-xl text-white placeholder-slate-600 focus:outline-none"
+                            class="input-field w-full pl-12 pr-12 py-3.5 rounded-xl placeholder-slate-400 focus:outline-none"
                             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
                         <button type="button" onclick="togglePassword()"
                             class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 focus:outline-none transition-colors duration-300">
@@ -235,9 +232,9 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                                 </svg>
                             </div>
                         </div>
-                        <span class="text-sm text-slate-400 group-hover/checkbox:text-slate-200 transition-colors">Remember me</span>
+                        <span class="text-sm text-slate-700 group-hover/checkbox:text-slate-900 transition-colors">Remember me</span>
                     </label>
-                    <a href="forgot_password.php" class="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors hover:underline decoration-indigo-400/30 underline-offset-4">
+                    <a href="forgot_password.php" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors hover:underline decoration-indigo-400/30 underline-offset-4">
                         Forgot Password?
                     </a>
                 </div>
@@ -262,7 +259,7 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
         
         <!-- Footer -->
         <div class="text-center mt-10 relative z-20">
-            <p class="text-sm text-slate-500 font-medium tracking-wide">
+            <p class="text-sm text-slate-700 font-medium tracking-wide">
                 &copy; <?= date('Y') ?> <?= $login_shop_name ?> System
             </p>
         </div>
