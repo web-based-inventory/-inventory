@@ -139,6 +139,7 @@ HTML;
                 <div class="sidebar-group-items <?= $purch_active ? '' : 'collapsed' ?>">
                     <div class="ml-4 mt-1 space-y-0.5 border-l border-white/[0.08] pl-3">
                         <?= menuItem('../purchase/add.php', 'New Purchase', 'purchase', 'add.php') ?>
+                        <?= menuItem('../purchase/index.php', 'Purchase Management', 'purchase', 'index.php') ?>
                         <?= menuItem('../purchase/history.php', 'Purchase History', 'purchase', 'history.php') ?>
                         <?= menuItem('../supplier/ledger.php', 'Supplier Ledger', 'supplier', 'ledger.php') ?>
                     </div>

@@ -405,7 +405,7 @@ if ($role === 'cashier') {
                                         </div>
                                         <h3 class="text-sm font-bold text-gray-800 dark:text-slate-200">Low Stock Products</h3>
                                     </div>
-                                    <a href="../product/index.php" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">View All</a>
+                                    <a href="../forecast/index.php" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">View All</a>
                                 </div>
                             </div>
                             <div class="p-4">

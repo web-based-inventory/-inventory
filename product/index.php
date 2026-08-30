@@ -430,7 +430,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                                 <!-- SKU -->
                                                 <div>
                                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SKU <span class="text-red-500">*</span></label>
-                                                    <input type="text" name="sku" value="<?= $is_edit ? htmlspecialchars($product['sku'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required>
+                                                    <input type="text" name="sku" value="<?= $is_edit ? htmlspecialchars($product['sku'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required maxlength="12">
                                                 </div>
 
                                                 <!-- Barcode -->
