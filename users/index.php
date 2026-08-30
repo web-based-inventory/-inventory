@@ -13,9 +13,15 @@ $alert = '';
 if (isset($_GET['confirm_delete'])) {
     $id = (int)$_GET['confirm_delete'];
     if ($id != $_SESSION['user_id']) {
-        mysqli_query($conn, "DELETE FROM users WHERE id=$id");
-        header("Location: index.php");
-        exit;
+        $sales_check = mysqli_query($conn, "SELECT COUNT(*) as count FROM sales WHERE user_id=$id");
+        $sales_row = mysqli_fetch_assoc($sales_check);
+        if ($sales_row['count'] > 0) {
+            $alert = "Cannot delete user: They have " . $sales_row['count'] . " sale record(s). Please set their status to Inactive instead.";
+        } else {
+            mysqli_query($conn, "DELETE FROM users WHERE id=$id");
+            header("Location: index.php?success=" . urlencode("User deleted successfully."));
+            exit;
+        }
     } else {
         $alert = "Cannot delete your own account!";
     }
@@ -67,14 +73,14 @@ if (isset($_POST['update'])) {
     }
 }
 
-$sql = "SELECT * FROM users WHERE 1";
+$sql = "SELECT u.*, (SELECT COUNT(*) FROM sales WHERE user_id = u.id) as sales_count FROM users u WHERE 1";
 if ($search) {
     $safe = mysqli_real_escape_string($conn, $search);
-    $sql .= " AND (username LIKE '%$safe%' OR name LIKE '%$safe%' OR email LIKE '%$safe%')";
+    $sql .= " AND (u.username LIKE '%$safe%' OR u.name LIKE '%$safe%' OR u.email LIKE '%$safe%')";
 }
-if ($role_filter) $sql .= " AND role='$role_filter'";
-if ($status_filter) $sql .= " AND status='$status_filter'";
-$sql .= " ORDER BY id DESC";
+if ($role_filter) $sql .= " AND u.role='$role_filter'";
+if ($status_filter) $sql .= " AND u.status='$status_filter'";
+$sql .= " ORDER BY u.id DESC";
 $page_title = "Users";
 $result = mysqli_query($conn, $sql);
 $edit_row = null;
@@ -163,7 +169,11 @@ if (isset($_GET['edit_id'])) {
                                                 <div class="actions">
                                                     <a href="?edit_id=<?= $row['id'] ?>" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded text-sm">Edit</a>
                                                     <?php if ($row['id'] != $_SESSION['user_id']): ?>
-                                                        <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>', 'index.php')" title="Delete" class="bg-red-100 text-red-600 px-3 py-1.5 rounded text-sm">Delete</button>
+                                                        <?php if ((int)$row['sales_count'] > 0): ?>
+                                                            <button onclick="alert('Cannot delete this user because they have <?= $row['sales_count'] ?> sale record(s). Please set their status to Inactive instead.')" title="Cannot delete: User has sales" class="bg-gray-100 text-gray-400 px-3 py-1.5 rounded text-sm cursor-not-allowed">Delete</button>
+                                                        <?php else: ?>
+                                                            <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>', 'index.php')" title="Delete" class="bg-red-100 text-red-600 px-3 py-1.5 rounded text-sm">Delete</button>
+                                                        <?php endif; ?>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>

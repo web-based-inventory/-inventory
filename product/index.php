@@ -22,11 +22,19 @@ include "../config/database.php";
 if (isset($_GET['confirm_delete'])) {
     protectProducts('delete');
     $id = (int)$_GET['confirm_delete'];
-    $p = mysqli_fetch_assoc(mysqli_query($conn, "SELECT image FROM products WHERE id=$id"));
-    if ($p && $p['image'] && file_exists("../img/" . $p['image'])) {
-        unlink("../img/" . $p['image']);
+    
+    $p = mysqli_fetch_assoc(mysqli_query($conn, "SELECT image, current_stock FROM products WHERE id=$id"));
+    if ($p) {
+        if ($p['current_stock'] > 0) {
+            header("Location:index.php?error=" . urlencode("Cannot delete product. Stock must be zero."));
+            exit;
+        }
+        
+        if ($p['image'] && file_exists("../img/" . $p['image'])) {
+            unlink("../img/" . $p['image']);
+        }
+        mysqli_query($conn, "DELETE FROM products WHERE id=$id");
     }
-    mysqli_query($conn, "DELETE FROM products WHERE id=$id");
     header("Location:index.php");
     exit;
 }
@@ -699,9 +707,15 @@ WHERE 1=1
                                                 </a>
                                             <?php endif; ?>
                                             <?php if (checkPermission('products', 'delete')): ?>
-                                                <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['product_name'])) ?>', 'index.php')" class="p-1.5 bg-white/90 dark:bg-slate-800/90 text-gray-600 dark:text-gray-300 rounded-lg shadow-sm hover:text-red-600 dark:hover:text-red-400 transition backdrop-blur-sm" title="Delete">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                </button>
+                                                <?php if ($qty > 0): ?>
+                                                    <button onclick="alert('Cannot delete this product because there is still stock remaining (<?= $qty ?>). Please adjust stock to 0 first.')" class="p-1.5 bg-white/50 dark:bg-slate-800/50 text-gray-400 dark:text-gray-500 rounded-lg shadow-sm cursor-not-allowed backdrop-blur-sm" title="Cannot delete: Stock is > 0">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['product_name'])) ?>', 'index.php')" class="p-1.5 bg-white/90 dark:bg-slate-800/90 text-gray-600 dark:text-gray-300 rounded-lg shadow-sm hover:text-red-600 dark:hover:text-red-400 transition backdrop-blur-sm" title="Delete">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </div>
 

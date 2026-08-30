@@ -533,6 +533,7 @@ if ($role === 'cashier') {
                                                     display: false
                                                 },
                                                 ticks: {
+
                                                     color: textColor,
                                                     maxRotation: 0
                                                 }

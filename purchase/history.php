@@ -11,6 +11,23 @@ if (!isAdmin() && !isStaff()) {
 if (isset($_GET['confirm_delete']) && isAdmin()) {
     $id = (int)$_GET['confirm_delete'];
 
+    // 1. Validation check: Prevent negative stock
+    $validation_query = mysqli_query($conn, "SELECT pd.quantity, p.product_name, p.current_stock FROM purchase_details pd JOIN products p ON pd.product_id = p.id WHERE pd.purchase_id='$id'");
+    $can_delete = true;
+    $error_msg = "";
+    while ($v_row = mysqli_fetch_assoc($validation_query)) {
+        if ($v_row['current_stock'] < $v_row['quantity']) {
+            $can_delete = false;
+            $error_msg = "Cannot delete purchase. The product '" . $v_row['product_name'] . "' has already been sold (Current Stock: " . $v_row['current_stock'] . ", Purchased: " . $v_row['quantity'] . ").";
+            break;
+        }
+    }
+
+    if (!$can_delete) {
+        header("Location: history.php?error=" . urlencode($error_msg));
+        exit;
+    }
+
     // Get supplier_id before deletion
     $del_sup = mysqli_fetch_assoc(mysqli_query($conn, "SELECT supplier_id FROM purchases WHERE id='$id'"));
     $del_supplier_id = $del_sup ? (int)$del_sup['supplier_id'] : 0;
@@ -135,6 +152,15 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                             <span class="text-sm font-medium">Purchase deleted successfully.</span>
                         </div>
                     <?php endif; ?>
+                    
+                    <?php if (isset($_GET['error'])): ?>
+                        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-start gap-3 shadow-sm">
+                            <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm font-medium"><?= htmlspecialchars($_GET['error']) ?></span>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- Stats Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -160,7 +186,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Spent</p>
-                                    <p class="text-xl font-bold text-emerald-600"><?= number_format($stats['total_spent']) ?> Ks</p>
+                                    <p class="text-xl font-bold text-emerald-600 truncate" title="Full amount: <?= number_format($stats['total_spent']) ?> Ks">
+                                        <?= compactMoney($stats['total_spent']) ?> <span class="text-sm font-medium opacity-80">Ks</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -173,8 +201,9 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Average Purchase</p>
-                                    <p class="text-xl font-bold text-blue-600">
-                                        <?= $stats['total_purchases'] > 0 ? number_format($stats['total_spent'] / $stats['total_purchases']) : '0' ?> Ks
+                                    <?php $avg_purchase = $stats['total_purchases'] > 0 ? ($stats['total_spent'] / $stats['total_purchases']) : 0; ?>
+                                    <p class="text-xl font-bold text-blue-600 truncate" title="Full amount: <?= number_format($avg_purchase) ?> Ks">
+                                        <?= compactMoney($avg_purchase) ?> <span class="text-sm font-medium opacity-80">Ks</span>
                                     </p>
                                 </div>
                             </div>

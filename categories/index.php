@@ -12,6 +12,14 @@ $status_filter = $_GET['status'] ?? '';
 if (isset($_GET['confirm_delete'])) {
     protectCategories('delete');
     $delete_id = (int)$_GET['confirm_delete'];
+    
+    // Check if there are products associated with this category
+    $prod_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM products WHERE category_id = $delete_id"));
+    if ($prod_check['count'] > 0) {
+        header("Location: index.php?error=" . urlencode("Cannot delete category. There are products associated with it."));
+        exit;
+    }
+
     $del_check = mysqli_query($conn, "SELECT name, image FROM categories WHERE id = $delete_id");
     if (mysqli_num_rows($del_check) > 0) {
         $del_row = mysqli_fetch_assoc($del_check);
@@ -134,9 +142,16 @@ if (!$result) {
                                             </a>
                                         <?php endif; ?>
                                         <?php if (checkPermission('categories', 'delete')): ?>
-                                            <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>', 'index.php')" class="p-1.5 bg-white/90 dark:bg-slate-800/90 text-gray-600 dark:text-gray-300 rounded-lg shadow-sm hover:text-red-600 dark:hover:text-red-400 transition backdrop-blur-sm border border-gray-200 dark:border-slate-600" title="Delete">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
+                                            <?php $btn_pcount = (int)($row['product_count'] ?? 0); ?>
+                                            <?php if ($btn_pcount > 0): ?>
+                                                <button onclick="alert('Cannot delete this category because it contains <?= $btn_pcount ?> product(s). Please move or delete the products first.')" class="p-1.5 bg-white/50 dark:bg-slate-800/50 text-gray-400 dark:text-gray-500 rounded-lg shadow-sm cursor-not-allowed backdrop-blur-sm border border-gray-200 dark:border-slate-600" title="Cannot delete: Category is not empty">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            <?php else: ?>
+                                                <button onclick="openDeleteModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['name'])) ?>', 'index.php')" class="p-1.5 bg-white/90 dark:bg-slate-800/90 text-gray-600 dark:text-gray-300 rounded-lg shadow-sm hover:text-red-600 dark:hover:text-red-400 transition backdrop-blur-sm border border-gray-200 dark:border-slate-600" title="Delete">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                 </div>

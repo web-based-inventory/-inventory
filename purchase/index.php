@@ -19,6 +19,23 @@ $show_view_id = isset($_GET['view_id']) ? (int)$_GET['view_id'] : null;
 if (isset($_GET['confirm_delete'])) {
     $id = (int)$_GET['confirm_delete'];
 
+    // 1. Validation check: Prevent negative stock
+    $validation_query = mysqli_query($conn, "SELECT pd.quantity, p.product_name, p.current_stock FROM purchase_details pd JOIN products p ON pd.product_id = p.id WHERE pd.purchase_id='$id'");
+    $can_delete = true;
+    $error_msg = "";
+    while ($v_row = mysqli_fetch_assoc($validation_query)) {
+        if ($v_row['current_stock'] < $v_row['quantity']) {
+            $can_delete = false;
+            $error_msg = "Cannot delete purchase. The product '" . $v_row['product_name'] . "' has already been sold (Current Stock: " . $v_row['current_stock'] . ", Purchased: " . $v_row['quantity'] . ").";
+            break;
+        }
+    }
+
+    if (!$can_delete) {
+        header("Location: index.php?error=" . urlencode($error_msg));
+        exit;
+    }
+
     // Get supplier_id before deletion
     $del_sup = mysqli_fetch_assoc(mysqli_query($conn, "SELECT supplier_id FROM purchases WHERE id='$id'"));
     $del_supplier_id = $del_sup ? (int)$del_sup['supplier_id'] : 0;
@@ -52,6 +69,36 @@ if (isset($_POST['update'])) {
     $quantities = $_POST['quantity'] ?? [];
     $prices = $_POST['purchase_price'] ?? [];
     $product_ids = $_POST['product_id'] ?? [];
+
+    // 1. Validation check for negative stock
+    $can_update = true;
+    $error_msg = "";
+    foreach ($detail_ids as $i => $detail_id) {
+        $detail_id = (int)$detail_id;
+        $qty = (int)($quantities[$i] ?? 0);
+        $product_id = (int)($product_ids[$i] ?? 0);
+        if ($detail_id <= 0 || $product_id <= 0) continue;
+
+        $old = mysqli_fetch_assoc(mysqli_query($conn, "SELECT quantity FROM purchase_details WHERE id='$detail_id'"));
+        $old_qty = $old ? (int)$old['quantity'] : 0;
+        $diff = $qty - $old_qty;
+
+        if ($diff < 0) {
+            $prod_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT product_name, current_stock FROM products WHERE id='$product_id'"));
+            $current_stock = $prod_check ? (int)$prod_check['current_stock'] : 0;
+            
+            if ($current_stock < abs($diff)) {
+                $can_update = false;
+                $error_msg = "Cannot reduce quantity for '" . $prod_check['product_name'] . "'. Stock would become negative. (Current Stock: " . $current_stock . ", Trying to reduce by: " . abs($diff) . ")";
+                break;
+            }
+        }
+    }
+
+    if (!$can_update) {
+        header("Location: index.php?error=" . urlencode($error_msg));
+        exit;
+    }
 
     $new_total = 0;
     foreach ($detail_ids as $i => $detail_id) {
@@ -102,8 +149,8 @@ if ($search) {
     $safe = mysqli_real_escape_string($conn, $search);
     $sql .= " AND (s.supplier_name LIKE '%$safe%' OR p.invoice_no LIKE '%$safe%')";
 }
-if ($status_filter && columnExists($conn, 'purchases', 'status')) {
-    $sql .= " AND p.status = '$status_filter'";
+if ($status_filter && columnExists($conn, 'purchases', 'payment_status')) {
+    $sql .= " AND p.payment_status = '$status_filter'";
 }
 // Safe date-range filter on the real purchase_date column.
 // purchase_date >= start  AND  purchase_date < (end + 1 day)
