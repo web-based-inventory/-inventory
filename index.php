@@ -36,9 +36,17 @@ if (isset($_SESSION['user_id'])) {
     <style>
         /* Slow cinematic zoom on the cover image */
         @keyframes kenburns {
-            0%   { transform: scale(1) translateY(0); }
-            50%  { transform: scale(1.08) translateY(-8px); }
-            100% { transform: scale(1) translateY(0); }
+            0% {
+                transform: scale(1) translateY(0);
+            }
+
+            50% {
+                transform: scale(1.08) translateY(-8px);
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+            }
         }
 
         .kenburns {
@@ -47,8 +55,15 @@ if (isset($_SESSION['user_id'])) {
         }
 
         @keyframes fade-up {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .fade-up {
@@ -58,8 +73,13 @@ if (isset($_SESSION['user_id'])) {
 
         /* Hand-drawn underline sweep under the accent words */
         @keyframes draw-line {
-            from { stroke-dashoffset: 260; }
-            to   { stroke-dashoffset: 0; }
+            from {
+                stroke-dashoffset: 260;
+            }
+
+            to {
+                stroke-dashoffset: 0;
+            }
         }
 
         .underline-sweep {
@@ -70,9 +90,12 @@ if (isset($_SESSION['user_id'])) {
 
         /* Soft pulsing glow behind the button */
         @keyframes glow-pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45), 0 12px 32px -8px rgba(37, 99, 235, 0.55);
             }
+
             50% {
                 box-shadow: 0 0 0 10px rgba(37, 99, 235, 0), 0 16px 40px -8px rgba(37, 99, 235, 0.7);
             }
@@ -139,7 +162,7 @@ if (isset($_SESSION['user_id'])) {
             <!-- Get Started button -->
             <div class="fade-up mt-11 flex flex-col items-center gap-5" style="animation-delay: 0.5s;">
                 <a href="login.php"
-                   class="group relative inline-flex items-center justify-center gap-2.5 overflow-hidden px-10 py-4 text-base sm:text-lg font-bold text-white rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-400/40 transition-transform duration-300">
+                    class="group relative inline-flex items-center justify-center gap-2.5 overflow-hidden px-10 py-4 text-base sm:text-lg font-bold text-white rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-blue-400/40 transition-transform duration-300">
                     <!-- Shine sweep on hover -->
                     <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out" aria-hidden="true"></span>
                     Get Started

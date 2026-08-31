@@ -115,8 +115,9 @@ if (isset($_POST['update'])) {
 
         $prod_check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT selling_price FROM products WHERE id='$product_id'"));
         $prod_sp = $prod_check ? (float)$prod_check['selling_price'] : 0;
+        $update_req = ($price > 0 && $prod_sp <= $price) ? 1 : 0;
 
-        mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $diff, purchase_price='$price' WHERE id='$product_id'");
+        mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $diff, purchase_price='$price', price_update_required = $update_req WHERE id='$product_id'");
         mysqli_query($conn, "UPDATE purchase_details SET quantity='$qty', purchase_price='$price', subtotal='$subtotal' WHERE id='$detail_id'");
         $new_total += $subtotal;
     }

@@ -202,8 +202,9 @@ if (isset($_POST['save_purchase'])) {
 
                 $check = mysqli_fetch_assoc(mysqli_query($conn, "SELECT selling_price FROM products WHERE id='$pid'"));
                 $sp = $check ? (float)$check['selling_price'] : 0;
+                $update_req = ($price > 0 && $sp <= $price) ? 1 : 0;
 
-                mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price' WHERE id='$pid'");
+                mysqli_query($conn, "UPDATE products SET current_stock = current_stock + $qty, purchase_price = '$price', price_update_required = $update_req WHERE id='$pid'");
             }
 
             // ── Update supplier balance & ledger ──
