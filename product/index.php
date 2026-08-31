@@ -64,7 +64,7 @@ if ($action === 'edit' && isset($_POST['update'])) {
         exit;
     }
 
-    mysqli_query($conn, "UPDATE products SET category_id=$category_id, product_name='$product_name', sku='$sku', barcode='$barcode', unit_id=$unit_id, reorder_level=$reorder_level, selling_price=$selling_price, price_update_required = CASE WHEN $selling_price > purchase_price THEN 0 ELSE price_update_required END, image='$image', status='$status' WHERE id=$id");
+    mysqli_query($conn, "UPDATE products SET category_id=$category_id, product_name='$product_name', sku='$sku', barcode='$barcode', unit_id=$unit_id, reorder_level=$reorder_level, selling_price=$selling_price, price_update_required = CASE WHEN purchase_price > 0 AND $selling_price <= purchase_price THEN 1 ELSE 0 END, image='$image', status='$status' WHERE id=$id");
     header("Location:index.php");
     exit;
 }

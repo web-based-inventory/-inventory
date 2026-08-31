@@ -127,22 +127,6 @@ $pur_shop_name = htmlspecialchars($pur_settings['shop_name']);
             <?php include "../includes/header.php"; ?>
             <main class="p-4 lg:p-6">
                 <div class="max-w-7xl mx-auto">
-                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <div class="flex gap-2">
-                            <button onclick="exportExcel()" class="btn btn-outline gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Export Excel
-                            </button>
-                            <a href="add.php" class="btn btn-primary gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                New Purchase
-                            </a>
-                        </div>
-                    </div>
 
                     <?php if (isset($_GET['success'])): ?>
                         <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-xl flex items-start gap-3 shadow-sm">
