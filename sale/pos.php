@@ -25,28 +25,37 @@ if (isset($_POST['add_cart']) || isset($_GET['remove']) || isset($_GET['clear_ca
         $product_id = (int)$_POST['product_id'];
         $qty = max(1, (int)($_POST['quantity'] ?? 1));
 
-        $found = false;
-        foreach ($_SESSION['sale_cart'] as &$item) {
-            if ($item['product_id'] == $product_id) {
-                $item['quantity'] += $qty;
-                $item['total'] = $item['quantity'] * $item['price'];
-                $found = true;
-                break;
-            }
-        }
-        unset($item);
+        $p = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, product_name, selling_price, purchase_price, current_stock AS stock FROM products WHERE id='$product_id' AND status='Active'"));
 
-        if (!$found) {
-            $p = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id, product_name, selling_price, purchase_price, current_stock AS stock FROM products WHERE id='$product_id' AND status='Active'"));
-            if ($p && $p['stock'] >= $qty) {
-                $_SESSION['sale_cart'][] = [
-                    'product_id' => $p['id'],
-                    'product_name' => $p['product_name'],
-                    'price' => $p['selling_price'],
-                    'purchase_price' => $p['purchase_price'],
-                    'quantity' => $qty,
-                    'total' => $qty * $p['selling_price']
-                ];
+        if ($p) {
+            $found = false;
+            foreach ($_SESSION['sale_cart'] as &$item) {
+                if ($item['product_id'] == $product_id) {
+                    if ($item['quantity'] + $qty <= $p['stock']) {
+                        $item['quantity'] += $qty;
+                    } else {
+                        $item['quantity'] = $p['stock'];
+                    }
+                    $item['total'] = $item['quantity'] * $item['price'];
+                    $item['stock'] = $p['stock'];
+                    $found = true;
+                    break;
+                }
+            }
+            unset($item);
+
+            if (!$found) {
+                if ($p['stock'] >= $qty) {
+                    $_SESSION['sale_cart'][] = [
+                        'product_id' => $p['id'],
+                        'product_name' => $p['product_name'],
+                        'price' => $p['selling_price'],
+                        'purchase_price' => $p['purchase_price'],
+                        'quantity' => $qty,
+                        'total' => $qty * $p['selling_price'],
+                        'stock' => $p['stock']
+                    ];
+                }
             }
         }
     }
@@ -56,6 +65,10 @@ if (isset($_POST['add_cart']) || isset($_GET['remove']) || isset($_GET['clear_ca
         $key = (int)$_POST['item_key'];
         $qty = max(1, (int)$_POST['quantity']);
         if (isset($_SESSION['sale_cart'][$key])) {
+            $stock = $_SESSION['sale_cart'][$key]['stock'] ?? 999999;
+            if ($qty > $stock) {
+                $qty = $stock;
+            }
             $_SESSION['sale_cart'][$key]['quantity'] = $qty;
             $_SESSION['sale_cart'][$key]['total'] = $qty * $_SESSION['sale_cart'][$key]['price'];
         }
@@ -638,14 +651,28 @@ $page_title = "New Sale (POS)";
         function changeQty(btn, delta) {
             const input = btn.parentElement.querySelector('.cart-qty');
             let val = parseInt(input.value) || 1;
-            val = Math.max(1, val + delta);
+            const max = parseInt(input.getAttribute('max')) || 999999;
+            
+            if (val + delta > max) {
+                alert("Out of stock! Maximum available is " + max);
+                return;
+            }
+            
+            val = Math.max(1, Math.min(max, val + delta));
             input.value = val;
             autoUpdateCart(input);
         }
 
         function autoUpdateCart(input) {
             let val = parseInt(input.value) || 1;
+            const max = parseInt(input.getAttribute('max')) || 999999;
+            
             if (val < 1) { val = 1; input.value = 1; }
+            if (val > max) { 
+                val = max; 
+                input.value = max; 
+                alert("Out of stock! Maximum available is " + max);
+            }
             
             // Optimistic UI update
             const price = parseFloat(input.dataset.price) || 0;

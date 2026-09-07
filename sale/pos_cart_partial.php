@@ -27,7 +27,7 @@
                     <div class="flex items-center justify-between mt-2">
                         <div class="flex items-center gap-1">
                             <button type="button" class="qty-btn bg-gray-100 text-gray-600 hover:bg-gray-200" onclick="changeQty(this, -1)">−</button>
-                            <input type="number" name="quantity[<?= $key ?>]" value="<?= $item['quantity'] ?>" min="1" data-price="<?= $item['price'] ?>" data-key="<?= $key ?>" class="cart-qty border border-gray-200 rounded-lg w-14 p-1 text-center text-sm focus:outline-none focus:border-indigo-400">
+                            <input type="number" name="quantity[<?= $key ?>]" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?? 999999 ?>" data-price="<?= $item['price'] ?>" data-key="<?= $key ?>" class="cart-qty border border-gray-200 rounded-lg w-14 p-1 text-center text-sm focus:outline-none focus:border-indigo-400">
                             <button type="button" class="qty-btn bg-gray-100 text-gray-600 hover:bg-gray-200" onclick="changeQty(this, 1)">+</button>
                         </div>
                         <span class="font-bold text-sm text-gray-800 text-right min-w-[80px] shrink-0 item-total-<?= $key ?>"><?= number_format($item['total']) ?> Ks</span>

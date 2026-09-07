@@ -437,8 +437,11 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
                                                 <!-- SKU -->
                                                 <div>
-                                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SKU <span class="text-red-500">*</span></label>
-                                                    <input type="text" name="sku" value="<?= $is_edit ? htmlspecialchars($product['sku'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required maxlength="12">
+                                                    <label class="flex justify-between items-center mb-2">
+                                                        <span class="block text-sm font-semibold text-gray-700 dark:text-gray-300">SKU <span class="text-red-500">*</span></span>
+                                                        <button type="button" onclick="generateSKU()" class="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded transition">Auto Generate</button>
+                                                    </label>
+                                                    <input type="text" name="sku" id="skuInput" value="<?= $is_edit ? htmlspecialchars($product['sku'] ?? '') : '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-slate-700 dark:text-white font-mono transition" placeholder="e.g. DRK001" required maxlength="12">
                                                 </div>
 
                                                 <!-- Barcode -->
@@ -572,6 +575,20 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 }
                                 reader.readAsDataURL(input.files[0]);
                             }
+                        }
+
+                        function generateSKU() {
+                            const categorySelect = document.querySelector('select[name="category_id"]');
+                            const catId = categorySelect ? categorySelect.value : '';
+                            
+                            fetch(`../ajax/generate_sku.php?category_id=${catId}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if(data.success) {
+                                        document.getElementById('skuInput').value = data.sku;
+                                    }
+                                })
+                                .catch(err => console.error(err));
                         }
                     </script>
 
